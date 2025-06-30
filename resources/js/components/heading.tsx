@@ -1,8 +1,8 @@
 export default function Heading({ title, description }: { title: string; description?: string }) {
     return (
-        <div className="mb-8 space-y-0.5">
-            <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-            {description && <p className="text-sm text-muted-foreground">{description}</p>}
+        <div className="mb-4 d-flex flex-column gap-1">
+            <h2 className="fs-4 fw-semibold">{title}</h2>
+            {description && <p className="small text-muted">{description}</p>}
         </div>
     );
 }

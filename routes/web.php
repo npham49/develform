@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FormController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -11,6 +12,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+    Route::resource('forms', FormController::class);
+    Route::get('forms/{form}/manage', [FormController::class, 'show'])->name('forms.manage');
+    Route::get('forms/{form}/manage/schema', [FormController::class, 'schema'])->name('forms.schema');
 });
 
 require __DIR__.'/settings.php';

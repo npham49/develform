@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Form;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use App\Http\Requests\FormCreateRequest;
 
 class FormController extends Controller
 {
@@ -12,7 +14,10 @@ class FormController extends Controller
      */
     public function index()
     {
-        //
+        $forms = Form::all();
+        return Inertia::render('forms/index', [
+            'forms' => $forms,
+        ]);
     }
 
     /**
@@ -20,15 +25,21 @@ class FormController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('forms/create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(FormCreateRequest $request)
     {
-        //
+        $form = Form::create($request->validated());
+
+        if ($form) {
+            return redirect()->route('forms.manage', $form)->with('success', 'Form created successfully');
+        }
+
+        return redirect()->back()->with('error', 'Failed to create form');
     }
 
     /**
@@ -36,7 +47,16 @@ class FormController extends Controller
      */
     public function show(Form $form)
     {
-        //
+        return Inertia::render('forms/manage', [
+            'form' => $form,
+        ]);
+    }
+
+    public function schema(Form $form)
+    {
+        return Inertia::render('forms/schema', [
+            'form' => $form,
+        ]);
     }
 
     /**
