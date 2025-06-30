@@ -5,15 +5,9 @@ import { ComponentProps } from 'react';
 type LinkProps = ComponentProps<typeof Link>;
 
 export default function TextLink({ className = '', children, ...props }: LinkProps) {
-    return (
-        <Link
-            className={cn(
-                'text-decoration-underline',
-                className,
-            )}
-            {...props}
-        >
-            {children}
-        </Link>
-    );
+  return (
+    <Link className={cn('text-decoration-underline', className)} {...props}>
+      {children}
+    </Link>
+  );
 }
