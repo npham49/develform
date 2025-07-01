@@ -7,13 +7,13 @@ export function UserInfo({ user, showEmail = false }: { user: User; showEmail?: 
 
   return (
     <>
-      <Avatar className="rounded-circle overflow-hidden" style={{ width: '32px', height: '32px' }}>
+      <Avatar className="rounded-circle overflow-hidden" style={{ width: '36px', height: '36px' }}>
         <AvatarImage src={user.avatar} alt={user.name} />
-        <AvatarFallback className="rounded bg-light text-dark">{getInitials(user.name)}</AvatarFallback>
+        <AvatarFallback className="rounded bg-primary text-white d-flex align-items-center justify-content-center">{getInitials(user.name)}</AvatarFallback>
       </Avatar>
-      <div className="d-flex small flex-1 text-start">
-        <span className="text-truncate fw-medium">{user.name}</span>
-        {showEmail && <span className="text-truncate small text-muted">{user.email}</span>}
+      <div className="d-flex flex-column flex-1 text-start lh-1">
+        <span className="text-truncate fw-semibold small">{user.name}</span>
+        {showEmail && <span className="text-truncate text-muted" style={{ fontSize: '0.75rem' }}>{user.email}</span>}
       </div>
     </>
   );

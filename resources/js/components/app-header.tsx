@@ -105,12 +105,15 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
               <li className="nav-item dropdown">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="nav-link btn btn-link d-flex align-items-center gap-2 text-dark p-2 border-0 bg-transparent">
+                    <button 
+                      className="btn d-flex align-items-center gap-2 border-0 bg-transparent p-2"
+                      style={{ minHeight: '2.5rem' }}
+                    >
                       <UserInfo user={auth.user} />
-                      <ChevronDown size={16} />
+                      <ChevronDown size={16} className="text-muted" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="dropdown-menu-end">
+                  <DropdownMenuContent className="dropdown-menu-end shadow border">
                     <UserMenuContent user={auth.user} />
                   </DropdownMenuContent>
                 </DropdownMenu>

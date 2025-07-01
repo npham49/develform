@@ -80,8 +80,10 @@ function DropdownMenuContent({
       className={cn(
         "dropdown-menu show",
         align === "end" && "dropdown-menu-end",
+        "py-2 border shadow-sm",
         className
       )}
+      style={{ minWidth: '200px' }}
       {...props}
     >
       {children}
@@ -108,7 +110,7 @@ function DropdownMenuItem({
     <button
       data-slot="dropdown-menu-item"
       className={cn(
-        "dropdown-item",
+        "dropdown-item border-0 bg-transparent w-100 text-start",
         variant === "destructive" && "text-danger",
         className
       )}
