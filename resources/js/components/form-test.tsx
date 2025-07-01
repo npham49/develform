@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 // Simple test component to verify the form builder and renderer work
 export function FormTest() {
-  const [formSchema, setFormSchema] = useState<object | null>(null);
+  const [formSchema] = useState<object | null>(null);
   const [submission, setSubmission] = useState<object>({});
 
   const handleSubmit = (submissionData: object) => {

@@ -157,3 +157,88 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* Essential Formio styles for proper form rendering */
+@layer components {
+    /* Form group styles */
+    .form-group {
+        @apply mb-5;
+    }
+    
+    .form-group:last-child {
+        @apply mb-0;
+    }
+    
+    .form-group.formio-hidden {
+        @apply hidden;
+    }
+    
+    .builder-component > .form-group {
+        @apply mb-5;
+    }
+    
+    /* Form control styles */
+    .form-control {
+        @apply appearance-none bg-white leading-normal px-3 py-2 block w-full rounded-md border border-gray-300 shadow-sm;
+    }
+    
+    .form-control.form-control-sm {
+        @apply px-2 py-1 text-sm;
+    }
+    
+    .form-control:disabled, 
+    .form-control[readonly] {
+        @apply bg-gray-200 border-transparent shadow-none;
+    }
+    
+    .form-control:focus {
+        @apply outline-none border-blue-500 ring-2 ring-blue-200/50;
+    }
+    
+    /* Button styles */
+    .btn {
+        @apply px-4 py-2 rounded font-medium transition-colors duration-150 inline-flex items-center justify-center border;
+    }
+    
+    .btn:focus {
+        @apply outline-none ring-2 ring-blue-500/50;
+    }
+    
+    .btn:disabled {
+        @apply opacity-50 cursor-not-allowed;
+    }
+    
+    /* Formio specific classes */
+    .formio-form {
+        @apply w-full;
+    }
+    
+    .formio-component {
+        @apply mb-4;
+    }
+    
+    .formio-component-label {
+        @apply block text-sm font-medium mb-1;
+    }
+    
+    /* Alert styles */
+    .alert {
+        @apply p-4 rounded-md border mb-4;
+    }
+    
+    .alert-info {
+        @apply bg-blue-50 border-blue-200 text-blue-800;
+    }
+    
+    .alert-warning {
+        @apply bg-yellow-50 border-yellow-200 text-yellow-800;
+    }
+    
+    .alert-danger {
+        @apply bg-red-50 border-red-200 text-red-800;
+    }
+    
+    .alert-success {
+        @apply bg-green-50 border-green-200 text-green-800;
+    }
+}
