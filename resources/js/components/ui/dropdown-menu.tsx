@@ -1,84 +1,122 @@
 import * as React from "react"
-import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-function DropdownMenu({
-  ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
-  return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />
+interface DropdownContextType {
+  open: boolean
+  setOpen: (open: boolean) => void
 }
 
-function DropdownMenuPortal({
+const DropdownContext = React.createContext<DropdownContextType | undefined>(undefined)
+
+function DropdownMenu({
+  open,
+  onOpenChange,
+  children,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Portal>) {
+}: {
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  children: React.ReactNode
+}) {
+  const [internalOpen, setInternalOpen] = React.useState(false)
+  const isControlled = open !== undefined
+  const isOpen = isControlled ? open : internalOpen
+
+  const setOpen = React.useCallback((newOpen: boolean) => {
+    if (isControlled) {
+      onOpenChange?.(newOpen)
+    } else {
+      setInternalOpen(newOpen)
+    }
+  }, [isControlled, onOpenChange])
+
   return (
-    <DropdownMenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />
+    <DropdownContext.Provider value={{ open: isOpen, setOpen }}>
+      <div data-slot="dropdown-menu" className="dropdown" {...props}>
+        {children}
+      </div>
+    </DropdownContext.Provider>
   )
 }
 
 function DropdownMenuTrigger({
+  children,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
+}: React.ComponentProps<"button">) {
+  const context = React.useContext(DropdownContext)
+  if (!context) throw new Error("DropdownMenuTrigger must be used within DropdownMenu")
+
   return (
-    <DropdownMenuPrimitive.Trigger
+    <button
       data-slot="dropdown-menu-trigger"
+      className="dropdown-toggle"
+      data-bs-toggle="dropdown"
+      onClick={() => context.setOpen(!context.open)}
       {...props}
-    />
+    >
+      {children}
+    </button>
   )
 }
 
 function DropdownMenuContent({
   className,
-  sideOffset = 4,
+  children,
+  align = "start",
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
-  return (
-    <DropdownMenuPrimitive.Portal>
-      <DropdownMenuPrimitive.Content
-        data-slot="dropdown-menu-content"
-        sideOffset={sideOffset}
-        className={cn(
-          "dropdown-menu show border shadow",
-          className
-        )}
-        {...props}
-      />
-    </DropdownMenuPrimitive.Portal>
-  )
-}
+}: React.ComponentProps<"div"> & {
+  align?: "start" | "end"
+}) {
+  const context = React.useContext(DropdownContext)
+  if (!context) throw new Error("DropdownMenuContent must be used within DropdownMenu")
 
-function DropdownMenuGroup({
-  ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Group>) {
+  if (!context.open) return null
+
   return (
-    <DropdownMenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />
+    <div
+      data-slot="dropdown-menu-content"
+      className={cn(
+        "dropdown-menu show",
+        align === "end" && "dropdown-menu-end",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
   )
 }
 
 function DropdownMenuItem({
   className,
-  inset,
+  children,
   variant = "default",
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
-  inset?: boolean
+}: React.ComponentProps<"button"> & {
   variant?: "default" | "destructive"
 }) {
+  const context = React.useContext(DropdownContext)
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    context?.setOpen(false)
+    props.onClick?.(e)
+  }
+
   return (
-    <DropdownMenuPrimitive.Item
+    <button
       data-slot="dropdown-menu-item"
-      data-inset={inset}
-      data-variant={variant}
       className={cn(
-        "dropdown-item d-flex align-items-center gap-2",
+        "dropdown-item",
         variant === "destructive" && "text-danger",
-        inset && "ps-4",
         className
       )}
+      onClick={handleClick}
       {...props}
-    />
+    >
+      {children}
+    </button>
   )
 }
 
@@ -87,35 +125,20 @@ function DropdownMenuCheckboxItem({
   children,
   checked,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem>) {
+}: React.ComponentProps<"button"> & {
+  checked?: boolean
+}) {
   return (
-    <DropdownMenuPrimitive.CheckboxItem
+    <DropdownMenuItem
       data-slot="dropdown-menu-checkbox-item"
-      className={cn(
-        "dropdown-item d-flex align-items-center gap-2 position-relative",
-        className
-      )}
-      checked={checked}
+      className={cn("d-flex align-items-center", className)}
       {...props}
     >
-      <span className="position-absolute start-0 ms-2 d-flex align-items-center justify-content-center">
-        <DropdownMenuPrimitive.ItemIndicator>
-          <CheckIcon />
-        </DropdownMenuPrimitive.ItemIndicator>
+      <span className="me-2">
+        {checked && <CheckIcon className="h-4 w-4" />}
       </span>
       {children}
-    </DropdownMenuPrimitive.CheckboxItem>
-  )
-}
-
-function DropdownMenuRadioGroup({
-  ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.RadioGroup>) {
-  return (
-    <DropdownMenuPrimitive.RadioGroup
-      data-slot="dropdown-menu-radio-group"
-      {...props}
-    />
+    </DropdownMenuItem>
   )
 }
 
@@ -123,42 +146,29 @@ function DropdownMenuRadioItem({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.RadioItem>) {
+}: React.ComponentProps<"button">) {
   return (
-    <DropdownMenuPrimitive.RadioItem
+    <DropdownMenuItem
       data-slot="dropdown-menu-radio-item"
-      className={cn(
-        "dropdown-item d-flex align-items-center gap-2 position-relative",
-        className
-      )}
+      className={cn("d-flex align-items-center", className)}
       {...props}
     >
-      <span className="position-absolute start-0 ms-2 d-flex align-items-center justify-content-center">
-        <DropdownMenuPrimitive.ItemIndicator>
-          <CircleIcon className="fill-current" />
-        </DropdownMenuPrimitive.ItemIndicator>
+      <span className="me-2">
+        <CircleIcon className="h-2 w-2 opacity-50" />
       </span>
       {children}
-    </DropdownMenuPrimitive.RadioItem>
+    </DropdownMenuItem>
   )
 }
 
 function DropdownMenuLabel({
   className,
-  inset,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Label> & {
-  inset?: boolean
-}) {
+}: React.ComponentProps<"div">) {
   return (
-    <DropdownMenuPrimitive.Label
+    <div
       data-slot="dropdown-menu-label"
-      data-inset={inset}
-      className={cn(
-        "dropdown-header fw-medium",
-        inset && "ps-4",
-        className
-      )}
+      className={cn("dropdown-header", className)}
       {...props}
     />
   )
@@ -167,9 +177,9 @@ function DropdownMenuLabel({
 function DropdownMenuSeparator({
   className,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Separator>) {
+}: React.ComponentProps<"hr">) {
   return (
-    <DropdownMenuPrimitive.Separator
+    <hr
       data-slot="dropdown-menu-separator"
       className={cn("dropdown-divider", className)}
       {...props}
@@ -184,57 +194,7 @@ function DropdownMenuShortcut({
   return (
     <span
       data-slot="dropdown-menu-shortcut"
-      className={cn(
-        "text-muted ms-auto small",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-function DropdownMenuSub({
-  ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Sub>) {
-  return <DropdownMenuPrimitive.Sub data-slot="dropdown-menu-sub" {...props} />
-}
-
-function DropdownMenuSubTrigger({
-  className,
-  inset,
-  children,
-  ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.SubTrigger> & {
-  inset?: boolean
-}) {
-  return (
-    <DropdownMenuPrimitive.SubTrigger
-      data-slot="dropdown-menu-sub-trigger"
-      data-inset={inset}
-      className={cn(
-        "dropdown-item d-flex align-items-center justify-content-between",
-        inset && "ps-4",
-        className
-      )}
-      {...props}
-    >
-      {children}
-      <ChevronRightIcon />
-    </DropdownMenuPrimitive.SubTrigger>
-  )
-}
-
-function DropdownMenuSubContent({
-  className,
-  ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) {
-  return (
-    <DropdownMenuPrimitive.SubContent
-      data-slot="dropdown-menu-sub-content"
-      className={cn(
-        "dropdown-menu show border shadow",
-        className
-      )}
+      className={cn("opacity-60 ms-auto text-xs", className)}
       {...props}
     />
   )
@@ -242,18 +202,12 @@ function DropdownMenuSubContent({
 
 export {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuRadioGroup,
+  DropdownMenuCheckboxItem,
   DropdownMenuRadioItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
 }

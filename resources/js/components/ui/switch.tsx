@@ -1,28 +1,33 @@
 import * as React from "react"
-import * as SwitchPrimitive from "@radix-ui/react-switch"
 
 import { cn } from "@/lib/utils"
 
+interface SwitchProps extends Omit<React.ComponentProps<"input">, "type"> {
+  checked?: boolean
+  onCheckedChange?: (checked: boolean) => void
+}
+
 function Switch({
   className,
+  checked,
+  onCheckedChange,
+  onChange,
   ...props
-}: React.ComponentProps<typeof SwitchPrimitive.Root>) {
+}: SwitchProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onCheckedChange?.(e.target.checked)
+    onChange?.(e)
+  }
+
   return (
-    <SwitchPrimitive.Root
+    <input
+      type="checkbox"
       data-slot="switch"
-      className={cn(
-        "form-check-input form-switch",
-        className
-      )}
+      className={cn("form-check-input", className)}
+      checked={checked}
+      onChange={handleChange}
       {...props}
-    >
-      <SwitchPrimitive.Thumb
-        data-slot="switch-thumb"
-        className={cn(
-          "form-check-input"
-        )}
-      />
-    </SwitchPrimitive.Root>
+    />
   )
 }
 

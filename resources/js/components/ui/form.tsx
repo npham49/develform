@@ -1,6 +1,4 @@
 import * as React from "react"
-import * as LabelPrimitive from "@radix-ui/react-label"
-import { Slot } from "@radix-ui/react-slot"
 import {
   Controller,
   FormProvider,
@@ -13,6 +11,16 @@ import {
 
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
+
+// Simple Slot replacement for asChild behavior
+const Slot = React.forwardRef<HTMLElement, React.PropsWithChildren<any>>(
+  ({ children, ...props }, ref) => {
+    if (React.isValidElement(children)) {
+      return React.cloneElement(children, { ...props, ref })
+    }
+    return <div {...props} ref={ref}>{children}</div>
+  }
+)
 
 const Form = FormProvider
 

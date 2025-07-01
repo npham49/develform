@@ -1,5 +1,4 @@
 import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
 
@@ -8,6 +7,16 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+
+// Simple Slot replacement for asChild behavior
+const Slot = React.forwardRef<HTMLElement, React.PropsWithChildren<any>>(
+  ({ children, ...props }, ref) => {
+    if (React.isValidElement(children)) {
+      return React.cloneElement(children, { ...props, ref })
+    }
+    return <div {...props} ref={ref}>{children}</div>
+  }
+)
 import {
   Sheet,
   SheetContent,
