@@ -6,9 +6,11 @@ import type { PropsWithChildren } from 'react';
 
 export default function AppHeaderLayout({ children, breadcrumbs }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
   return (
-    <AppShell>
+    <AppShell variant="header">
       <AppHeader breadcrumbs={breadcrumbs} />
-      <AppContent>{children}</AppContent>
+      <AppContent variant="header" className="flex-fill overflow-x-hidden">
+        {children}
+      </AppContent>
     </AppShell>
   );
 }

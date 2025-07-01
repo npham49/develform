@@ -1,19 +1,12 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
-import { Icon } from '@/components/icon';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { UserInfo } from '@/components/user-info';
 import { UserMenuContent } from '@/components/user-menu-content';
-import { useInitials } from '@/hooks/use-initials';
-import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
+import { BookOpen, ChevronDown, Folder, FormInput, LayoutGrid, Menu } from 'lucide-react';
+import { useState } from 'react';
 import AppLogo from './app-logo';
-import AppLogoIcon from './app-logo-icon';
 
 const mainNavItems: NavItem[] = [
   {
@@ -21,9 +14,14 @@ const mainNavItems: NavItem[] = [
     href: '/dashboard',
     icon: LayoutGrid,
   },
+  {
+    title: 'Forms',
+    href: '/forms',
+    icon: FormInput,
+  },
 ];
 
-const rightNavItems: NavItem[] = [
+const footerNavItems: NavItem[] = [
   {
     title: 'Repository',
     href: 'https://github.com/laravel/react-starter-kit',
@@ -36,135 +34,96 @@ const rightNavItems: NavItem[] = [
   },
 ];
 
-const activeItemStyles = 'text-dark bg-light';
-
 interface AppHeaderProps {
   breadcrumbs?: BreadcrumbItem[];
 }
 
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
-  const page = usePage<SharedData>();
-  const { auth } = page.props;
-  const getInitials = useInitials();
+  const { auth } = usePage<SharedData>().props;
+  const page = usePage();
+  const [isNavCollapsed, setIsNavCollapsed] = useState(true);
+
   return (
     <>
-      <div className="border-bottom">
-        <div className="d-flex align-items-center px-4 h-16 mx-auto">
-          {/* Mobile Menu */}
-          <div className="d-lg-none">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="me-2 h-34 w-34">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="d-flex h-100 w-64 flex-column align-items-stretch justify-content-between bg-light">
-                <SheetTitle className="visually-hidden">Navigation Menu</SheetTitle>
-                <SheetHeader className="d-flex justify-content-start text-start">
-                  <AppLogoIcon className="h-6 w-6 text-dark fill-current" />
-                </SheetHeader>
-                <div className="d-flex h-100 flex-column gap-4 p-4 flex-1">
-                  <div className="d-flex h-100 flex-column justify-content-between small">
-                    <div className="d-flex flex-column gap-4">
-                      {mainNavItems.map((item) => (
-                        <Link key={item.title} href={item.href} className="d-flex align-items-center gap-2 fw-medium">
-                          {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                          <span>{item.title}</span>
-                        </Link>
-                      ))}
-                    </div>
-
-                    <div className="d-flex flex-column gap-4">
-                      {rightNavItems.map((item) => (
-                        <a
-                          key={item.title}
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="d-flex align-items-center gap-2 fw-medium"
-                        >
-                          {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                          <span>{item.title}</span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-
-          <Link href="/dashboard" prefetch className="d-flex align-items-center gap-2">
+      {/* Main Navigation */}
+      <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+        <div className="container-fluid px-4">
+          {/* Brand/Logo */}
+          <Link href="/dashboard" className="navbar-brand d-flex align-items-center">
             <AppLogo />
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="ms-6 d-none h-100 align-items-center gap-6 d-lg-flex">
-            <NavigationMenu className="d-flex h-100 align-items-stretch">
-              <NavigationMenuList className="d-flex h-100 align-items-stretch gap-2">
-                {mainNavItems.map((item, index) => (
-                  <NavigationMenuItem key={index} className="position-relative d-flex h-100 align-items-center">
-                    <Link
-                      href={item.href}
-                      className={cn(navigationMenuTriggerStyle(), page.url === item.href && activeItemStyles, 'h-9 px-3 cursor-pointer')}
-                    >
-                      {item.icon && <Icon iconNode={item.icon} className="me-2 h-4 w-4" />}
-                      {item.title}
-                    </Link>
-                    {page.url === item.href && <div className="position-absolute bottom-0 start-0 h-0-5 w-100 bg-dark"></div>}
-                  </NavigationMenuItem>
-                ))}
-              </NavigationMenuList>
-            </NavigationMenu>
-          </div>
+          {/* Mobile toggle button */}
+          <button
+            className="navbar-toggler"
+            type="button"
+            onClick={() => setIsNavCollapsed(!isNavCollapsed)}
+            aria-controls="navbarNav"
+            aria-expanded={!isNavCollapsed}
+            aria-label="Toggle navigation"
+          >
+            <Menu size={20} />
+          </button>
 
-          <div className="d-flex align-items-center gap-2 ms-auto">
-            <div className="position-relative d-flex align-items-center gap-1">
-              <Button variant="ghost" size="icon" className="h-9 w-9 cursor-pointer">
-                <Search className="opacity-80" />
-              </Button>
-              <div className="d-none d-lg-flex">
-                {rightNavItems.map((item) => (
-                  <TooltipProvider key={item.title} delayDuration={0}>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <a
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn btn-link btn-sm ms-1 h-9 w-9 d-inline-flex align-items-center justify-content-center rounded p-0"
-                        >
-                          <span className="visually-hidden">{item.title}</span>
-                          {item.icon && <Icon iconNode={item.icon} className="opacity-80" />}
-                        </a>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{item.title}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ))}
-              </div>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="rounded-circle p-1" style={{ width: '40px', height: '40px' }}>
-                  <Avatar className="rounded-circle overflow-hidden" style={{ width: '32px', height: '32px' }}>
-                    <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
-                    <AvatarFallback className="rounded bg-light text-dark">{getInitials(auth.user.name)}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end">
-                <UserMenuContent user={auth.user} />
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {/* Navigation content */}
+          <div className={`collapse navbar-collapse ${!isNavCollapsed ? 'show' : ''}`} id="navbarNav">
+            {/* Main navigation items */}
+            <ul className="navbar-nav me-auto">
+              {mainNavItems.map((item) => (
+                <li key={item.title} className="nav-item">
+                  <Link
+                    href={item.href}
+                    className={`nav-link d-flex align-items-center gap-2 ${
+                      page.url.startsWith(item.href) ? 'active' : ''
+                    }`}
+                  >
+                    {item.icon && <item.icon size={16} />}
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            {/* Right side items */}
+            <ul className="navbar-nav">
+              {/* External links */}
+              {footerNavItems.map((item) => (
+                <li key={item.title} className="nav-item">
+                  <a
+                    href={item.href}
+                    className="nav-link d-flex align-items-center gap-2 text-muted"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {item.icon && <item.icon size={16} />}
+                    <span className="d-none d-lg-inline">{item.title}</span>
+                  </a>
+                </li>
+              ))}
+
+              {/* User dropdown */}
+              <li className="nav-item dropdown">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="nav-link btn btn-link d-flex align-items-center gap-2 text-dark p-2 border-0 bg-transparent">
+                      <UserInfo user={auth.user} />
+                      <ChevronDown size={16} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="dropdown-menu-end">
+                    <UserMenuContent user={auth.user} />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </li>
+            </ul>
           </div>
         </div>
-      </div>
+      </nav>
+
+      {/* Breadcrumbs */}
       {breadcrumbs.length > 1 && (
-        <div className="d-flex w-100 border-bottom">
-          <div className="d-flex h-12 w-100 align-items-center justify-content-start px-4 text-muted mx-auto">
+        <div className="bg-light border-bottom py-3">
+          <div className="container-fluid px-4">
             <Breadcrumbs breadcrumbs={breadcrumbs} />
           </div>
         </div>
