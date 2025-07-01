@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 
 // Simple Slot replacement for asChild behavior
-const Slot = React.forwardRef<HTMLElement, React.PropsWithChildren<any>>(
+const Slot = React.forwardRef<HTMLElement, React.PropsWithChildren<Record<string, unknown>>>(
   ({ children, ...props }, ref) => {
     if (React.isValidElement(children)) {
       return React.cloneElement(children, { ...props, ref })

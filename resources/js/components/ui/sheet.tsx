@@ -1,44 +1,79 @@
 import * as React from "react"
-import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
-  return <SheetPrimitive.Root data-slot="sheet" {...props} />
+interface SheetContextType {
+  open: boolean
+  setOpen: (open: boolean) => void
+}
+
+const SheetContext = React.createContext<SheetContextType | undefined>(undefined)
+
+function Sheet({
+  open,
+  onOpenChange,
+  children,
+  ...props
+}: {
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  children: React.ReactNode
+}) {
+  const [internalOpen, setInternalOpen] = React.useState(false)
+  const isControlled = open !== undefined
+  const isOpen = isControlled ? open : internalOpen
+
+  const setOpen = React.useCallback((newOpen: boolean) => {
+    if (isControlled) {
+      onOpenChange?.(newOpen)
+    } else {
+      setInternalOpen(newOpen)
+    }
+  }, [isControlled, onOpenChange])
+
+  return (
+    <SheetContext.Provider value={{ open: isOpen, setOpen }}>
+      <div data-slot="sheet" {...props}>
+        {children}
+      </div>
+    </SheetContext.Provider>
+  )
 }
 
 function SheetTrigger({
+  children,
   ...props
-}: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
-  return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />
+}: React.ComponentProps<"button">) {
+  const context = React.useContext(SheetContext)
+  if (!context) throw new Error("SheetTrigger must be used within Sheet")
+
+  return (
+    <button
+      data-slot="sheet-trigger"
+      onClick={() => context.setOpen(true)}
+      {...props}
+    >
+      {children}
+    </button>
+  )
 }
 
 function SheetClose({
+  children,
   ...props
-}: React.ComponentProps<typeof SheetPrimitive.Close>) {
-  return <SheetPrimitive.Close data-slot="sheet-close" {...props} />
-}
+}: React.ComponentProps<"button">) {
+  const context = React.useContext(SheetContext)
+  if (!context) throw new Error("SheetClose must be used within Sheet")
 
-function SheetPortal({
-  ...props
-}: React.ComponentProps<typeof SheetPrimitive.Portal>) {
-  return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />
-}
-
-function SheetOverlay({
-  className,
-  ...props
-}: React.ComponentProps<typeof SheetPrimitive.Overlay>) {
   return (
-    <SheetPrimitive.Overlay
-      data-slot="sheet-overlay"
-      className={cn(
-        "modal-backdrop fade show",
-        className
-      )}
+    <button
+      data-slot="sheet-close"
+      onClick={() => context.setOpen(false)}
       {...props}
-    />
+    >
+      {children}
+    </button>
   )
 }
 
@@ -47,30 +82,44 @@ function SheetContent({
   children,
   side = "right",
   ...props
-}: React.ComponentProps<typeof SheetPrimitive.Content> & {
-  side?: "top" | "right" | "bottom" | "left"
+}: React.ComponentProps<"div"> & {
+  side?: "left" | "right" | "top" | "bottom"
 }) {
+  const context = React.useContext(SheetContext)
+  if (!context) throw new Error("SheetContent must be used within Sheet")
+
+  if (!context.open) return null
+
   return (
-    <SheetPortal>
-      <SheetOverlay />
-      <SheetPrimitive.Content
+    <>
+      <div 
+        className="offcanvas-backdrop fade show"
+        onClick={() => context.setOpen(false)}
+      />
+      <div
         data-slot="sheet-content"
         className={cn(
-          "offcanvas offcanvas-end show",
+          "offcanvas show",
           side === "left" && "offcanvas-start",
+          side === "right" && "offcanvas-end", 
           side === "top" && "offcanvas-top",
           side === "bottom" && "offcanvas-bottom",
           className
         )}
+        tabIndex={-1}
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className="btn-close position-absolute top-0 end-0 mt-3 me-3">
-          <XIcon />
+        <button
+          type="button"
+          className="btn-close position-absolute top-0 end-0 mt-3 me-3"
+          onClick={() => context.setOpen(false)}
+        >
+          <XIcon size={16} />
           <span className="visually-hidden">Close</span>
-        </SheetPrimitive.Close>
-      </SheetPrimitive.Content>
-    </SheetPortal>
+        </button>
+      </div>
+    </>
   )
 }
 
@@ -88,7 +137,7 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-footer"
-      className={cn("offcanvas-footer p-3", className)}
+      className={cn("offcanvas-footer mt-auto p-3", className)}
       {...props}
     />
   )
@@ -97,9 +146,9 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
 function SheetTitle({
   className,
   ...props
-}: React.ComponentProps<typeof SheetPrimitive.Title>) {
+}: React.ComponentProps<"h1">) {
   return (
-    <SheetPrimitive.Title
+    <h1
       data-slot="sheet-title"
       className={cn("offcanvas-title fw-semibold", className)}
       {...props}
@@ -110,9 +159,9 @@ function SheetTitle({
 function SheetDescription({
   className,
   ...props
-}: React.ComponentProps<typeof SheetPrimitive.Description>) {
+}: React.ComponentProps<"p">) {
   return (
-    <SheetPrimitive.Description
+    <p
       data-slot="sheet-description"
       className={cn("text-muted small", className)}
       {...props}
@@ -122,11 +171,11 @@ function SheetDescription({
 
 export {
   Sheet,
-  SheetTrigger,
   SheetClose,
   SheetContent,
-  SheetHeader,
-  SheetFooter,
-  SheetTitle,
   SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
 }

@@ -1,59 +1,48 @@
 import * as React from "react"
-import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
-function TooltipProvider({
-  delayDuration = 0,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
+function TooltipProvider({ children }: { children: React.ReactNode }) {
+  return <>{children}</>
+}
+
+function Tooltip({ children }: { children: React.ReactNode }) {
+  return <>{children}</>
+}
+
+function TooltipTrigger({ children, ...props }: React.ComponentProps<"div">) {
   return (
-    <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
-      delayDuration={delayDuration}
+    <div
+      data-slot="tooltip-trigger"
       {...props}
-    />
+    >
+      {children}
+    </div>
   )
-}
-
-function Tooltip({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return (
-    <TooltipProvider>
-      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-    </TooltipProvider>
-  )
-}
-
-function TooltipTrigger({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
 }
 
 function TooltipContent({
   className,
-  sideOffset = 4,
   children,
   ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Content>) {
+}: React.ComponentProps<"div">) {
   return (
-    <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Content
-        data-slot="tooltip-content"
-        sideOffset={sideOffset}
-        className={cn(
-          "tooltip-inner bg-dark text-white rounded px-3 py-2 small",
-          className
-        )}
-        {...props}
-      >
+    <div
+      data-slot="tooltip-content"
+      className={cn("tooltip bs-tooltip-auto", className)}
+      role="tooltip"
+      {...props}
+    >
+      <div className="tooltip-inner">
         {children}
-        <TooltipPrimitive.Arrow className="bg-dark" />
-      </TooltipPrimitive.Content>
-    </TooltipPrimitive.Portal>
+      </div>
+    </div>
   )
 }
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+export {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+}

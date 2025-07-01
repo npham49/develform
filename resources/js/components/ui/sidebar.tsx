@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 
 // Simple Slot replacement for asChild behavior
-const Slot = React.forwardRef<HTMLElement, React.PropsWithChildren<any>>(
+const Slot = React.forwardRef<HTMLElement, React.PropsWithChildren<Record<string, unknown>>>(
   ({ children, ...props }, ref) => {
     if (React.isValidElement(children)) {
       return React.cloneElement(children, { ...props, ref })
