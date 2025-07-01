@@ -1,10 +1,11 @@
 import { FormBuilder } from '@tsed/react-formio';
+import { ComponentSchema } from 'formiojs';
 import { useState } from 'react';
 
 export function FormBuilderWrapper() {
-  const [components, setComponents] = useState([]);
+  const [components, setComponents] = useState<ComponentSchema[]>([]);
 
-  const handleChange = (updatedComponents: any) => {
+  const handleChange = (updatedComponents: ComponentSchema[]) => {
     setComponents(updatedComponents);
   };
 

@@ -22,8 +22,6 @@
     "typescript-eslint": "^8.23.0"
   },
   "dependencies": {
-    "@formio/js": "^5.2.0",
-    "@formio/react": "^6.0.1",
     "@headlessui/react": "^2.2.0",
     "@hookform/resolvers": "^5.1.1",
     "@inertiajs/react": "^2.0.0",

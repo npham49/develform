@@ -1,11 +1,11 @@
 import { Form } from '@tsed/react-formio';
 
 interface FormRendererProps {
-  form?: any;
-  submission?: any;
-  onSubmit?: (submission: any) => void;
-  onChange?: (submission: any) => void;
-  options?: any;
+  form?: object;
+  submission?: object;
+  onSubmit?: (submission: object) => void;
+  onChange?: (submission: object) => void;
+  options?: object;
   className?: string;
 }
 
