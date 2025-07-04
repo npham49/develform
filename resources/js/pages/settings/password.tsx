@@ -1,15 +1,9 @@
-import InputError from '@/components/input-error';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler, useRef } from 'react';
-
-import HeadingSmall from '@/components/heading-small';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -53,62 +47,67 @@ export default function Password() {
       <Head title="Password settings" />
 
       <SettingsLayout>
-        <div className="space-y-6">
-          <HeadingSmall title="Update password" description="Ensure your account is using a long, random password to stay secure" />
+        <div className="d-flex flex-column gap-4">
+          <div className="mb-4">
+            <h4 className="fw-semibold">Update password</h4>
+            <p className="text-muted mb-0">Ensure your account is using a long, random password to stay secure</p>
+          </div>
 
-          <form onSubmit={updatePassword} className="space-y-6">
-            <div className="gap-2 grid">
-              <Label htmlFor="current_password">Current password</Label>
-
-              <Input
+          <form onSubmit={updatePassword} className="d-flex flex-column gap-4">
+            <div className="mb-3">
+              <label htmlFor="current_password" className="form-label">
+                Current password
+              </label>
+              <input
                 id="current_password"
                 ref={currentPasswordInput}
                 value={data.current_password}
                 onChange={(e) => setData('current_password', e.target.value)}
                 type="password"
-                className="mt-1 block w-full"
+                className="form-control"
                 autoComplete="current-password"
                 placeholder="Current password"
               />
-
-              <InputError message={errors.current_password} />
+              {errors.current_password && <div className="text-danger small mt-1">{errors.current_password}</div>}
             </div>
 
-            <div className="gap-2 grid">
-              <Label htmlFor="password">New password</Label>
-
-              <Input
+            <div className="mb-3">
+              <label htmlFor="password" className="form-label">
+                New password
+              </label>
+              <input
                 id="password"
                 ref={passwordInput}
                 value={data.password}
                 onChange={(e) => setData('password', e.target.value)}
                 type="password"
-                className="mt-1 block w-full"
+                className="form-control"
                 autoComplete="new-password"
                 placeholder="New password"
               />
-
-              <InputError message={errors.password} />
+              {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
             </div>
 
-            <div className="gap-2 grid">
-              <Label htmlFor="password_confirmation">Confirm password</Label>
-
-              <Input
+            <div className="mb-3">
+              <label htmlFor="password_confirmation" className="form-label">
+                Confirm password
+              </label>
+              <input
                 id="password_confirmation"
                 value={data.password_confirmation}
                 onChange={(e) => setData('password_confirmation', e.target.value)}
                 type="password"
-                className="mt-1 block w-full"
+                className="form-control"
                 autoComplete="new-password"
                 placeholder="Confirm password"
               />
-
-              <InputError message={errors.password_confirmation} />
+              {errors.password_confirmation && <div className="text-danger small mt-1">{errors.password_confirmation}</div>}
             </div>
 
-            <div className="gap-4 flex items-center">
-              <Button disabled={processing}>Save password</Button>
+            <div className="d-flex align-items-center gap-3">
+              <button type="submit" disabled={processing} className="btn btn-primary">
+                Save password
+              </button>
 
               <Transition
                 show={recentlySuccessful}
@@ -117,7 +116,7 @@ export default function Password() {
                 leave="transition ease-in-out"
                 leaveTo="opacity-0"
               >
-                <p className="text-sm text-neutral-600">Saved</p>
+                <p className="text-muted small">Saved</p>
               </Transition>
             </div>
           </form>

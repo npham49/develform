@@ -3,8 +3,6 @@ import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
 import AuthLayout from '@/layouts/auth-layout';
 
 export default function VerifyEmail({ status }: { status?: string }) {
@@ -21,20 +19,28 @@ export default function VerifyEmail({ status }: { status?: string }) {
       <Head title="Email verification" />
 
       {status === 'verification-link-sent' && (
-        <div className="mb-4 text-sm font-medium text-green-600 text-center">
+        <div className="mb-4 text-sm fw-medium text-success text-center">
           A new verification link has been sent to the email address you provided during registration.
         </div>
       )}
 
-      <form onSubmit={submit} className="space-y-6 text-center">
-        <Button disabled={processing} variant="secondary">
+      <form onSubmit={submit} className="d-flex flex-column gap-3 text-center">
+        <button type="button" disabled={processing} className="btn btn-secondary d-flex align-items-center justify-content-center gap-2">
           {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
           Resend verification email
-        </Button>
+        </button>
 
-        <TextLink href={route('logout')} method="post" className="text-sm mx-auto block">
+        <a
+          href={route('logout')}
+          className="text-sm mx-auto d-block text-decoration-none"
+          onClick={(e) => {
+            e.preventDefault();
+            // Use Inertia's router for logout
+            window.location.href = route('logout');
+          }}
+        >
           Log out
-        </TextLink>
+        </a>
       </form>
     </AuthLayout>
   );

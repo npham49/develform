@@ -2,10 +2,6 @@ import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 
 interface ResetPasswordProps {
@@ -40,57 +36,63 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
       <Head title="Reset password" />
 
       <form onSubmit={submit}>
-        <div className="gap-6 grid">
-          <div className="gap-2 grid">
-            <Label htmlFor="email">Email</Label>
-            <Input
+        <div className="d-flex flex-column gap-4">
+          <div className="d-flex flex-column gap-2">
+            <label htmlFor="email" className="form-label">
+              Email
+            </label>
+            <input
               id="email"
               type="email"
               name="email"
               autoComplete="email"
               value={data.email}
-              className="mt-1 block w-full"
+              className="form-control"
               readOnly
               onChange={(e) => setData('email', e.target.value)}
             />
-            <InputError message={errors.email} className="mt-2" />
+            {errors.email && <div className="text-danger small mt-2">{errors.email}</div>}
           </div>
 
-          <div className="gap-2 grid">
-            <Label htmlFor="password">Password</Label>
-            <Input
+          <div className="d-flex flex-column gap-2">
+            <label htmlFor="password" className="form-label">
+              Password
+            </label>
+            <input
               id="password"
               type="password"
               name="password"
               autoComplete="new-password"
               value={data.password}
-              className="mt-1 block w-full"
+              className="form-control"
               autoFocus
               onChange={(e) => setData('password', e.target.value)}
               placeholder="Password"
             />
-            <InputError message={errors.password} />
+            {errors.password && <div className="text-danger small">{errors.password}</div>}
           </div>
 
-          <div className="gap-2 grid">
-            <Label htmlFor="password_confirmation">Confirm password</Label>
-            <Input
+          <div className="d-flex flex-column gap-2">
+            <label htmlFor="password_confirmation" className="form-label">
+              Confirm password
+            </label>
+            <input
               id="password_confirmation"
               type="password"
               name="password_confirmation"
               autoComplete="new-password"
               value={data.password_confirmation}
-              className="mt-1 block w-full"
+              className="form-control"
               onChange={(e) => setData('password_confirmation', e.target.value)}
               placeholder="Confirm password"
             />
-            <InputError message={errors.password_confirmation} className="mt-2" />
+            {errors.password_confirmation && <div className="text-danger small mt-2">{errors.password_confirmation}</div>}
           </div>
 
-          <Button type="submit" className="mt-4 w-full" disabled={processing}>
+          <button type="submit" className="btn btn-primary mt-4 w-100 d-flex align-items-center justify-content-center gap-2" disabled={processing}>
             {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
             Reset password
-          </Button>
+          </button>
         </div>
       </form>
     </AuthLayout>

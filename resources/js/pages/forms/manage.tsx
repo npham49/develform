@@ -1,5 +1,3 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Form } from '@/types/form';
@@ -24,11 +22,11 @@ export default function FormsManage({ form }: FormsManageProps) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={`Manage ${form.name}`} />
-      <Card>
-        <CardHeader>
-          <CardTitle>Manage Form: {form.name}</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="card">
+        <div className="card-header">
+          <h5 className="card-title mb-0">Manage Form: {form.name}</h5>
+        </div>
+        <div className="card-body">
           <div className="d-flex flex-column gap-4">
             <div>
               <h3 className="fs-4 fw-semibold">Form Details</h3>
@@ -52,12 +50,12 @@ export default function FormsManage({ form }: FormsManageProps) {
             </div>
             <div className="d-flex justify-content-end">
               <Link as="a" href={route('forms.schema', form.id)}>
-                <Button variant={'outline'}>Edit Schema</Button>
+                <button className="btn btn-outline-secondary">Edit Schema</button>
               </Link>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </AppLayout>
   );
 }

@@ -2,12 +2,6 @@ import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 
 type LoginForm = {
@@ -42,8 +36,10 @@ export default function Login({ status, canResetPassword }: LoginProps) {
       <form className="d-flex flex-column gap-4" onSubmit={submit}>
         <div className="d-flex flex-column gap-4">
           <div className="d-flex flex-column gap-2">
-            <Label htmlFor="email">Email address</Label>
-            <Input
+            <label htmlFor="email" className="form-label">
+              Email address
+            </label>
+            <input
               id="email"
               type="email"
               required
@@ -53,20 +49,23 @@ export default function Login({ status, canResetPassword }: LoginProps) {
               value={data.email}
               onChange={(e) => setData('email', e.target.value)}
               placeholder="email@example.com"
+              className="form-control"
             />
-            <InputError message={errors.email} />
+            {errors.email && <div className="text-danger small">{errors.email}</div>}
           </div>
 
           <div className="d-flex flex-column gap-2">
             <div className="d-flex align-items-center">
-              <Label htmlFor="password">Password</Label>
+              <label htmlFor="password" className="form-label">
+                Password
+              </label>
               {canResetPassword && (
-                <TextLink href={route('password.request')} className="small ms-auto" tabIndex={5}>
+                <a href={route('password.request')} className="small ms-auto text-decoration-none" tabIndex={5}>
                   Forgot password?
-                </TextLink>
+                </a>
               )}
             </div>
-            <Input
+            <input
               id="password"
               type="password"
               required
@@ -75,30 +74,46 @@ export default function Login({ status, canResetPassword }: LoginProps) {
               value={data.password}
               onChange={(e) => setData('password', e.target.value)}
               placeholder="Password"
+              className="form-control"
             />
-            <InputError message={errors.password} />
+            {errors.password && <div className="text-danger small">{errors.password}</div>}
           </div>
 
-          <div className="d-flex align-items-center gap-3">
-            <Checkbox id="remember" name="remember" checked={data.remember} onClick={() => setData('remember', !data.remember)} tabIndex={3} />
-            <Label htmlFor="remember">Remember me</Label>
+          <div className="form-check d-flex align-items-center gap-2">
+            <input
+              id="remember"
+              name="remember"
+              type="checkbox"
+              checked={data.remember}
+              onChange={() => setData('remember', !data.remember)}
+              tabIndex={3}
+              className="form-check-input"
+            />
+            <label htmlFor="remember" className="form-check-label">
+              Remember me
+            </label>
           </div>
 
-          <Button type="submit" className="mt-2 w-100" tabIndex={4} disabled={processing}>
+          <button
+            type="submit"
+            className="btn btn-primary mt-2 w-100 d-flex align-items-center justify-content-center gap-2"
+            tabIndex={4}
+            disabled={processing}
+          >
             {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
             Log in
-          </Button>
+          </button>
         </div>
 
         <div className="small text-muted text-center">
           Don't have an account?{' '}
-          <TextLink href={route('register')} tabIndex={5}>
+          <a href={route('register')} tabIndex={5} className="text-decoration-none">
             Sign up
-          </TextLink>
+          </a>
         </div>
       </form>
 
-      {status && <div className="mb-4 text-sm font-medium text-green-600 text-center">{status}</div>}
+      {status && <div className="mb-4 text-sm fw-medium text-success text-center">{status}</div>}
     </AuthLayout>
   );
 }

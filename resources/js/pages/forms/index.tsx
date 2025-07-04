@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -29,9 +28,7 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
       <Head title="Manage Forms" />
       <div className="gap-4 rounded p-4 d-flex h-100 flex-1 flex-column overflow-x-auto">
         <Link as="a" href={route('forms.create')} className="ms-auto">
-          <Button className="cursor-pointer" variant={'outline'}>
-            Create Form
-          </Button>
+          <button className="btn btn-outline-secondary">Create Form</button>
         </Link>
         <table className="table table-striped">
           <thead>
@@ -52,9 +49,7 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
                 <td>{new Date(form.created_at).toLocaleDateString()}</td>
                 <td>
                   <Link href={route('forms.manage', form.id)}>
-                    <Button variant="outline" size="sm">
-                      Manage
-                    </Button>
+                    <button className="btn btn-outline-secondary btn-sm">Manage</button>
                   </Link>
                 </td>
               </tr>

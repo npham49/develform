@@ -2,11 +2,6 @@ import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 
 type RegisterForm = {
@@ -37,8 +32,10 @@ export default function Register() {
       <form className="d-flex flex-column gap-4" onSubmit={submit}>
         <div className="d-flex flex-column gap-4">
           <div className="d-flex flex-column gap-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
+            <label htmlFor="name" className="form-label">
+              Name
+            </label>
+            <input
               id="name"
               type="text"
               required
@@ -49,13 +46,16 @@ export default function Register() {
               onChange={(e) => setData('name', e.target.value)}
               disabled={processing}
               placeholder="Full name"
+              className="form-control"
             />
-            <InputError message={errors.name} className="mt-2" />
+            {errors.name && <div className="text-danger small mt-2">{errors.name}</div>}
           </div>
 
           <div className="d-flex flex-column gap-2">
-            <Label htmlFor="email">Email address</Label>
-            <Input
+            <label htmlFor="email" className="form-label">
+              Email address
+            </label>
+            <input
               id="email"
               type="email"
               required
@@ -65,13 +65,16 @@ export default function Register() {
               onChange={(e) => setData('email', e.target.value)}
               disabled={processing}
               placeholder="email@example.com"
+              className="form-control"
             />
-            <InputError message={errors.email} />
+            {errors.email && <div className="text-danger small">{errors.email}</div>}
           </div>
 
           <div className="d-flex flex-column gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
+            <label htmlFor="password" className="form-label">
+              Password
+            </label>
+            <input
               id="password"
               type="password"
               required
@@ -81,13 +84,16 @@ export default function Register() {
               onChange={(e) => setData('password', e.target.value)}
               disabled={processing}
               placeholder="Password"
+              className="form-control"
             />
-            <InputError message={errors.password} />
+            {errors.password && <div className="text-danger small">{errors.password}</div>}
           </div>
 
           <div className="d-flex flex-column gap-2">
-            <Label htmlFor="password_confirmation">Confirm password</Label>
-            <Input
+            <label htmlFor="password_confirmation" className="form-label">
+              Confirm password
+            </label>
+            <input
               id="password_confirmation"
               type="password"
               required
@@ -97,21 +103,27 @@ export default function Register() {
               onChange={(e) => setData('password_confirmation', e.target.value)}
               disabled={processing}
               placeholder="Confirm password"
+              className="form-control"
             />
-            <InputError message={errors.password_confirmation} />
+            {errors.password_confirmation && <div className="text-danger small">{errors.password_confirmation}</div>}
           </div>
 
-          <Button type="submit" className="mt-2 w-100" tabIndex={5} disabled={processing}>
+          <button
+            type="submit"
+            className="btn btn-primary mt-2 w-100 d-flex align-items-center justify-content-center gap-2"
+            tabIndex={5}
+            disabled={processing}
+          >
             {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
             Create account
-          </Button>
+          </button>
         </div>
 
         <div className="small text-muted text-center">
           Already have an account?{' '}
-          <TextLink href={route('login')} tabIndex={6}>
+          <a href={route('login')} tabIndex={6} className="text-decoration-none">
             Log in
-          </TextLink>
+          </a>
         </div>
       </form>
     </AuthLayout>

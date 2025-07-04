@@ -1,5 +1,3 @@
-import AppLogoIcon from '@/components/app-logo-icon';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
@@ -13,22 +11,25 @@ export default function AuthCardLayout({
   description?: string;
 }>) {
   return (
-    <div className="gap-6 bg-muted p-6 md:p-10 flex min-h-svh flex-col items-center justify-center">
-      <div className="max-w-md gap-6 flex w-full flex-col">
-        <Link href={route('home')} className="gap-2 font-medium flex items-center self-center">
-          <div className="h-9 w-9 flex items-center justify-center">
-            <AppLogoIcon className="size-9 text-black dark:text-white fill-current" />
+    <div className="d-flex flex-column align-items-center justify-content-center min-vh-100 bg-light p-4">
+      <div className="w-100 d-flex flex-column gap-4" style={{ maxWidth: '400px' }}>
+        <Link href={route('home')} className="d-flex align-items-center justify-content-center gap-2 fw-medium text-decoration-none">
+          <div
+            className="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle"
+            style={{ height: '36px', width: '36px' }}
+          >
+            <span className="fw-bold">FL</span>
           </div>
         </Link>
 
-        <div className="gap-6 flex flex-col">
-          <Card className="rounded-xl">
-            <CardHeader className="px-10 pt-8 pb-0 text-center">
-              <CardTitle className="text-xl">{title}</CardTitle>
-              <CardDescription>{description}</CardDescription>
-            </CardHeader>
-            <CardContent className="px-10 py-8">{children}</CardContent>
-          </Card>
+        <div className="d-flex flex-column gap-4">
+          <div className="card shadow-sm">
+            <div className="card-header text-center py-4">
+              <h5 className="card-title fs-4 mb-2">{title}</h5>
+              <p className="text-muted mb-0">{description}</p>
+            </div>
+            <div className="card-body p-4">{children}</div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,3 @@
-import AppLogoIcon from '@/components/app-logo-icon';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
@@ -10,20 +9,23 @@ interface AuthLayoutProps {
 
 export default function AuthSimpleLayout({ children, title, description }: PropsWithChildren<AuthLayoutProps>) {
   return (
-    <div className="gap-6 bg-background p-6 md:p-10 flex min-h-svh flex-col items-center justify-center">
-      <div className="max-w-sm w-full">
-        <div className="gap-8 flex flex-col">
-          <div className="gap-4 flex flex-col items-center">
-            <Link href={route('home')} className="gap-2 font-medium flex flex-col items-center">
-              <div className="mb-1 h-9 w-9 rounded-md flex items-center justify-center">
-                <AppLogoIcon className="size-9 dark:text-white fill-current text-[var(--foreground)]" />
+    <div className="d-flex flex-column align-items-center justify-content-center min-vh-100 bg-light p-4">
+      <div className="w-100" style={{ maxWidth: '400px' }}>
+        <div className="d-flex flex-column gap-4">
+          <div className="d-flex flex-column align-items-center gap-3">
+            <Link href={route('home')} className="d-flex flex-column align-items-center gap-2 fw-medium text-decoration-none">
+              <div
+                className="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle"
+                style={{ height: '36px', width: '36px' }}
+              >
+                <span className="fw-bold">FL</span>
               </div>
-              <span className="sr-only">{title}</span>
+              <span className="visually-hidden">{title}</span>
             </Link>
 
-            <div className="space-y-2 text-center">
-              <h1 className="text-xl font-medium">{title}</h1>
-              <p className="text-sm text-muted-foreground text-center">{description}</p>
+            <div className="text-center">
+              <h1 className="h4 fw-medium">{title}</h1>
+              <p className="text-muted small text-center">{description}</p>
             </div>
           </div>
           {children}

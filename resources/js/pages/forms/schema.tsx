@@ -1,8 +1,7 @@
-import { FormBuilderWrapper } from '@/components/form-builder-wrapper';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Form } from '@/types/form';
+import { FormBuilder } from '@formio/react';
 import { Head } from '@inertiajs/react';
 
 interface FormsSchemaProps {
@@ -28,26 +27,27 @@ export default function FormsSchema({ form }: FormsSchemaProps) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={`Schema ${form.name}`} />
-      <Card className="bg-background-bootstrap">
-        <CardHeader>
-          <CardTitle>Schema: {form.name}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+      <div className="card">
+        <div className="card-header">
+          <h5 className="card-title mb-0">Schema: {form.name}</h5>
+        </div>
+        <div className="card-body">
+          <div className="d-flex flex-column gap-4">
             <div>
-              <h3 className="text-lg font-semibold">Form Details</h3>
-              <div className="mt-2 space-y-2">
+              <h3 className="fs-5 fw-semibold">Form Details</h3>
+              <div className="mt-2 d-flex flex-column gap-2">
                 <div>
-                  <span className="font-medium">Name:</span> {form.name}
+                  <span className="fw-medium">Name:</span> {form.name}
                 </div>
               </div>
             </div>
-            <div className="bg-background-bootstrap">
-              <FormBuilderWrapper />
+            <div className="p-4 bg-light rounded border">
+              <p className="text-muted">Form Builder will be implemented here</p>
+              <FormBuilder />
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </AppLayout>
   );
 }

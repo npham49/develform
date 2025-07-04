@@ -3,10 +3,6 @@ import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 
 export default function ConfirmPassword() {
@@ -27,10 +23,12 @@ export default function ConfirmPassword() {
       <Head title="Confirm password" />
 
       <form onSubmit={submit}>
-        <div className="space-y-6">
-          <div className="gap-2 grid">
-            <Label htmlFor="password">Password</Label>
-            <Input
+        <div className="d-flex flex-column gap-4">
+          <div className="d-flex flex-column gap-2">
+            <label htmlFor="password" className="form-label">
+              Password
+            </label>
+            <input
               id="password"
               type="password"
               name="password"
@@ -39,16 +37,17 @@ export default function ConfirmPassword() {
               value={data.password}
               autoFocus
               onChange={(e) => setData('password', e.target.value)}
+              className="form-control"
             />
 
-            <InputError message={errors.password} />
+            {errors.password && <div className="text-danger small">{errors.password}</div>}
           </div>
 
-          <div className="flex items-center">
-            <Button className="w-full" disabled={processing}>
+          <div className="d-flex align-items-center">
+            <button type="submit" className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" disabled={processing}>
               {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
               Confirm password
-            </Button>
+            </button>
           </div>
         </div>
       </form>
