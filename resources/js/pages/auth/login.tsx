@@ -39,9 +39,9 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
       <Head title="Log in" />
 
-      <form className="gap-6 flex flex-col" onSubmit={submit}>
-        <div className="gap-6 grid">
-          <div className="gap-2 grid">
+      <form className="d-flex flex-column gap-4" onSubmit={submit}>
+        <div className="d-flex flex-column gap-4">
+          <div className="d-flex flex-column gap-2">
             <Label htmlFor="email">Email address</Label>
             <Input
               id="email"
@@ -57,11 +57,11 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             <InputError message={errors.email} />
           </div>
 
-          <div className="gap-2 grid">
-            <div className="flex items-center">
+          <div className="d-flex flex-column gap-2">
+            <div className="d-flex align-items-center">
               <Label htmlFor="password">Password</Label>
               {canResetPassword && (
-                <TextLink href={route('password.request')} className="text-sm ml-auto" tabIndex={5}>
+                <TextLink href={route('password.request')} className="small ms-auto" tabIndex={5}>
                   Forgot password?
                 </TextLink>
               )}
@@ -79,18 +79,18 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             <InputError message={errors.password} />
           </div>
 
-          <div className="space-x-3 flex items-center">
+          <div className="d-flex align-items-center gap-3">
             <Checkbox id="remember" name="remember" checked={data.remember} onClick={() => setData('remember', !data.remember)} tabIndex={3} />
             <Label htmlFor="remember">Remember me</Label>
           </div>
 
-          <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
+          <Button type="submit" className="mt-2 w-100" tabIndex={4} disabled={processing}>
             {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
             Log in
           </Button>
         </div>
 
-        <div className="text-sm text-muted-foreground text-center">
+        <div className="small text-muted text-center">
           Don't have an account?{' '}
           <TextLink href={route('register')} tabIndex={5}>
             Sign up

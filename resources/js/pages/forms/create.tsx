@@ -44,7 +44,7 @@ export default function FormsCreate() {
           <CardTitle>Create Form</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="gap-4 flex flex-col" onSubmit={handleSubmit}>
+          <form className="d-flex flex-column gap-4" onSubmit={handleSubmit}>
             <Label>Name</Label>
             <Input name="name" value={data.name} onChange={(e) => setData('name', e.target.value)} />
             <InputError message={errors.name} />

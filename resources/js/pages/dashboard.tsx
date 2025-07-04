@@ -14,20 +14,26 @@ export default function Dashboard() {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Dashboard" />
-      <div className="gap-4 rounded-xl p-4 flex h-full flex-1 flex-col overflow-x-auto">
-        <div className="gap-4 md:grid-cols-3 grid auto-rows-min">
-          <div className="aspect-video rounded-xl border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden border">
-            <PlaceholderPattern className="inset-0 stroke-neutral-900/20 dark:stroke-neutral-100/20 absolute size-full" />
+      <div className="gap-4 rounded p-4 d-flex h-100 flex-1 flex-column overflow-x-auto">
+        <div className="row g-4">
+          <div className="col-md-4">
+            <div className="rounded border position-relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
+              <PlaceholderPattern className="position-absolute top-0 start-0 w-100 h-100" />
+            </div>
           </div>
-          <div className="aspect-video rounded-xl border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden border">
-            <PlaceholderPattern className="inset-0 stroke-neutral-900/20 dark:stroke-neutral-100/20 absolute size-full" />
+          <div className="col-md-4">
+            <div className="rounded border position-relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
+              <PlaceholderPattern className="position-absolute top-0 start-0 w-100 h-100" />
+            </div>
           </div>
-          <div className="aspect-video rounded-xl border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden border">
-            <PlaceholderPattern className="inset-0 stroke-neutral-900/20 dark:stroke-neutral-100/20 absolute size-full" />
+          <div className="col-md-4">
+            <div className="rounded border position-relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
+              <PlaceholderPattern className="position-absolute top-0 start-0 w-100 h-100" />
+            </div>
           </div>
         </div>
-        <div className="rounded-xl border-sidebar-border/70 md:min-h-min dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden border">
-          <PlaceholderPattern className="inset-0 stroke-neutral-900/20 dark:stroke-neutral-100/20 absolute size-full" />
+        <div className="rounded border position-relative flex-fill overflow-hidden" style={{ minHeight: '50vh' }}>
+          <PlaceholderPattern className="position-absolute top-0 start-0 w-100 h-100" />
         </div>
       </div>
     </AppLayout>

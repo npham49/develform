@@ -1,29 +1,33 @@
 import * as React from "react"
-import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
-import { CheckIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+interface CheckboxProps extends React.ComponentProps<"input"> {
+  checked?: boolean
+  onClick?: () => void
+}
+
 function Checkbox({
   className,
+  checked,
+  onClick,
+  onChange,
   ...props
-}: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
+}: CheckboxProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onClick?.()
+    onChange?.(e)
+  }
+
   return (
-    <CheckboxPrimitive.Root
+    <input
+      type="checkbox"
       data-slot="checkbox"
-      className={cn(
-        "form-check-input",
-        className
-      )}
+      className={cn("form-check-input", className)}
+      checked={checked}
+      onChange={handleChange}
       {...props}
-    >
-      <CheckboxPrimitive.Indicator
-        data-slot="checkbox-indicator"
-        className="d-flex align-items-center justify-content-center text-current"
-      >
-        <CheckIcon />
-      </CheckboxPrimitive.Indicator>
-    </CheckboxPrimitive.Root>
+    />
   )
 }
 

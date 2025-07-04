@@ -1,5 +1,5 @@
 import { Toaster } from '@/components/ui/sonner';
-import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
+import AppLayoutTemplate from '@/layouts/app/app-header-layout';
 import { type BreadcrumbItem } from '@/types';
 import '@formio/js/dist/formio.full.min.css';
 import 'bootstrap/dist/css/bootstrap.min.css';

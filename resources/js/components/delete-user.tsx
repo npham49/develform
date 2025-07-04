@@ -40,15 +40,17 @@ export default function DeleteUser() {
         </div>
 
         <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="destructive">Delete account</Button>
+          <DialogTrigger>
+            Delete account
           </DialogTrigger>
           <DialogContent>
-            <DialogTitle>Are you sure you want to delete your account?</DialogTitle>
-            <DialogDescription>
-              Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you
-              would like to permanently delete your account.
-            </DialogDescription>
+            <DialogHeader>
+              <DialogTitle>Are you sure you want to delete your account?</DialogTitle>
+              <DialogDescription>
+                Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you
+                would like to permanently delete your account.
+              </DialogDescription>
+            </DialogHeader>
             <form className="d-flex flex-column gap-4" onSubmit={deleteUser}>
               <div className="d-flex flex-column gap-2">
                 <Label htmlFor="password" className="visually-hidden">
@@ -70,14 +72,14 @@ export default function DeleteUser() {
               </div>
 
               <DialogFooter className="gap-2">
-                <DialogClose asChild>
+                <DialogClose>
                   <Button variant="secondary" onClick={closeModal}>
                     Cancel
                   </Button>
                 </DialogClose>
 
-                <Button variant="destructive" disabled={processing} asChild>
-                  <button type="submit">Delete account</button>
+                <Button variant="destructive" disabled={processing} type="submit">
+                  Delete account
                 </Button>
               </DialogFooter>
             </form>

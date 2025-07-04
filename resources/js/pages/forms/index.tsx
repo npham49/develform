@@ -27,30 +27,30 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Manage Forms" />
-      <div className="gap-4 rounded-xl p-4 flex h-full flex-1 flex-col overflow-x-auto">
-        <Link as="a" href={route('forms.create')} className="ml-auto">
+      <div className="gap-4 rounded p-4 d-flex h-100 flex-1 flex-column overflow-x-auto">
+        <Link as="a" href={route('forms.create')} className="ms-auto">
           <Button className="cursor-pointer" variant={'outline'}>
             Create Form
           </Button>
         </Link>
-        <table className="w-full table-auto">
+        <table className="table table-striped">
           <thead>
-            <tr className="border-b">
-              <th className="p-2 text-left">Name</th>
-              <th className="p-2 text-left">Description</th>
-              <th className="p-2 text-left">Public</th>
-              <th className="p-2 text-left">Created At</th>
-              <th className="p-2 text-left">Actions</th>
+            <tr>
+              <th className="text-start">Name</th>
+              <th className="text-start">Description</th>
+              <th className="text-start">Public</th>
+              <th className="text-start">Created At</th>
+              <th className="text-start">Actions</th>
             </tr>
           </thead>
           <tbody>
             {forms.map((form) => (
-              <tr key={form.id} className="hover:bg-gray-50 border-b">
-                <td className="p-2">{form.name}</td>
-                <td className="p-2">{form.description || 'No description'}</td>
-                <td className="p-2">{form.is_public ? 'Yes' : 'No'}</td>
-                <td className="p-2">{new Date(form.created_at).toLocaleDateString()}</td>
-                <td className="p-2">
+              <tr key={form.id}>
+                <td>{form.name}</td>
+                <td>{form.description || 'No description'}</td>
+                <td>{form.is_public ? 'Yes' : 'No'}</td>
+                <td>{new Date(form.created_at).toLocaleDateString()}</td>
+                <td>
                   <Link href={route('forms.manage', form.id)}>
                     <Button variant="outline" size="sm">
                       Manage
@@ -61,7 +61,7 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
             ))}
           </tbody>
         </table>
-        {forms.length === 0 && <div className="py-8 text-gray-500 text-center">No forms found. Create your first form to get started.</div>}
+        {forms.length === 0 && <div className="py-4 text-muted text-center">No forms found. Create your first form to get started.</div>}
       </div>
     </AppLayout>
   );

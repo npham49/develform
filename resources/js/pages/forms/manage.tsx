@@ -29,28 +29,28 @@ export default function FormsManage({ form }: FormsManageProps) {
           <CardTitle>Manage Form: {form.name}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="d-flex flex-column gap-4">
             <div>
-              <h3 className="text-lg font-semibold">Form Details</h3>
-              <div className="mt-2 space-y-2">
+              <h3 className="fs-4 fw-semibold">Form Details</h3>
+              <div className="mt-2 d-flex flex-column gap-2">
                 <div>
-                  <span className="font-medium">Name:</span> {form.name}
+                  <span className="fw-medium">Name:</span> {form.name}
                 </div>
                 <div>
-                  <span className="font-medium">Description:</span> {form.description || 'No description'}
+                  <span className="fw-medium">Description:</span> {form.description || 'No description'}
                 </div>
                 <div>
-                  <span className="font-medium">Public:</span> {form.is_public ? 'Yes' : 'No'}
+                  <span className="fw-medium">Public:</span> {form.is_public ? 'Yes' : 'No'}
                 </div>
                 <div>
-                  <span className="font-medium">Created:</span> {new Date(form.created_at).toLocaleDateString()}
+                  <span className="fw-medium">Created:</span> {new Date(form.created_at).toLocaleDateString()}
                 </div>
                 <div>
-                  <span className="font-medium">Last Updated:</span> {new Date(form.updated_at).toLocaleDateString()}
+                  <span className="fw-medium">Last Updated:</span> {new Date(form.updated_at).toLocaleDateString()}
                 </div>
               </div>
             </div>
-            <div className="flex justify-end">
+            <div className="d-flex justify-content-end">
               <Link as="a" href={route('forms.schema', form.id)}>
                 <Button variant={'outline'}>Edit Schema</Button>
               </Link>

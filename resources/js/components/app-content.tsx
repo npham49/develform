@@ -1,17 +1,13 @@
-import { SidebarInset } from '@/components/ui/sidebar';
 import * as React from 'react';
 
 interface AppContentProps extends React.ComponentProps<'main'> {
   variant?: 'header' | 'sidebar';
 }
 
-export function AppContent({ variant = 'header', children, ...props }: AppContentProps) {
-  if (variant === 'sidebar') {
-    return <SidebarInset {...props}>{children}</SidebarInset>;
-  }
-
+export function AppContent({ children, ...props }: AppContentProps) {
+  // Always use header layout - no sidebar inset
   return (
-    <main className="d-flex h-100 w-100 flex-column gap-4 rounded mx-auto flex-1" {...props}>
+    <main className="container-fluid px-4 py-4 flex-fill overflow-x-hidden" {...props}>
       {children}
     </main>
   );

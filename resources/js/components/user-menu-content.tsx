@@ -19,24 +19,23 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
 
   return (
     <>
-      <DropdownMenuLabel className="p-0 fw-normal">
-        <div className="d-flex align-items-center gap-2 px-1 py-1-5 small text-start">
+      <DropdownMenuLabel className="p-0 fw-normal border-bottom">
+        <div className="d-flex align-items-center gap-3 px-3 py-3">
           <UserInfo user={user} showEmail={true} />
         </div>
       </DropdownMenuLabel>
-      <DropdownMenuSeparator />
       <DropdownMenuGroup>
         <DropdownMenuItem asChild>
-          <Link className="d-block w-100" href={route('profile.edit')} as="button" prefetch onClick={cleanup}>
-            <Settings className="me-2" />
+          <Link className="d-flex align-items-center w-100 px-3 py-2 text-decoration-none" href={route('profile.edit')} as="button" prefetch onClick={cleanup}>
+            <Settings className="me-2" size={16} />
             Settings
           </Link>
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuItem asChild>
-        <Link className="d-block w-100" method="post" href={route('logout')} as="button" onClick={handleLogout}>
-          <LogOut className="me-2" />
+        <Link className="d-flex align-items-center w-100 px-3 py-2 text-decoration-none text-danger" method="post" href={route('logout')} as="button" onClick={handleLogout}>
+          <LogOut className="me-2" size={16} />
           Log out
         </Link>
       </DropdownMenuItem>
