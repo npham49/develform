@@ -23,7 +23,8 @@ export default function FormsCreate() {
       onSuccess: () => {
         toast.success('Form created successfully');
       },
-      onError: () => {
+      onError: (e) => {
+        console.log(e);
         toast.error('Failed to create form');
       },
     });

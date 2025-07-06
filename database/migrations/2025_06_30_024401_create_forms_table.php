@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->boolean('is_public')->default(true);
             $table->jsonb('schema')->nullable();
-            $table->string('created_by')->nullable();
-            $table->string('updated_by')->nullable();
+            $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('updated_by')->constrained('users');
             $table->timestamps();
         });
     }

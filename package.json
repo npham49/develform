@@ -43,6 +43,7 @@
     "react-dom": "^19.0.0",
     "react-frame-component": "^5.2.7",
     "react-hook-form": "^7.59.0",
+    "react-toastify": "^11.0.5",
     "sonner": "^2.0.5",
     "typescript": "^5.7.2",
     "vite": "^6.0",

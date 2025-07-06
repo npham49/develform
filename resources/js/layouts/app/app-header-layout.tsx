@@ -1,7 +1,6 @@
 import { type BreadcrumbItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
-import { router } from '@inertiajs/react';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 export default function AppHeaderLayout({ children, breadcrumbs }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
@@ -35,18 +34,12 @@ export default function AppHeaderLayout({ children, breadcrumbs }: PropsWithChil
               </li>
             </ul>
             <Dropdown>
-              <Dropdown.Toggle id="dropdown-basic">
-                Account
-              </Dropdown.Toggle>
+              <Dropdown.Toggle id="dropdown-basic">Account</Dropdown.Toggle>
 
-                             <Dropdown.Menu>
-                 <Dropdown.Item onClick={() => router.visit('/settings')}>
-                   Settings
-                 </Dropdown.Item>
-                 <Dropdown.Item onClick={() => router.post(route('logout'))}>
-                   Logout
-                 </Dropdown.Item>
-               </Dropdown.Menu>
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={() => router.visit('/settings')}>Settings</Dropdown.Item>
+                <Dropdown.Item onClick={() => router.post(route('logout'))}>Logout</Dropdown.Item>
+              </Dropdown.Menu>
             </Dropdown>
           </div>
         </div>
@@ -58,7 +51,7 @@ export default function AppHeaderLayout({ children, breadcrumbs }: PropsWithChil
             <ol className="breadcrumb mb-0">
               {breadcrumbs.map((breadcrumb, index) => (
                 <li key={index} className={`breadcrumb-item ${index === breadcrumbs.length - 1 ? 'active' : ''}`}>
-                  {index === breadcrumbs.length - 1 ? breadcrumb.title : <a href={breadcrumb.href}>{breadcrumb.title}</a>}
+                  {index === breadcrumbs.length - 1 ? breadcrumb.title : <Link href={breadcrumb.href}>{breadcrumb.title}</Link>}
                 </li>
               ))}
             </ol>

@@ -1,8 +1,21 @@
 /* Bootstrap 5 CSS */
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
+$white: #ffffff;
+
+$theme-colors: (
+  'light': #d2eae7,
+  'dark': #000305,
+  'primary': #225366,
+  'secondary': #e32171,
+  'info': #0cd9b1,
+  'success': #03af5a,
+  'warning': #ebcc02,
+  'danger': #fa011b
+);
+
 /* Custom CSS Variables for theming */
-:root {
+/* :root {
   --background-bootstrap: oklch(1 0 0);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -73,10 +86,10 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
-}
+} */
 
 /* Custom utility classes for Bootstrap compatibility */
-.h-16 {
+/* .h-16 {
   height: 4rem;
 }
 .h-34 {
@@ -416,4 +429,4 @@
   50% {
     opacity: 0.5;
   }
-}
+} */

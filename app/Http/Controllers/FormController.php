@@ -6,6 +6,11 @@ use App\Models\Form;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Http\Requests\FormCreateRequest;
+use App\Http\Requests\FormUpdateRequest;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+
+use function Laravel\Prompts\error;
 
 class FormController extends Controller
 {
@@ -14,7 +19,7 @@ class FormController extends Controller
      */
     public function index()
     {
-        $forms = Form::all();
+        $forms = Form::where('created_by', '=', Auth::user()->id)->get();
         return Inertia::render('forms/index', [
             'forms' => $forms,
         ]);
@@ -33,7 +38,11 @@ class FormController extends Controller
      */
     public function store(FormCreateRequest $request)
     {
-        $form = Form::create($request->validated());
+        $validatedData = $request->validated();
+        $validatedData['created_by'] = Auth::user()->id;
+        $validatedData['updated_by'] = Auth::user()->id;
+        
+        $form = Form::create($validatedData);
 
         if ($form) {
             return redirect()->route('forms.manage', $form)->with('success', 'Form created successfully');
@@ -67,12 +76,26 @@ class FormController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Form $form)
+    public function update(FormUpdateRequest $request, Form $form)
     {
-        //
+        if (Auth::user()->id !== $form->created_by) {
+            return error('You are not authorized to update this form');
+        }
+        $request->merge(['updated_by' => $request->user()->id]);
+        $updated = $form->update($request->validated());
+
+        if ($updated) {
+            return redirect()->back()->with('success', 'Form updated successfully');
+        }
+
+        return error('Failed to update form');
+    }
+
+    public function preview(Form $form)
+    {
+        return Inertia::render('forms/preview', [
+            'form' => $form,
+        ]);
     }
 
     /**

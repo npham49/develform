@@ -15,6 +15,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('forms', FormController::class);
     Route::get('forms/{form}/manage', [FormController::class, 'show'])->name('forms.manage');
     Route::get('forms/{form}/manage/schema', [FormController::class, 'schema'])->name('forms.schema');
+    Route::post('forms/{form}/manage/schema', [FormController::class, 'update'])->name('forms.schema.update');
+    Route::get('forms/{form}/manage/preview', [FormController::class, 'preview'])->name('forms.preview');
 });
 
 require __DIR__.'/settings.php';

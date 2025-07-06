@@ -3,7 +3,7 @@ export interface Form {
   name: string;
   description: string | null;
   is_public: boolean;
-  schema: unknown;
+  schema: string | null;
   created_at: string;
   updated_at: string;
 }
