@@ -52,6 +52,12 @@ export default function FormsManage({ form }: FormsManageProps) {
               <Link as="a" href={route('forms.schema', form.id)}>
                 <button className="btn btn-outline-secondary">Edit Schema</button>
               </Link>
+              <Link as="a" href={route('forms.preview', form.id)}>
+                <button className="btn btn-outline-secondary">Preview</button>
+              </Link>
+              <Link as="a" href={route('submit', form.id)}>
+                <button className="btn btn-outline-secondary">Submit</button>
+              </Link>
             </div>
           </div>
         </div>

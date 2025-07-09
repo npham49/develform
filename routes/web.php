@@ -19,5 +19,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('forms/{form}/manage/preview', [FormController::class, 'preview'])->name('forms.preview');
 });
 
+Route::get('forms/{form}/submit', [FormController::class, 'get_schema'])->name('submit');
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

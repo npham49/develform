@@ -60,9 +60,8 @@ export default function FormsSchema({ form }: FormsSchemaProps) {
   ];
 
   useEffect(() => {
-    console.log(form.schema ?? INITIAL_SCHEMA);
     setBuilderReady(true);
-  }, [schema]);
+  }, []);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>

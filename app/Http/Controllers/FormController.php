@@ -9,6 +9,7 @@ use App\Http\Requests\FormCreateRequest;
 use App\Http\Requests\FormUpdateRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
 
 use function Laravel\Prompts\error;
 
@@ -23,6 +24,29 @@ class FormController extends Controller
         return Inertia::render('forms/index', [
             'forms' => $forms,
         ]);
+    }
+
+    /**
+     * Get the form schema, return the schema and name without auth if the form is public,
+     * otherwise only return the schema if the user is authenticated
+     */
+    public function get_schema(Form $form)
+    {
+        if ($form->is_public) {
+            return Inertia::render('submit', [
+                'schema' => $form->schema,
+                'name' => $form->name,
+            ]);
+        }
+
+        if (!$form->is_public && Auth::check()) {
+            return Inertia::render('submit', [
+                'schema' => $form->schema,
+                'name' => $form->name,
+            ]);
+        }
+
+        return error('You are not authorized to view this form');
     }
 
     /**
@@ -41,7 +65,7 @@ class FormController extends Controller
         $validatedData = $request->validated();
         $validatedData['created_by'] = Auth::user()->id;
         $validatedData['updated_by'] = Auth::user()->id;
-        
+
         $form = Form::create($validatedData);
 
         if ($form) {
