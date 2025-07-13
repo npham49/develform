@@ -1,8 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { FileText, Plus, Eye, Settings, Calendar, Globe, Lock } from 'lucide-react';
-import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
+import { FileText, Plus, Eye, Settings, Calendar, Globe, Lock, Edit, MoreVertical } from 'lucide-react';
+import { Badge, Button, Card, Col, Container, Row, Table, Dropdown } from 'react-bootstrap';
 
 interface Form {
   id: number;
@@ -24,6 +24,11 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
       href: '/forms',
     },
   ];
+
+  // Sort forms by updated_at and get the 4 most recent
+  const recentForms = [...forms]
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+    .slice(0, 4);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -55,7 +60,6 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
             </Link>
           </div>
 
-          {/* Forms Grid */}
           {forms.length === 0 ? (
             <Card className="shadow-sm border-0 text-center py-5">
               <Card.Body>
@@ -80,61 +84,167 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
               </Card.Body>
             </Card>
           ) : (
-            <Row className="g-4">
-              {forms.map((form) => (
-                <Col md={6} lg={4} key={form.id}>
-                  <Card className="h-100 shadow-sm border-0 hover-shadow">
-                    <Card.Body className="p-4">
-                      <div className="d-flex align-items-start justify-content-between mb-3">
-                        <div
-                          className="d-inline-flex align-items-center justify-content-center rounded-circle"
-                          style={{ width: 48, height: 48, backgroundColor: '#dbeafe' }}
-                        >
-                          <FileText size={20} className="text-primary" />
-                        </div>
-                        <div className="d-flex align-items-center gap-2">
-                          {form.is_public ? (
-                            <Badge bg="success" className="d-flex align-items-center">
-                              <Globe size={12} className="me-1" />
-                              Public
-                            </Badge>
-                          ) : (
-                            <Badge bg="secondary" className="d-flex align-items-center">
-                              <Lock size={12} className="me-1" />
-                              Private
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <h5 className="fw-bold text-dark mb-2">{form.name}</h5>
-                      <p className="text-muted mb-3" style={{ height: '3rem', overflow: 'hidden' }}>
-                        {form.description || 'No description provided'}
-                      </p>
-                      
-                      <div className="d-flex align-items-center text-muted small mb-3">
-                        <Calendar size={14} className="me-1" />
-                        Created {new Date(form.created_at).toLocaleDateString()}
-                      </div>
-                      
-                      <div className="d-flex gap-2">
-                        <Link href={route('forms.manage', form.id)} className="flex-fill text-decoration-none">
-                          <Button variant="outline-primary" size="sm" className="w-100 d-flex align-items-center justify-content-center">
-                            <Settings size={16} className="me-1" />
-                            Manage
-                          </Button>
-                        </Link>
-                        <Link href={route('forms.preview', form.id)} className="text-decoration-none">
-                          <Button variant="outline-secondary" size="sm" className="d-flex align-items-center">
-                            <Eye size={16} />
-                          </Button>
-                        </Link>
-                      </div>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+            <>
+              {/* Recent Forms Section */}
+              {recentForms.length > 0 && (
+                <div className="mb-5">
+                  <h5 className="fw-bold text-dark mb-3">Recently Updated</h5>
+                  <Row className="g-4">
+                    {recentForms.map((form) => (
+                      <Col md={6} lg={3} key={form.id}>
+                        <Card className="h-100 shadow-sm border-0 hover-shadow">
+                          <Card.Body className="p-3">
+                            <div className="d-flex align-items-start justify-content-between mb-3">
+                              <div
+                                className="d-inline-flex align-items-center justify-content-center rounded-circle"
+                                style={{ width: 40, height: 40, backgroundColor: '#dbeafe' }}
+                              >
+                                <FileText size={16} className="text-primary" />
+                              </div>
+                              <div className="d-flex align-items-center gap-2">
+                                {form.is_public ? (
+                                  <Badge bg="success" className="d-flex align-items-center small">
+                                    <Globe size={10} className="me-1" />
+                                    Public
+                                  </Badge>
+                                ) : (
+                                  <Badge bg="secondary" className="d-flex align-items-center small">
+                                    <Lock size={10} className="me-1" />
+                                    Private
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <h6 className="fw-bold text-dark mb-2" style={{ fontSize: '0.9rem' }}>{form.name}</h6>
+                            <p className="text-muted small mb-2" style={{ height: '2.5rem', overflow: 'hidden' }}>
+                              {form.description || 'No description'}
+                            </p>
+                            
+                            <div className="d-flex align-items-center text-muted small mb-3">
+                              <Calendar size={12} className="me-1" />
+                              Updated {new Date(form.updated_at).toLocaleDateString()}
+                            </div>
+                            
+                            <div className="d-flex gap-2">
+                              <Link href={route('forms.manage', form.id)} className="flex-fill text-decoration-none">
+                                <Button variant="outline-primary" size="sm" className="w-100 d-flex align-items-center justify-content-center">
+                                  <Settings size={14} className="me-1" />
+                                  Manage
+                                </Button>
+                              </Link>
+                            </div>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                </div>
+              )}
+
+              {/* All Forms Table */}
+              <Card className="shadow-sm border-0">
+                <Card.Header className="bg-white py-3">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0 fw-bold">All Forms</h5>
+                    <Badge bg="light" text="dark">{forms.length} total</Badge>
+                  </div>
+                </Card.Header>
+                <Card.Body className="p-0">
+                  <Table responsive className="mb-0">
+                    <thead className="table-light">
+                      <tr>
+                        <th className="ps-4 py-3">Form</th>
+                        <th className="py-3">Status</th>
+                        <th className="py-3">Created</th>
+                        <th className="py-3">Updated</th>
+                        <th className="py-3 text-end pe-4">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {forms.map((form, index) => (
+                        <tr key={form.id} className={index % 2 === 0 ? 'table-light' : ''}>
+                          <td className="ps-4 py-3">
+                            <div className="d-flex align-items-center">
+                              <div
+                                className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
+                                style={{ width: 32, height: 32, backgroundColor: '#dbeafe' }}
+                              >
+                                <FileText size={14} className="text-primary" />
+                              </div>
+                              <div>
+                                <div className="fw-semibold text-dark">{form.name}</div>
+                                <div className="text-muted small" style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {form.description || 'No description'}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3">
+                            {form.is_public ? (
+                              <Badge bg="success" className="d-flex align-items-center w-fit">
+                                <Globe size={12} className="me-1" />
+                                Public
+                              </Badge>
+                            ) : (
+                              <Badge bg="secondary" className="d-flex align-items-center w-fit">
+                                <Lock size={12} className="me-1" />
+                                Private
+                              </Badge>
+                            )}
+                          </td>
+                          <td className="py-3">
+                            <div className="text-muted small">
+                              {new Date(form.created_at).toLocaleDateString()}
+                            </div>
+                          </td>
+                          <td className="py-3">
+                            <div className="text-muted small">
+                              {new Date(form.updated_at).toLocaleDateString()}
+                            </div>
+                          </td>
+                          <td className="py-3 text-end pe-4">
+                            <div className="d-flex gap-2 justify-content-end">
+                              <Link href={route('forms.preview', form.id)} className="text-decoration-none">
+                                <Button variant="outline-secondary" size="sm" className="d-flex align-items-center">
+                                  <Eye size={14} className="me-1" />
+                                  Preview
+                                </Button>
+                              </Link>
+                              <Link href={route('forms.schema', form.id)} className="text-decoration-none">
+                                <Button variant="outline-primary" size="sm" className="d-flex align-items-center">
+                                  <Edit size={14} className="me-1" />
+                                  Edit
+                                </Button>
+                              </Link>
+                              <Dropdown>
+                                <Dropdown.Toggle variant="outline-secondary" size="sm" className="border-0 d-flex align-items-center">
+                                  <MoreVertical size={14} />
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                  <Dropdown.Item as={Link} href={route('forms.manage', form.id)}>
+                                    <Settings size={14} className="me-2" />
+                                    Manage
+                                  </Dropdown.Item>
+                                  <Dropdown.Item as={Link} href={route('submit', form.id)}>
+                                    <FileText size={14} className="me-2" />
+                                    Submit
+                                  </Dropdown.Item>
+                                  <Dropdown.Divider />
+                                  <Dropdown.Item className="text-danger">
+                                    Delete Form
+                                  </Dropdown.Item>
+                                </Dropdown.Menu>
+                              </Dropdown>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </Card.Body>
+              </Card>
+            </>
           )}
 
           {/* Stats Section */}
