@@ -28,11 +28,11 @@ export default function Submit({ schema, name }: SubmitProps) {
   return (
     <div className="min-vh-100 d-flex align-items-center justify-content-center">
       <div className="container">
-      <Card>
-        <Card.Header>
-          <h5 className="card-title mb-0">{name}</h5>
-        </Card.Header>
-        <Card.Body>
+        <Card>
+          <Card.Header>
+            <h5 className="card-title mb-0">{name}</h5>
+          </Card.Header>
+          <Card.Body>
             <Form src={formSchema.current} onChange={handleChange} onSubmit={handleSubmit} />
           </Card.Body>
         </Card>
