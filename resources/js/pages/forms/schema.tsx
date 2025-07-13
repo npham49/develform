@@ -46,7 +46,7 @@ export default function FormsSchema({ form }: FormsSchemaProps) {
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
-      title: 'Forms',
+      title: 'Manage Forms',
       href: route('forms.index'),
     },
     {

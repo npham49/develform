@@ -33,16 +33,18 @@ class FormController extends Controller
     public function get_schema(Form $form)
     {
         if ($form->is_public) {
-            return Inertia::render('submit', [
+            return Inertia::render('forms/submit', [
                 'schema' => $form->schema,
                 'name' => $form->name,
+                'form_id' => $form->id,
             ]);
         }
 
         if (!$form->is_public && Auth::check()) {
-            return Inertia::render('submit', [
+            return Inertia::render('forms/submit', [
                 'schema' => $form->schema,
                 'name' => $form->name,
+                'form_id' => $form->id,
             ]);
         }
 

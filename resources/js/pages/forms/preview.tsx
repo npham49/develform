@@ -21,7 +21,7 @@ export default function FormsPreview({ form }: FormsPreviewProps) {
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
-      title: 'Forms',
+      title: 'Manage Forms',
       href: route('forms.index'),
     },
     {
@@ -48,6 +48,12 @@ export default function FormsPreview({ form }: FormsPreviewProps) {
 
   useEffect(() => {
     setFormReady(true);
+
+    return () => {
+      formSchema.current = INITIAL_SCHEMA;
+      previewRef.current = null;
+      setFormReady(false);
+    };
   }, []);
 
   return (
@@ -71,9 +77,16 @@ export default function FormsPreview({ form }: FormsPreviewProps) {
                 <Button variant="primary">Go back to schema</Button>
               </Link>
             </div>
-            <div className="p-4 bg-light rounded border">
-              {formReady && <FormioForm src={formSchema.current} onSubmit={handleSubmit} onFormReady={handleFormReady} />}
-            </div>
+            {formReady && (
+              <Card>
+                <Card.Header>
+                  <h5 className="card-title mb-0">{form.name}</h5>
+                </Card.Header>
+                <Card.Body>
+                  <FormioForm src={formSchema.current} onSubmit={handleSubmit} onFormReady={handleFormReady} />
+                </Card.Body>
+              </Card>
+            )}
           </div>
         </Card.Body>
       </Card>

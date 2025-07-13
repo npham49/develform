@@ -9,11 +9,12 @@ import { Toaster } from 'sonner';
 
 interface AppLayoutProps {
   children: ReactNode;
+  hideHeader?: boolean;
   breadcrumbs?: BreadcrumbItem[];
 }
 
-export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => (
-  <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
+export default ({ children, breadcrumbs, hideHeader, ...props }: AppLayoutProps) => (
+  <AppLayoutTemplate breadcrumbs={breadcrumbs} hideHeader={hideHeader} {...props}>
     <FormioProvider projectUrl={Formio.projectUrl}>
       <Toaster richColors duration={3000} position="top-right" />
       {children}

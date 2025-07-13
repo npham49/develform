@@ -55,4 +55,10 @@ class Submission extends Model
     {
         return $this->createdBy ? $this->createdBy->name : 'Anonymous';
     }
+
+    // relation to submission token (for anonymous submissions)
+    public function submissionToken()
+    {
+        return $this->hasOne(SubmissionToken::class);
+    }
 }

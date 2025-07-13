@@ -3,10 +3,11 @@ import { Link, router } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 
-export default function AppHeaderLayout({ children, breadcrumbs }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
+export default function AppHeaderLayout({ children, breadcrumbs, hideHeader }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[]; hideHeader?: boolean }>) {
   return (
     <div className="d-flex flex-column min-vh-100">
-      <header className="navbar navbar-expand-lg navbar-dark bg-primary">
+      {!hideHeader && (
+        <header className="navbar navbar-expand-lg navbar-dark bg-primary">
         <div className="container-fluid">
           <a className="navbar-brand fw-bold" href="/">
             <span
@@ -41,9 +42,10 @@ export default function AppHeaderLayout({ children, breadcrumbs }: PropsWithChil
                 <Dropdown.Item onClick={() => router.post(route('logout'))}>Logout</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {breadcrumbs && breadcrumbs.length > 0 && (
         <nav aria-label="breadcrumb" className="bg-light py-2">

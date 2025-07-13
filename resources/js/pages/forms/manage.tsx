@@ -10,7 +10,7 @@ interface FormsManageProps {
 export default function FormsManage({ form }: FormsManageProps) {
   const breadcrumbs: BreadcrumbItem[] = [
     {
-      title: 'Forms',
+      title: 'Manage Forms',
       href: route('forms.index'),
     },
     {

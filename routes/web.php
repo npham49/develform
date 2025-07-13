@@ -22,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('forms/{form}/submit', [FormController::class, 'get_schema'])->name('submit');
 Route::post('forms/{form}/submit', [SubmissionController::class, 'store'])->name('submit.store');
+Route::get('forms/{form}/submit/success/{submission}', [SubmissionController::class, 'success'])->name('submit.success');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
