@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\FormController;
+use App\Http\Controllers\SubmissionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -20,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::get('forms/{form}/submit', [FormController::class, 'get_schema'])->name('submit');
+Route::post('forms/{form}/submit', [SubmissionController::class, 'store'])->name('submit.store');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

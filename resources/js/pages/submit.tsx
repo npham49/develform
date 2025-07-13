@@ -1,4 +1,4 @@
-import { Form, FormType } from '@formio/react';
+import { Form, FormType, Submission } from '@formio/react';
 import { useEffect, useRef, useState } from 'react';
 import Card from 'react-bootstrap/esm/Card';
 
@@ -17,6 +17,10 @@ export default function Submit({ schema, name }: SubmitProps) {
     setData(value.data);
   };
 
+  const handleSubmit = (submission: Submission) => {
+    console.log(submission);
+  };
+
   useEffect(() => {
     console.log(data);
   }, [data]);
@@ -29,7 +33,7 @@ export default function Submit({ schema, name }: SubmitProps) {
           <h5 className="card-title mb-0">{name}</h5>
         </Card.Header>
         <Card.Body>
-            <Form src={formSchema.current} onChange={handleChange} />
+            <Form src={formSchema.current} onChange={handleChange} onSubmit={handleSubmit} />
           </Card.Body>
         </Card>
       </div>
