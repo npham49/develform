@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
@@ -16,6 +16,10 @@ interface LoginProps {
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
+  const { url } = usePage();
+  const urlParams = new URLSearchParams(url.split('?')[1] || '');
+  const redirect = urlParams.get('redirect');
+
   const { data, setData, post, processing, errors, reset } = useForm<Required<LoginForm>>({
     email: '',
     password: '',
@@ -24,7 +28,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
   const submit: FormEventHandler = (e) => {
     e.preventDefault();
-    post(route('login'), {
+    post(route('login', { redirect: redirect ?? null }), {
       onFinish: () => reset('password'),
     });
   };
@@ -36,6 +40,9 @@ export default function Login({ status, canResetPassword }: LoginProps) {
       <form className="d-flex flex-column gap-4" onSubmit={submit}>
         <div className="d-flex flex-column gap-4">
           <div className="d-flex flex-column gap-2">
+            {redirect !== null && (
+              <div className="alert alert-info mb-3"> This form requires authentication. You will be redirected to {redirect?.toString()} after logging in.</div>
+            )}
             <label htmlFor="email" className="form-label">
               Email address
             </label>
@@ -107,9 +114,9 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
         <div className="small text-muted text-center">
           Don't have an account?{' '}
-          <a href={route('register')} tabIndex={5} className="text-decoration-none">
+          <Link href={route('register', { redirect: redirect ?? null })} tabIndex={5} className="text-decoration-none">
             Sign up
-          </a>
+          </Link>
         </div>
       </form>
 

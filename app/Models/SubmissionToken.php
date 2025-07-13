@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+// Anonymous submission tokens
 class SubmissionToken extends Model
 {
     protected $table = 'submission_tokens';

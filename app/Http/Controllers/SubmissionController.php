@@ -6,6 +6,7 @@ use App\Http\Requests\Submission\SubmissionCreateRequest;
 use App\Models\Submission;
 use App\Models\SubmissionToken;
 use App\Models\Form;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use function Laravel\Prompts\error;
@@ -55,19 +56,24 @@ class SubmissionController extends Controller
     {
         $token = request()->query('token');
 
-        // If user is authenticated, allow access to their own submissions
-        if (Auth::check() && $submission->created_by === Auth::user()->id) {
+        // If user is authenticated and the form is owned by the user, show the submission
+        if (Auth::check() && ($form->created_by === Auth::user()->id)) {
             return Inertia::render('forms/success', [
                 'submission_id' => $submission->id,
                 'form_name' => $form->name,
                 'submission_data' => $submission->data,
                 'schema' => $form->schema,
                 'created_at' => $submission->created_at,
+                'is_form_owner' => $form->created_by === Auth::user()->id,
+                'submitter_information' => $submission->created_by ? [
+                    'name' => User::find($submission->created_by)->name,
+                    'email' => User::find($submission->created_by)->email,
+                ] : null,
             ]);
         }
 
-        // For anonymous submissions, verify token
-        if ($token && $submission->isAnonymous()) {
+        // For anonymous submissions or authenticated users who are the submitter
+        if (($token && $submission->isAnonymous()) || (Auth::check() && !$submission->isAnonymous() && $submission->created_by === Auth::user()->id)) {
             $submissionToken = SubmissionToken::findByToken($token);
 
             if ($submissionToken && $submissionToken->submission_id === $submission->id) {
@@ -78,6 +84,8 @@ class SubmissionController extends Controller
                     'schema' => $form->schema,
                     'created_at' => $submission->created_at,
                     'token' => $token,
+                    'is_form_owner' => false,
+                    'submitter_information' => null,
                 ]);
             }
         }

@@ -48,7 +48,7 @@ class FormController extends Controller
             ]);
         }
 
-        return error('You are not authorized to view this form');
+        return redirect()->route('login', ['redirect' => route('submit', $form->id)]);
     }
 
     /**

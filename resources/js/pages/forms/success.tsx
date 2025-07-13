@@ -13,9 +13,23 @@ interface SubmitSuccessProps {
   schema: string;
   created_at: string;
   token?: string;
+  submitter_information?: {
+    name: string;
+    email: string;
+  };
+  is_form_owner: boolean;
 }
 
-export default function SubmitSuccess({ submission_id, form_name, submission_data, schema, created_at, token }: SubmitSuccessProps) {
+export default function SubmitSuccess({
+  submission_id,
+  form_name,
+  submission_data,
+  schema,
+  created_at,
+  token,
+  is_form_owner,
+  submitter_information,
+}: SubmitSuccessProps) {
   const formSchema = useRef<FormType>(JSON.parse(schema ?? '{}'));
   const [formReady, setFormReady] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -39,19 +53,25 @@ export default function SubmitSuccess({ submission_id, form_name, submission_dat
               <div className="alert alert-success mb-3">
                 <strong>Success!</strong> Your submission has been received. Thank you for your time.
               </div>
+              {is_form_owner && (
+                <div className="alert alert-info mb-3">
+                  <strong>Submitter:</strong> {submitter_information ? submitter_information.name : 'Anonymous'}
+                  {submitter_information && ` (${submitter_information.email})`}
+                </div>
+              )}
               {token && (
                 <div className="alert alert-info mb-3">
                   <strong>Anonymous Submission:</strong> You can view this submission using the following link (bookmark it to access later):
                   <br />
-                  <small
-                    className="text-muted"
-                  >
+                  <small className="text-muted">
                     {window.location.origin}/forms/{window.location.pathname.split('/')[2]}/submit/success/{submission_id}?token={token}
                   </small>
                   <Button
                     variant="outline-secondary"
                     onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}/forms/${window.location.pathname.split('/')[2]}/submit/success/${submission_id}?token=${token}`);
+                      navigator.clipboard.writeText(
+                        `${window.location.origin}/forms/${window.location.pathname.split('/')[2]}/submit/success/${submission_id}?token=${token}`,
+                      );
                       setCopied(true);
                       setTimeout(() => {
                         setCopied(false);

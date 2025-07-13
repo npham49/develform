@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
@@ -12,6 +12,10 @@ type RegisterForm = {
 };
 
 export default function Register() {
+  const { url } = usePage();
+  const urlParams = new URLSearchParams(url.split('?')[1] || '');
+  const redirect = urlParams.get('redirect');
+
   const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
     name: '',
     email: '',
@@ -21,7 +25,7 @@ export default function Register() {
 
   const submit: FormEventHandler = (e) => {
     e.preventDefault();
-    post(route('register'), {
+    post(route('register', { redirect: redirect ?? null }), {
       onFinish: () => reset('password', 'password_confirmation'),
     });
   };
@@ -32,6 +36,12 @@ export default function Register() {
       <form className="d-flex flex-column gap-4" onSubmit={submit}>
         <div className="d-flex flex-column gap-4">
           <div className="d-flex flex-column gap-2">
+            {redirect !== null && (
+              <div className="alert alert-info mb-3">
+                {' '}
+                This form requires authentication. You will be redirected to {redirect?.toString()} after logging in.
+              </div>
+            )}
             <label htmlFor="name" className="form-label">
               Name
             </label>
