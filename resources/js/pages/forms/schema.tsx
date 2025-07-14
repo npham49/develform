@@ -4,9 +4,9 @@ import { type BreadcrumbItem } from '@/types';
 import { Form } from '@/types/form';
 import { FormBuilder, type FormType } from '@formio/react';
 import { Head, Link, router } from '@inertiajs/react';
+import { ArrowLeft, Code, Eye, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Save, Eye, ArrowLeft, Code, Settings } from 'lucide-react';
-import { Badge, Button, Card, Container, Row, Col } from 'react-bootstrap';
+import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
 import { toast } from 'sonner';
 
 interface FormsSchemaProps {
@@ -34,13 +34,11 @@ export default function FormsSchema({ form }: FormsSchemaProps) {
           toast.error('Failed to update schema');
           setProcessing(false);
         },
-      }
+      },
     );
   };
 
-  const initialBuilderSchema = useRef<FormType>(
-    form.schema ? JSON.parse(form.schema) : INITIAL_SCHEMA
-  );
+  const initialBuilderSchema = useRef<FormType>(form.schema ? JSON.parse(form.schema) : INITIAL_SCHEMA);
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -65,7 +63,7 @@ export default function FormsSchema({ form }: FormsSchemaProps) {
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={`Schema ${form.name}`} />
       <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>
-        <Container className="py-5">
+        <Container className="py-4">
           {/* Header */}
           <div className="text-center mb-5">
             <Badge bg="secondary" className="mb-3 d-inline-flex align-items-center">
@@ -73,122 +71,76 @@ export default function FormsSchema({ form }: FormsSchemaProps) {
               Form Builder
             </Badge>
             <h1 className="display-6 fw-bold text-dark">Design Your Form</h1>
-            <p className="lead text-muted">
-              Use our drag-and-drop builder to create and customize your form
-            </p>
+            <p className="lead text-muted">Use our drag-and-drop builder to create and customize your form</p>
           </div>
 
-          {/* Back Button */}
-          <div className="mb-4">
-            <Link href={route('forms.manage', form.id)} className="text-decoration-none">
-              <Button variant="outline-secondary" className="d-flex align-items-center">
-                <ArrowLeft size={16} className="me-2" />
-                Back to Manage
-              </Button>
-            </Link>
-          </div>
-
-          <Row className="g-4">
-            {/* Form Info */}
-            <Col lg={4}>
-              <Card className="shadow-sm border-0 sticky-top" style={{ top: '20px' }}>
-                <Card.Header className="bg-white py-3">
-                  <div className="d-flex align-items-center">
-                    <div
-                      className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
-                      style={{ width: 40, height: 40, backgroundColor: '#dbeafe' }}
-                    >
-                      <Settings size={20} className="text-primary" />
-                    </div>
-                    <div>
-                      <h5 className="mb-0 fw-bold">Form Settings</h5>
-                      <p className="text-muted small mb-0">Configure your form</p>
-                    </div>
-                  </div>
-                </Card.Header>
-                <Card.Body className="p-4">
-                  <div className="d-flex flex-column gap-3">
-                    <div>
-                      <div className="fw-semibold text-dark mb-1">Form Name</div>
-                      <div className="text-muted">{form.name}</div>
-                    </div>
-                    
-                    <div>
-                      <div className="fw-semibold text-dark mb-1">Description</div>
-                      <div className="text-muted">{form.description || 'No description'}</div>
-                    </div>
-
-                    <div>
-                      <div className="fw-semibold text-dark mb-1">Status</div>
-                      <Badge bg={form.is_public ? 'success' : 'secondary'}>
-                        {form.is_public ? 'Public' : 'Private'}
-                      </Badge>
-                    </div>
-
-                    <hr />
-
-                    <div className="d-flex flex-column gap-2">
-                      <Button 
-                        variant="primary" 
-                        onClick={handleUpdateSchema} 
-                        disabled={processing || !schema}
-                        className="d-flex align-items-center justify-content-center"
-                      >
-                        {processing ? (
-                          <>
-                            <div className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
-                            Saving...
-                          </>
-                        ) : (
-                          <>
-                            <Save size={18} className="me-2" />
-                            Save Schema
-                          </>
-                        )}
-                      </Button>
-                      
-                      <Link href={route('forms.preview', form.id)} className="text-decoration-none">
-                        <Button variant="outline-primary" className="w-100 d-flex align-items-center justify-content-center">
-                          <Eye size={18} className="me-2" />
-                          Preview Form
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            {/* Form Builder */}
-            <Col lg={8}>
-              <Card className="shadow-sm border-0">
-                <Card.Header className="bg-white py-3">
-                  <div className="d-flex align-items-center">
-                    <div
-                      className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
-                      style={{ width: 40, height: 40, backgroundColor: '#dcfce7' }}
-                    >
-                      <Code size={20} className="text-success" />
-                    </div>
-                    <div>
-                      <h5 className="mb-0 fw-bold">Form Builder</h5>
-                      <p className="text-muted small mb-0">Drag and drop components to build your form</p>
-                    </div>
-                  </div>
-                </Card.Header>
-                <Card.Body className="p-0">
-                  <div style={{ minHeight: '600px' }}>
-                    {builderReady && (
-                      <FormBuilder 
-                        initialForm={initialBuilderSchema.current} 
-                        onChange={(form) => setSchema(form)} 
-                      />
+          {/* Actions Card */}
+          <Card className="shadow-sm border-0 mb-4">
+            <Card.Body className="p-4">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <h6 className="fw-bold text-dark mb-1">Ready to make changes?</h6>
+                  <p className="text-muted small mb-0">Return to the form editor to modify your form structure</p>
+                </div>
+                <div className="d-flex gap-2">
+                  <Link href={route('forms.manage', form.id)} className="text-decoration-none">
+                    <Button variant="outline-secondary" className="d-flex align-items-center">
+                      <ArrowLeft size={16} className="me-2" />
+                      Back to Manage
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="primary"
+                    onClick={handleUpdateSchema}
+                    disabled={processing || !schema}
+                    className="d-flex align-items-center justify-content-center"
+                  >
+                    {processing ? (
+                      <>
+                        <div className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={18} className="me-2" />
+                        Save Schema
+                      </>
                     )}
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
+                  </Button>
+
+                  <Link href={route('forms.preview', form.id)} className="text-decoration-none">
+                    <Button variant="outline-primary" className="w-100 d-flex align-items-center justify-content-center">
+                      <Eye size={18} className="me-2" />
+                      Preview Form
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+
+          {/* Form Builder */}
+          <Card className="shadow-sm border-0">
+            <Card.Header className="bg-white py-3">
+              <div className="d-flex align-items-center">
+                <div
+                  className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
+                  style={{ width: 40, height: 40, backgroundColor: '#dcfce7' }}
+                >
+                  <Code size={20} className="text-success" />
+                </div>
+                <div>
+                  <h5 className="mb-0 fw-bold">Form Builder</h5>
+                  <p className="text-muted small mb-0">Drag and drop components to build your form</p>
+                </div>
+              </div>
+            </Card.Header>
+            <Card.Body className="px-2">
+              <div style={{ minHeight: '600px' }}>
+                {builderReady && <FormBuilder initialForm={initialBuilderSchema.current} onChange={(form) => setSchema(form)} />}
+              </div>
+            </Card.Body>
+          </Card>
 
           {/* Tips Card */}
           <Card className="shadow-sm border-0 mt-4">

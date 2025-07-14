@@ -3,9 +3,9 @@ import { Form } from '@/types/form';
 import { Webform } from '@formio/js';
 import { Form as FormioForm, FormType, Submission } from '@formio/react';
 import { Head, Link } from '@inertiajs/react';
+import { ArrowLeft, Eye, Info, Settings } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { FileText, Eye, ArrowLeft, Calendar, User, Info, Settings } from 'lucide-react';
-import { Badge, Card, Container, Alert, Button } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Container } from 'react-bootstrap';
 import { toast } from 'sonner';
 
 interface FormsPreviewProps {
@@ -43,7 +43,7 @@ export default function FormsPreview({ form }: FormsPreviewProps) {
     <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>
       <Head title={`Preview ${form.name}`} />
       <Container className="d-flex align-items-center justify-content-center min-vh-100">
-        <div className="w-100" style={{ maxWidth: '900px' }}>
+        <div className="w-100">
           {/* Header */}
           <div className="text-center mb-5">
             <Badge bg="secondary" className="mb-3 d-inline-flex align-items-center">
@@ -51,9 +51,7 @@ export default function FormsPreview({ form }: FormsPreviewProps) {
               Form Preview
             </Badge>
             <h1 className="display-6 fw-bold text-dark">{form.name}</h1>
-            <p className="lead text-muted">
-              Preview your form as it will appear to users
-            </p>
+            <p className="lead text-muted">Preview your form as it will appear to users</p>
           </div>
 
           {/* Preview Notice */}
@@ -63,112 +61,6 @@ export default function FormsPreview({ form }: FormsPreviewProps) {
               <strong>Preview Mode:</strong> This is a preview of your form. Submissions will not be saved and are for testing purposes only.
             </div>
           </Alert>
-
-          {/* Form Details Card */}
-          <Card className="shadow-sm border-0 mb-4">
-            <Card.Header className="bg-white py-4">
-              <div className="d-flex align-items-center justify-content-between">
-                <div className="d-flex align-items-center">
-                  <div
-                    className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
-                    style={{ width: 40, height: 40, backgroundColor: '#dbeafe' }}
-                  >
-                    <FileText size={20} className="text-primary" />
-                  </div>
-                  <div>
-                    <h5 className="mb-0 fw-bold">Form Details</h5>
-                    <p className="text-muted small mb-0">Information about this form</p>
-                  </div>
-                </div>
-                                 <Badge bg={form.is_public ? 'success' : 'secondary'}>
-                   {form.is_public ? 'Public' : 'Private'}
-                 </Badge>
-              </div>
-            </Card.Header>
-            <Card.Body className="p-4">
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <div className="d-flex align-items-center mb-3">
-                    <div
-                      className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
-                      style={{ width: 32, height: 32, backgroundColor: '#f3f4f6' }}
-                    >
-                      <FileText size={16} className="text-dark" />
-                    </div>
-                    <div>
-                      <div className="fw-semibold text-dark">Form Name</div>
-                      <div className="text-muted small">{form.name}</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-6">
-                  <div className="d-flex align-items-center mb-3">
-                    <div
-                      className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
-                      style={{ width: 32, height: 32, backgroundColor: '#f3f4f6' }}
-                    >
-                      <Calendar size={16} className="text-dark" />
-                    </div>
-                    <div>
-                      <div className="fw-semibold text-dark">Last Updated</div>
-                      <div className="text-muted small">{new Date(form.updated_at).toLocaleDateString()}</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-6">
-                  <div className="d-flex align-items-center mb-3">
-                    <div
-                      className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
-                      style={{ width: 32, height: 32, backgroundColor: '#f3f4f6' }}
-                    >
-                      <User size={16} className="text-dark" />
-                    </div>
-                                         <div>
-                       <div className="fw-semibold text-dark">Created</div>
-                       <div className="text-muted small">{new Date(form.created_at).toLocaleDateString()}</div>
-                     </div>
-                  </div>
-                </div>
-                <div className="col-md-6">
-                  <div className="d-flex align-items-center mb-3">
-                    <div
-                      className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
-                      style={{ width: 32, height: 32, backgroundColor: '#f3f4f6' }}
-                    >
-                      <Settings size={16} className="text-dark" />
-                    </div>
-                                         <div>
-                       <div className="fw-semibold text-dark">Status</div>
-                       <div className="text-muted small">{form.is_public ? 'Public - accepting submissions' : 'Private - restricted access'}</div>
-                     </div>
-                  </div>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-
-          {/* Form Preview Card */}
-          <Card className="shadow-sm border-0 mb-4">
-            <Card.Header className="bg-white py-4">
-              <div className="d-flex align-items-center">
-                <div
-                  className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
-                  style={{ width: 40, height: 40, backgroundColor: '#dbeafe' }}
-                >
-                  <Eye size={20} className="text-primary" />
-                </div>
-                <div>
-                  <h5 className="mb-0 fw-bold">{form.name}</h5>
-                  <p className="text-muted small mb-0">This is how your form will appear to users</p>
-                </div>
-              </div>
-            </Card.Header>
-            <Card.Body className="p-4">
-              {formReady && (
-                <FormioForm src={formSchema.current} onSubmit={handleSubmit} onFormReady={handleFormReady} />
-              )}
-            </Card.Body>
-          </Card>
 
           {/* Actions Card */}
           <Card className="shadow-sm border-0 mb-4">
@@ -193,6 +85,27 @@ export default function FormsPreview({ form }: FormsPreviewProps) {
                   </Link>
                 </div>
               </div>
+            </Card.Body>
+          </Card>
+
+          {/* Form Preview Card */}
+          <Card className="shadow-sm border-0 mb-4">
+            <Card.Header className="bg-white py-4">
+              <div className="d-flex align-items-center">
+                <div
+                  className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
+                  style={{ width: 40, height: 40, backgroundColor: '#dbeafe' }}
+                >
+                  <Eye size={20} className="text-primary" />
+                </div>
+                <div>
+                  <h5 className="mb-0 fw-bold">{form.name}</h5>
+                  <p className="text-muted small mb-0">This is how your form will appear to users</p>
+                </div>
+              </div>
+            </Card.Header>
+            <Card.Body className="p-4">
+              {formReady && <FormioForm src={formSchema.current} onSubmit={handleSubmit} onFormReady={handleFormReady} />}
             </Card.Body>
           </Card>
 

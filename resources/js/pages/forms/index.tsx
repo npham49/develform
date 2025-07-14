@@ -1,8 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { FileText, Plus, Eye, Settings, Calendar, Globe, Lock, Edit, MoreVertical } from 'lucide-react';
-import { Badge, Button, Card, Col, Container, Row, Table, Dropdown } from 'react-bootstrap';
+import { Calendar, Eye, FileText, Globe, Lock, MoreVertical, Plus, Settings } from 'lucide-react';
+import { Badge, Button, Card, Col, Container, Dropdown, Row, Table } from 'react-bootstrap';
 
 interface Form {
   id: number;
@@ -26,9 +26,7 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
   ];
 
   // Sort forms by updated_at and get the 4 most recent
-  const recentForms = [...forms]
-    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-    .slice(0, 4);
+  const recentForms = [...forms].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 4);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -115,17 +113,19 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
                                 )}
                               </div>
                             </div>
-                            
-                            <h6 className="fw-bold text-dark mb-2" style={{ fontSize: '0.9rem' }}>{form.name}</h6>
+
+                            <h6 className="fw-bold text-dark mb-2" style={{ fontSize: '0.9rem' }}>
+                              {form.name}
+                            </h6>
                             <p className="text-muted small mb-2" style={{ height: '2.5rem', overflow: 'hidden' }}>
                               {form.description || 'No description'}
                             </p>
-                            
+
                             <div className="d-flex align-items-center text-muted small mb-3">
                               <Calendar size={12} className="me-1" />
                               Updated {new Date(form.updated_at).toLocaleDateString()}
                             </div>
-                            
+
                             <div className="d-flex gap-2">
                               <Link href={route('forms.manage', form.id)} className="flex-fill text-decoration-none">
                                 <Button variant="outline-primary" size="sm" className="w-100 d-flex align-items-center justify-content-center">
@@ -147,7 +147,9 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
                 <Card.Header className="bg-white py-3">
                   <div className="d-flex justify-content-between align-items-center">
                     <h5 className="mb-0 fw-bold">All Forms</h5>
-                    <Badge bg="light" text="dark">{forms.length} total</Badge>
+                    <Badge bg="light" text="dark">
+                      {forms.length} total
+                    </Badge>
                   </div>
                 </Card.Header>
                 <Card.Body className="p-0">
@@ -174,7 +176,10 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
                               </div>
                               <div>
                                 <div className="fw-semibold text-dark">{form.name}</div>
-                                <div className="text-muted small" style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                <div
+                                  className="text-muted small"
+                                  style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                                >
                                   {form.description || 'No description'}
                                 </div>
                               </div>
@@ -194,46 +199,34 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
                             )}
                           </td>
                           <td className="py-3">
-                            <div className="text-muted small">
-                              {new Date(form.created_at).toLocaleDateString()}
-                            </div>
+                            <div className="text-muted small">{new Date(form.created_at).toLocaleDateString()}</div>
                           </td>
                           <td className="py-3">
-                            <div className="text-muted small">
-                              {new Date(form.updated_at).toLocaleDateString()}
-                            </div>
+                            <div className="text-muted small">{new Date(form.updated_at).toLocaleDateString()}</div>
                           </td>
                           <td className="py-3 text-end pe-4">
                             <div className="d-flex gap-2 justify-content-end">
-                              <Link href={route('forms.preview', form.id)} className="text-decoration-none">
-                                <Button variant="outline-secondary" size="sm" className="d-flex align-items-center">
-                                  <Eye size={14} className="me-1" />
-                                  Preview
-                                </Button>
-                              </Link>
-                              <Link href={route('forms.schema', form.id)} className="text-decoration-none">
-                                <Button variant="outline-primary" size="sm" className="d-flex align-items-center">
-                                  <Edit size={14} className="me-1" />
-                                  Edit
+                              <Link href={route('forms.manage', form.id)} className="text-decoration-none">
+                                <Button variant="primary" size="sm" className="d-flex align-items-center">
+                                  <Settings size={14} className="me-2" />
+                                  Manage
                                 </Button>
                               </Link>
                               <Dropdown>
                                 <Dropdown.Toggle variant="outline-secondary" size="sm" className="border-0 d-flex align-items-center">
                                   <MoreVertical size={14} />
                                 </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                  <Dropdown.Item as={Link} href={route('forms.manage', form.id)}>
-                                    <Settings size={14} className="me-2" />
-                                    Manage
+                                <Dropdown.Menu className="z-1000">
+                                  <Dropdown.Item as={Link} href={route('forms.preview', form.id)}>
+                                    <Eye size={14} className="me-1" />
+                                    Preview
                                   </Dropdown.Item>
                                   <Dropdown.Item as={Link} href={route('submit', form.id)}>
                                     <FileText size={14} className="me-2" />
                                     Submit
                                   </Dropdown.Item>
                                   <Dropdown.Divider />
-                                  <Dropdown.Item className="text-danger">
-                                    Delete Form
-                                  </Dropdown.Item>
+                                  <Dropdown.Item className="text-danger">Delete Form</Dropdown.Item>
                                 </Dropdown.Menu>
                               </Dropdown>
                             </div>
@@ -266,7 +259,7 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
                   <Col md={3}>
                     <div className="text-center">
                       <div className="fw-bold text-dark mb-1" style={{ fontSize: '1.5rem' }}>
-                        {forms.filter(f => f.is_public).length}
+                        {forms.filter((f) => f.is_public).length}
                       </div>
                       <div className="text-muted small">Public Forms</div>
                     </div>
@@ -274,7 +267,7 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
                   <Col md={3}>
                     <div className="text-center">
                       <div className="fw-bold text-dark mb-1" style={{ fontSize: '1.5rem' }}>
-                        {forms.filter(f => !f.is_public).length}
+                        {forms.filter((f) => !f.is_public).length}
                       </div>
                       <div className="text-muted small">Private Forms</div>
                     </div>
@@ -282,7 +275,7 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
                   <Col md={3}>
                     <div className="text-center">
                       <div className="fw-bold text-dark mb-1" style={{ fontSize: '1.5rem' }}>
-                        {forms.filter(f => new Date(f.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
+                        {forms.filter((f) => new Date(f.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
                       </div>
                       <div className="text-muted small">Created This Week</div>
                     </div>
