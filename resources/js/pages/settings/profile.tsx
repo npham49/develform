@@ -25,7 +25,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
   const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm>>({
     name: auth.user.name,
-    email: auth.user.email,
+    email: auth.user.email || '',
   });
 
   const submit: FormEventHandler = (e) => {
@@ -103,12 +103,17 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             className={`form-control ps-5 ${errors.email ? 'is-invalid' : ''}`}
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
-                            required
                             autoComplete="username"
-                            placeholder="Enter your email address"
+                            placeholder={data.email ? "Enter your email address" : "No email available from GitHub"}
+                            disabled={!auth.user.email}
                           />
                           <Mail size={18} className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
                           {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+                          {!auth.user.email && (
+                            <div className="form-text text-muted">
+                              <small>Your GitHub account doesn't share an email address. You can update your GitHub privacy settings to make your email available.</small>
+                            </div>
+                          )}
                         </div>
                       </div>
 

@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'github_id' => '123456789',
+            'avatar_url' => 'https://avatars.githubusercontent.com/u/123456789?v=4',
         ]);
     }
 }
