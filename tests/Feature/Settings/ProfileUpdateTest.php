@@ -13,7 +13,10 @@ test('profile page is displayed', function () {
 });
 
 test('profile information can be updated', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'email' => 'original@example.com',
+        'email_verified_at' => now()
+    ]);
 
     $response = $this
         ->actingAs($user)
@@ -50,14 +53,38 @@ test('email verification status is unchanged when the email address is unchanged
     expect($user->refresh()->email_verified_at)->not->toBeNull();
 });
 
-test('user can delete their account', function () {
-    $user = User::factory()->create();
+test('profile information can be updated for user without email', function () {
+    $user = User::factory()->create([
+        'email' => null,
+        'email_verified_at' => null
+    ]);
 
     $response = $this
         ->actingAs($user)
-        ->delete('/settings/profile', [
-            'password' => 'password',
+        ->patch('/settings/profile', [
+            'name' => 'Test User',
+            'email' => null,
         ]);
+
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/settings/profile');
+
+    $user->refresh();
+
+    expect($user->name)->toBe('Test User');
+    expect($user->email)->toBeNull();
+    expect($user->email_verified_at)->toBeNull();
+});
+
+test('user can delete their account', function () {
+    $user = User::factory()->create([
+        'password' => null // GitHub user without password
+    ]);
+
+    $response = $this
+        ->actingAs($user)
+        ->delete('/settings/profile');
 
     $response
         ->assertSessionHasNoErrors()
@@ -67,19 +94,20 @@ test('user can delete their account', function () {
     expect($user->fresh())->toBeNull();
 });
 
-test('correct password must be provided to delete account', function () {
-    $user = User::factory()->create();
+test('github users can delete account without password verification', function () {
+    $user = User::factory()->create([
+        'password' => null, // GitHub user
+        'github_id' => '123456789'
+    ]);
 
     $response = $this
         ->actingAs($user)
-        ->from('/settings/profile')
-        ->delete('/settings/profile', [
-            'password' => 'wrong-password',
-        ]);
+        ->delete('/settings/profile');
 
     $response
-        ->assertSessionHasErrors('password')
-        ->assertRedirect('/settings/profile');
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/');
 
-    expect($user->fresh())->not->toBeNull();
+    $this->assertGuest();
+    expect($user->fresh())->toBeNull();
 });

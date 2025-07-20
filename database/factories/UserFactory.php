@@ -23,11 +23,15 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $hasEmail = fake()->boolean(80); // 80% chance of having an email
+        
         return [
             'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'email' => $hasEmail ? fake()->safeEmail() : null,
+            'email_verified_at' => $hasEmail ? now() : null,
+            'password' => null, // No password for GitHub users
+            'github_id' => fake()->unique()->randomNumber(8),
+            'avatar_url' => fake()->imageUrl(200, 200, 'people'),
             'remember_token' => Str::random(10),
         ];
     }
