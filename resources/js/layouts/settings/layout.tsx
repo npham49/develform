@@ -1,7 +1,7 @@
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
-import { User, Lock, Palette } from 'lucide-react';
+import { User, Palette } from 'lucide-react';
 import { Card, Nav, Row, Col } from 'react-bootstrap';
 
 const sidebarNavItems: NavItem[] = [
@@ -9,11 +9,6 @@ const sidebarNavItems: NavItem[] = [
     title: 'Profile',
     href: '/settings/profile',
     icon: User,
-  },
-  {
-    title: 'Password',
-    href: '/settings/password',
-    icon: Lock,
   },
   {
     title: 'Appearance',
