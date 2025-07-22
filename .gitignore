@@ -20,5 +20,9 @@ yarn-error.log
 /.fleet
 /.idea
 /.nova
-/.vscode
 /.zed
+
+# IDE Helper files
+_ide_helper.php
+.phpstorm.meta.php
+_ide_helper_models.php

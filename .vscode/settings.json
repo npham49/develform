@@ -1,0 +1,28 @@
+{
+  "css.validate": false,
+  "files.associations": {
+    "*.module": "php"
+  },
+  "cSpell.words": ["Webform"],
+  "php.version": "8.4.8",
+  "php.suggest.basic": false,
+  "php.validate.enable": true,
+  "php.validate.executablePath": "/usr/bin/php",
+  "intelephense.files.exclude": [
+    "**/.git/**",
+    "**/.svn/**",
+    "**/.hg/**",
+    "**/CVS/**",
+    "**/.DS_Store/**",
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**/{Tests,tests}/**",
+    "**/.history/**",
+    "**/vendor/**/vendor/**"
+  ],
+  "intelephense.files.associations": ["*.php", "*.phtml"],
+  "files.exclude": {
+    "_ide_helper.php": true,
+    ".phpstorm.meta.php": true
+  }
+}

@@ -4,6 +4,33 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $form_id
+ * @property array<array-key, mixed> $data
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int|null $version_id
+ * @property-read \App\Models\User|null $createdBy
+ * @property-read \App\Models\Form $form
+ * @property-read string $creator_name
+ * @property-read \App\Models\SubmissionToken|null $submissionToken
+ * @property-read \App\Models\User|null $updatedBy
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission whereData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission whereFormId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Submission whereVersionId($value)
+ * @mixin \Eloquent
+ */
 class Submission extends Model
 {
     //

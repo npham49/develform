@@ -18,7 +18,7 @@ class SubmissionController extends Controller
     {
 
         // check if the form is public
-        $form = Form::find($request->form_id);
+        $form = Form::find($request->input('form_id'));
         if (!$form->is_public && !Auth::check()) {
             return error('You must be logged in to submit this form');
         }

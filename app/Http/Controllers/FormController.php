@@ -3,14 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Form;
-use Illuminate\Http\Request;
+use App\Models\Submission;
+use App\Models\SubmissionToken;
+use App\Models\User;
 use Inertia\Inertia;
 use App\Http\Requests\FormCreateRequest;
 use App\Http\Requests\FormUpdateRequest;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Response;
-
 use function Laravel\Prompts\error;
 
 class FormController extends Controller
@@ -107,7 +106,7 @@ class FormController extends Controller
         if (Auth::user()->id !== $form->created_by) {
             return error('You are not authorized to update this form');
         }
-        $request->merge(['updated_by' => $request->user()->id]);
+        $request->merge(['updated_by' => Auth::user()->id]);
         $updated = $form->update($request->validated());
 
         if ($updated) {

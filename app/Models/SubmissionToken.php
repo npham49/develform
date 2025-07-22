@@ -6,6 +6,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 // Anonymous submission tokens
+/**
+ * @property int $id
+ * @property int $submission_id
+ * @property string $token
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Submission $submission
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubmissionToken newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubmissionToken newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubmissionToken query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubmissionToken whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubmissionToken whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubmissionToken whereSubmissionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubmissionToken whereToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubmissionToken whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class SubmissionToken extends Model
 {
     protected $table = 'submission_tokens';
