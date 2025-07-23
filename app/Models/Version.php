@@ -31,4 +31,39 @@ use Illuminate\Database\Eloquent\Model;
 class Version extends Model
 {
     //
+    protected $table = 'versions';
+
+    protected $fillable = [
+        'form_id',
+        'version_number',
+        'title',
+        'description',
+        'data',
+        'differences',
+        'created_by',
+        'updated_by',
+    ];
+
+    protected $casts = [
+        'data' => 'array',
+        'differences' => 'array',
+    ];
+
+    // relation to form
+    public function form()
+    {
+        return $this->belongsTo(Form::class);
+    }
+
+    // relation to user
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // relation to user
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 }
