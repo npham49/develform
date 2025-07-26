@@ -16,8 +16,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
     Route::resource('forms', FormController::class);
     Route::get('forms/{form}/manage', [FormController::class, 'show'])->name('forms.manage');
-    Route::get('forms/{form}/manage/schema', [FormController::class, 'schema'])->name('forms.schema');
-    Route::patch('forms/{form}/manage/schema', [FormController::class, 'update'])->name('forms.schema.update');
+    Route::get('forms/{form}/manage/schema/{version?}', [VersionController::class, 'schema'])->name('forms.schema');
+    Route::patch('forms/{form}/manage/schema/{version?}', [VersionController::class, 'update_schema'])->name('forms.schema.update');
     Route::get('forms/{form}/manage/preview', [FormController::class, 'preview'])->name('forms.preview');
     Route::get('forms/{form}/versions', [VersionController::class, 'get_all_form_versions'])->name('forms.versions');
     Route::post('forms/{form}/versions', [VersionController::class, 'store'])->name('forms.versions.store');

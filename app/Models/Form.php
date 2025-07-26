@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $name
  * @property string|null $description
  * @property bool $is_public
- * @property string|null $schema
  * @property int $version_id
  * @property int $created_by
  * @property int $updated_by
@@ -43,7 +42,6 @@ class Form extends Model
         'name',
         'description',
         'is_public',
-        'schema',
         'version_id',
         'created_by',
         'updated_by',

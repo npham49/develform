@@ -143,100 +143,88 @@ export default function FormsIndex({ forms }: FormsIndexProps) {
               )}
 
               {/* All Forms Table */}
-              <Card className="shadow-sm border-0">
-                <Card.Header className="bg-white py-3">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <h5 className="mb-0 fw-bold">All Forms</h5>
-                    <Badge bg="light" text="dark">
-                      {forms.length} total
-                    </Badge>
-                  </div>
-                </Card.Header>
-                <Card.Body className="p-0">
-                  <Table responsive className="mb-0">
-                    <thead className="table-light">
-                      <tr>
-                        <th className="ps-4 py-3">Form</th>
-                        <th className="py-3">Status</th>
-                        <th className="py-3">Created</th>
-                        <th className="py-3">Updated</th>
-                        <th className="py-3 text-end pe-4">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {forms.map((form, index) => (
-                        <tr key={form.id} className={index % 2 === 0 ? 'table-light' : ''}>
-                          <td className="ps-4 py-3">
-                            <div className="d-flex align-items-center">
-                              <div
-                                className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
-                                style={{ width: 32, height: 32, backgroundColor: '#dbeafe' }}
-                              >
-                                <FileText size={14} className="text-primary" />
-                              </div>
-                              <div>
-                                <div className="fw-semibold text-dark">{form.name}</div>
-                                <div
-                                  className="text-muted small"
-                                  style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                                >
-                                  {form.description || 'No description'}
-                                </div>
-                              </div>
+              <Table responsive className="mb-0">
+                <thead className="table-light">
+                  <tr>
+                    <th className="ps-4 py-3">Form</th>
+                    <th className="py-3">Status</th>
+                    <th className="py-3">Created</th>
+                    <th className="py-3">Updated</th>
+                    <th className="py-3 text-end pe-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {forms.map((form, index) => (
+                    <tr key={form.id} className={index % 2 === 0 ? 'table-light' : ''}>
+                      <td className="ps-4 py-3">
+                        <div className="d-flex align-items-center">
+                          <div
+                            className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
+                            style={{ width: 32, height: 32, backgroundColor: '#dbeafe' }}
+                          >
+                            <FileText size={14} className="text-primary" />
+                          </div>
+                          <div>
+                            <div className="fw-semibold text-dark">{form.name}</div>
+                            <div
+                              className="text-muted small"
+                              style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                            >
+                              {form.description || 'No description'}
                             </div>
-                          </td>
-                          <td className="py-3">
-                            {form.is_public ? (
-                              <Badge bg="success" className="d-flex align-items-center w-fit">
-                                <Globe size={12} className="me-1" />
-                                Public
-                              </Badge>
-                            ) : (
-                              <Badge bg="secondary" className="d-flex align-items-center w-fit">
-                                <Lock size={12} className="me-1" />
-                                Private
-                              </Badge>
-                            )}
-                          </td>
-                          <td className="py-3">
-                            <div className="text-muted small">{new Date(form.created_at).toLocaleDateString()}</div>
-                          </td>
-                          <td className="py-3">
-                            <div className="text-muted small">{new Date(form.updated_at).toLocaleDateString()}</div>
-                          </td>
-                          <td className="py-3 text-end pe-4">
-                            <div className="d-flex gap-2 justify-content-end">
-                              <Link href={route('forms.manage', form.id)} className="text-decoration-none">
-                                <Button variant="primary" size="sm" className="d-flex align-items-center">
-                                  <Settings size={14} className="me-2" />
-                                  Manage
-                                </Button>
-                              </Link>
-                              <Dropdown>
-                                <Dropdown.Toggle variant="outline-secondary" size="sm" className="border-0 d-flex align-items-center">
-                                  <MoreVertical size={14} />
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu className="z-1000">
-                                  <Dropdown.Item as={Link} href={route('forms.preview', form.id)}>
-                                    <Eye size={14} className="me-1" />
-                                    Preview
-                                  </Dropdown.Item>
-                                  <Dropdown.Item as={Link} href={route('submit', form.id)}>
-                                    <FileText size={14} className="me-2" />
-                                    Submit
-                                  </Dropdown.Item>
-                                  <Dropdown.Divider />
-                                  <Dropdown.Item className="text-danger">Delete Form</Dropdown.Item>
-                                </Dropdown.Menu>
-                              </Dropdown>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </Card.Body>
-              </Card>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        {form.is_public ? (
+                          <Badge bg="success" className="d-flex align-items-center w-fit">
+                            <Globe size={12} className="me-1" />
+                            Public
+                          </Badge>
+                        ) : (
+                          <Badge bg="secondary" className="d-flex align-items-center w-fit">
+                            <Lock size={12} className="me-1" />
+                            Private
+                          </Badge>
+                        )}
+                      </td>
+                      <td className="py-3">
+                        <div className="text-muted small">{new Date(form.created_at).toLocaleDateString()}</div>
+                      </td>
+                      <td className="py-3">
+                        <div className="text-muted small">{new Date(form.updated_at).toLocaleDateString()}</div>
+                      </td>
+                      <td className="py-3 text-end pe-4">
+                        <div className="d-flex gap-2 justify-content-end">
+                          <Link href={route('forms.manage', form.id)} className="text-decoration-none">
+                            <Button variant="primary" size="sm" className="d-flex align-items-center">
+                              <Settings size={14} className="me-2" />
+                              Manage
+                            </Button>
+                          </Link>
+                          <Dropdown>
+                            <Dropdown.Toggle variant="outline-secondary" size="sm" className="border-0 d-flex align-items-center">
+                              <MoreVertical size={14} />
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu className="z-3">
+                              <Dropdown.Item as={Link} href={route('forms.preview', form.id)}>
+                                <Eye size={14} className="me-1" />
+                                Preview
+                              </Dropdown.Item>
+                              <Dropdown.Item as={Link} href={route('submit', form.id)}>
+                                <FileText size={14} className="me-2" />
+                                Submit
+                              </Dropdown.Item>
+                              <Dropdown.Divider />
+                              <Dropdown.Item className="text-danger">Delete Form</Dropdown.Item>
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
             </>
           )}
 

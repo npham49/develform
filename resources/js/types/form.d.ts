@@ -4,6 +4,7 @@ export interface Form {
   description: string | null;
   is_public: boolean;
   schema: string | null;
+  version_id: number;
   created_at: string;
   updated_at: string;
 }

@@ -6,6 +6,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class VersionCreateRequest extends FormRequest
 {
+  public function authorize(): bool
+  {
+    return $this->user()->id === $this->route('form')->created_by;
+  }
+
   public function rules(): array
   {
     return [
@@ -14,6 +19,7 @@ class VersionCreateRequest extends FormRequest
       'description' => 'nullable|string|max:1000',
       'data' => 'nullable|json',
       'differences' => 'nullable|json',
+      'based_on' => 'nullable|exists:versions,version_number',
     ];
   }
 
@@ -29,6 +35,7 @@ class VersionCreateRequest extends FormRequest
       'description.max' => 'The description must be less than 1000 characters.',
       'data.json' => 'The data must be a valid JSON object.',
       'differences.json' => 'The differences must be a valid JSON object.',
+      'based_on.exists' => 'The based on version must be an existing version.',
     ];
   }
 }

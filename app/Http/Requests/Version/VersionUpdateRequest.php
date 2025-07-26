@@ -6,10 +6,15 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class VersionUpdateRequest extends FormRequest
 {
+  public function authorize(): bool
+  {
+    return $this->user()->id === $this->route('form')->created_by;
+  }
+
   public function rules(): array
   {
     return [
-      'title' => 'required|string|max:255',
+      'title' => 'nullable|string|max:255',
       'description' => 'nullable|string|max:1000',
       'data' => 'required|json',
       'differences' => 'nullable|json',
@@ -21,7 +26,6 @@ class VersionUpdateRequest extends FormRequest
     return [
       'form_id.required' => 'The form id is required.',
       'form_id.exists' => 'The form id must be an existing form id.',
-      'title.required' => 'A title is required.',
       'title.string' => 'The title must be a string.',
       'title.max' => 'The title must be less than 255 characters.',
       'description.string' => 'The description must be a string.',

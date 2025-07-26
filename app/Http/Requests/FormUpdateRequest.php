@@ -12,7 +12,7 @@ class FormUpdateRequest extends FormRequest
     public function authorize(): bool
     {
         // only allow the owner to update the form
-        return $this->user()->id === $this->form->created_by;
+        return $this->user()->id === $this->route('form')->created_by;
     }
 
     /**
@@ -26,7 +26,6 @@ class FormUpdateRequest extends FormRequest
             'name' => 'string|max:255',
             'description' => 'string|max:255',
             'is_public' => 'boolean',
-            'schema' => 'json',
         ];
     }
 
@@ -38,7 +37,6 @@ class FormUpdateRequest extends FormRequest
             'description.string' => 'The description field must be a string.',
             'description.max' => 'The description field must be less than 255 characters.',
             'is_public.boolean' => 'The is_public field must be a boolean.',
-            'schema.json' => 'The schema field must be a valid JSON object.',
         ];
     }
 }

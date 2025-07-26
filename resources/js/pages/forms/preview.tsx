@@ -1,5 +1,6 @@
 import { INITIAL_SCHEMA } from '@/lib/constants';
 import { Form } from '@/types/form';
+import { Version } from '@/types/version';
 import { Webform } from '@formio/js';
 import { Form as FormioForm, FormType, Submission } from '@formio/react';
 import { Head, Link } from '@inertiajs/react';
@@ -10,10 +11,11 @@ import { toast } from 'sonner';
 
 interface FormsPreviewProps {
   form: Form;
+  version: Version;
 }
 
-export default function FormsPreview({ form }: FormsPreviewProps) {
-  const formSchema = useRef<FormType>(JSON.parse(form.schema ?? '{}') ?? INITIAL_SCHEMA);
+export default function FormsPreview({ form, version }: FormsPreviewProps) {
+  const formSchema = useRef<FormType | null>(version.data ? (JSON.parse(version.data) as unknown as FormType) : null);
   const previewRef = useRef<Webform>(null);
   const [formReady, setFormReady] = useState(false);
 
@@ -105,7 +107,7 @@ export default function FormsPreview({ form }: FormsPreviewProps) {
               </div>
             </Card.Header>
             <Card.Body className="p-4">
-              {formReady && <FormioForm src={formSchema.current} onSubmit={handleSubmit} onFormReady={handleFormReady} />}
+              {formReady && formSchema.current && <FormioForm src={formSchema.current} onSubmit={handleSubmit} onFormReady={handleFormReady} />}
             </Card.Body>
           </Card>
 

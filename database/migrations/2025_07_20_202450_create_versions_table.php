@@ -22,11 +22,18 @@ return new class extends Migration {
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('updated_by')->constrained('users');
             $table->timestamps();
+
+            $table->unique(['form_id', 'version_number']);
         });
 
         // add a foreign key to the submissions table
         // version_id links to the version that is the live one
         Schema::table('submissions', function (Blueprint $table) {
+            $table->foreignId('version_id')->nullable()->constrained('versions');
+        });
+
+        // add a foreign key to the forms table
+        Schema::table('forms', function (Blueprint $table) {
             $table->foreignId('version_id')->nullable()->constrained('versions');
         });
     }
@@ -38,6 +45,12 @@ return new class extends Migration {
     {
         // First drop the foreign key constraint from submissions table
         Schema::table('submissions', function (Blueprint $table) {
+            $table->dropForeign(['version_id']);
+            $table->dropColumn('version_id');
+        });
+
+        // drop the foreign key constraint from forms table
+        Schema::table('forms', function (Blueprint $table) {
             $table->dropForeign(['version_id']);
             $table->dropColumn('version_id');
         });

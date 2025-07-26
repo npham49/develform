@@ -2,6 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { INITIAL_SCHEMA } from '@/lib/constants';
 import { type BreadcrumbItem } from '@/types';
 import { Form } from '@/types/form';
+import { Version } from '@/types/version';
 import { FormBuilder, type FormType } from '@formio/react';
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Code, Eye, Save } from 'lucide-react';
@@ -11,9 +12,10 @@ import { toast } from 'sonner';
 
 interface FormsSchemaProps {
   form: Form;
+  version: Version;
 }
 
-export default function FormsSchema({ form }: FormsSchemaProps) {
+export default function FormsSchema({ form, version }: FormsSchemaProps) {
   const [schema, setSchema] = useState<FormType | null>(null);
   const [processing, setProcessing] = useState(false);
   const [builderReady, setBuilderReady] = useState(false);
@@ -23,14 +25,15 @@ export default function FormsSchema({ form }: FormsSchemaProps) {
     setProcessing(true);
 
     router.patch(
-      route('forms.schema.update', form.id),
-      { schema: JSON.stringify(schema) },
+      route('forms.schema.update', [form.id, version.id]),
+      { data: JSON.stringify(schema) },
       {
         onSuccess: () => {
           toast.success('Schema updated successfully');
           setProcessing(false);
         },
-        onError: () => {
+        onError: (e) => {
+          console.log(e);
           toast.error('Failed to update schema');
           setProcessing(false);
         },
@@ -38,7 +41,7 @@ export default function FormsSchema({ form }: FormsSchemaProps) {
     );
   };
 
-  const initialBuilderSchema = useRef<FormType>(form.schema ? JSON.parse(form.schema) : INITIAL_SCHEMA);
+  const initialBuilderSchema = useRef<FormType>(version.data ? (JSON.parse(version.data) as unknown as FormType) : INITIAL_SCHEMA);
 
   const breadcrumbs: BreadcrumbItem[] = [
     {

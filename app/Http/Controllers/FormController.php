@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Form;
-use App\Models\Submission;
-use App\Models\SubmissionToken;
-use App\Models\User;
 use Inertia\Inertia;
 use App\Http\Requests\FormCreateRequest;
 use App\Http\Requests\FormUpdateRequest;
+use App\Models\Version;
 use Illuminate\Support\Facades\Auth;
 use function Laravel\Prompts\error;
 
@@ -33,7 +31,6 @@ class FormController extends Controller
     {
         if ($form->is_public) {
             return Inertia::render('forms/submit', [
-                'schema' => $form->schema,
                 'name' => $form->name,
                 'form_id' => $form->id,
             ]);
@@ -41,7 +38,6 @@ class FormController extends Controller
 
         if (!$form->is_public && Auth::check()) {
             return Inertia::render('forms/submit', [
-                'schema' => $form->schema,
                 'name' => $form->name,
                 'form_id' => $form->id,
             ]);
@@ -81,15 +77,17 @@ class FormController extends Controller
      */
     public function show(Form $form)
     {
+        // check if the user is the owner of the form
+        if (Auth::user()->id !== $form->created_by) {
+            return redirect()->route('forms.index')->withErrors([
+                'error' => 'You are not authorized to manage this form',
+            ]);
+        }
+
+        $versions = $form->versions()->orderBy('created_at', 'desc')->get();
         return Inertia::render('forms/manage', [
             'form' => $form,
-        ]);
-    }
-
-    public function schema(Form $form)
-    {
-        return Inertia::render('forms/schema', [
-            'form' => $form,
+            'versions' => $versions,
         ]);
     }
 
