@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property int $id
  * @property int $form_id
+ * @property int $version_number
+ * @property bool $is_live
  * @property string $title
  * @property string|null $description
- * @property string $data
+ * @property array $data
+ * @property array $differences
  * @property int $created_by
  * @property int $updated_by
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -26,6 +29,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Version whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Version whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Version whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Version whereIsLive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Version whereVersionNumber($value)
  * @mixin \Eloquent
  */
 class Version extends Model
@@ -40,6 +45,7 @@ class Version extends Model
         'description',
         'data',
         'differences',
+        'is_live',
         'created_by',
         'updated_by',
     ];
@@ -52,7 +58,7 @@ class Version extends Model
     // relation to form
     public function form()
     {
-        return $this->belongsTo(Form::class);
+        return $this->belongsTo(Form::class, 'form_id');
     }
 
     // relation to user

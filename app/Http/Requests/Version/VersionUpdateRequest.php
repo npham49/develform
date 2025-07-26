@@ -4,15 +4,14 @@ namespace App\Http\Requests\Version;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class VersionCreateRequest extends FormRequest
+class VersionUpdateRequest extends FormRequest
 {
   public function rules(): array
   {
     return [
-      'form_id' => 'required|exists:forms,id',
       'title' => 'required|string|max:255',
       'description' => 'nullable|string|max:1000',
-      'data' => 'nullable|json',
+      'data' => 'required|json',
       'differences' => 'nullable|json',
     ];
   }
@@ -27,6 +26,7 @@ class VersionCreateRequest extends FormRequest
       'title.max' => 'The title must be less than 255 characters.',
       'description.string' => 'The description must be a string.',
       'description.max' => 'The description must be less than 1000 characters.',
+      'data.required' => 'The data is required.',
       'data.json' => 'The data must be a valid JSON object.',
       'differences.json' => 'The differences must be a valid JSON object.',
     ];

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\SubmissionController;
+use App\Http\Controllers\VersionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -18,11 +19,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('forms/{form}/manage/schema', [FormController::class, 'schema'])->name('forms.schema');
     Route::patch('forms/{form}/manage/schema', [FormController::class, 'update'])->name('forms.schema.update');
     Route::get('forms/{form}/manage/preview', [FormController::class, 'preview'])->name('forms.preview');
+    Route::get('forms/{form}/versions', [VersionController::class, 'get_all_form_versions'])->name('forms.versions');
+    Route::post('forms/{form}/versions', [VersionController::class, 'store'])->name('forms.versions.store');
+    Route::patch('forms/{form}/versions/{version}', [VersionController::class, 'update'])->name('forms.versions.update');
 });
 
 Route::get('forms/{form}/submit', [FormController::class, 'get_schema'])->name('submit');
 Route::post('forms/{form}/submit', [SubmissionController::class, 'store'])->name('submit.store');
 Route::get('forms/{form}/submit/success/{submission}', [SubmissionController::class, 'success'])->name('submit.success');
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

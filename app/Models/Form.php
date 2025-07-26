@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $description
  * @property bool $is_public
  * @property string|null $schema
+ * @property int $version_id
  * @property int $created_by
  * @property int $updated_by
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Form whereSchema($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Form whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Form whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Form whereVersionId($value)
  * @mixin \Eloquent
  */
 class Form extends Model
@@ -42,6 +44,7 @@ class Form extends Model
         'description',
         'is_public',
         'schema',
+        'version_id',
         'created_by',
         'updated_by',
     ];
@@ -50,6 +53,18 @@ class Form extends Model
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // relation to version
+    public function version()
+    {
+        return $this->belongsTo(Version::class, 'version_id');
+    }
+
+    // relation to versions
+    public function versions()
+    {
+        return $this->hasMany(Version::class);
     }
 
     public function submissions()

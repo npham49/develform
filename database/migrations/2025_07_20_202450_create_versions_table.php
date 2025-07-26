@@ -14,9 +14,10 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('form_id')->constrained('forms');
             $table->integer('version_number')->default(0);
+            $table->boolean('is_live')->default(false);
             $table->string('title');
             $table->string('description')->nullable();
-            $table->jsonb('data');
+            $table->jsonb('data')->nullable();
             $table->jsonb('differences')->nullable();
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('updated_by')->constrained('users');
