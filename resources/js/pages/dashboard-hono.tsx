@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { BarChart3, FileText, GitBranch, Users, TrendingUp, Clock } from 'lucide-react'
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap'
-import AppLayout from '@/layouts/app-layout'
+import AppLayout from '@/layouts/app-layout-hono'
 import { type BreadcrumbItem } from '@/types'
 import { useForms } from '@/hooks/use-forms'
 import { useAuth } from '@/hooks/use-auth'
