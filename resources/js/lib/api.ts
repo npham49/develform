@@ -111,3 +111,32 @@ export const submissionsApi = {
   getSuccess: (formId: number, submissionId: number, token: string) =>
     apiRequest<{ submission: any; form: any; message: string }>(`/submissions/forms/${formId}/submissions/${submissionId}/success?token=${token}`),
 }
+
+// Versions API
+export const versionsApi = {
+  getByFormId: (formId: number) =>
+    apiRequest<{ versions: any[] }>(`/forms/${formId}/versions`),
+
+  getById: (formId: number, versionId: number) =>
+    apiRequest<{ version: any }>(`/forms/${formId}/versions/${versionId}`),
+
+  getSchema: (formId: number, versionId: number) =>
+    apiRequest<{ schema: any; name: string; form_id: number; version_id: number; is_live: boolean }>(`/forms/${formId}/versions/${versionId}/schema`),
+
+  create: (formId: number, versionData: { title: string; description?: string; based_on: number }) =>
+    apiRequest<{ version: any; message: string }>(`/forms/${formId}/versions`, {
+      method: 'POST',
+      body: JSON.stringify(versionData),
+    }),
+
+  update: (formId: number, versionId: number, versionData: any) =>
+    apiRequest<{ version: any; message: string }>(`/forms/${formId}/versions/${versionId}`, {
+      method: 'PUT',
+      body: JSON.stringify(versionData),
+    }),
+
+  makeLive: (formId: number, versionId: number) =>
+    apiRequest<{ version: any; message: string }>(`/forms/${formId}/versions/${versionId}/live`, {
+      method: 'PUT',
+    }),
+}

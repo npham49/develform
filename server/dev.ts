@@ -109,6 +109,64 @@ app.post('/api/forms', async (c) => {
   return c.json({ form: newForm, message: 'Form created successfully' }, 201)
 })
 
+// Version API routes
+app.get('/api/forms/:formId/versions', (c) => {
+  const formId = Number(c.req.param('formId'))
+  const versions = [
+    {
+      id: 1,
+      form_id: formId,
+      version_number: 1,
+      title: 'Initial Version',
+      description: 'First version of the form',
+      data: { fields: [] },
+      differences: null,
+      is_live: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: 2,
+      form_id: formId,
+      version_number: 2,
+      title: 'Updated Fields',
+      description: 'Added validation to form fields',
+      data: { fields: [{ type: 'text', label: 'Name', required: true }] },
+      differences: {
+        created: ['Name field'],
+        updated: [],
+        deleted: []
+      },
+      is_live: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+  ]
+  return c.json({ versions })
+})
+
+app.post('/api/forms/:formId/versions', async (c) => {
+  const formId = Number(c.req.param('formId'))
+  const body = await c.req.json()
+  const newVersion = {
+    id: Date.now(), // Simple ID generation for mock
+    form_id: formId,
+    version_number: 3,
+    title: body.title || 'New Version',
+    description: body.description || '',
+    data: { fields: [] },
+    differences: {
+      created: [],
+      updated: [],
+      deleted: []
+    },
+    is_live: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }
+  return c.json({ version: newVersion, message: 'Version created successfully' }, 201)
+})
+
 // Default route for React app
 app.get('*', (c) => {
   return c.html(`

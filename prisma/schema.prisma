@@ -25,6 +25,8 @@ model User {
   updatedForms      Form[]                 @relation("FormUpdatedBy")
   createdSubmissions Submission[]          @relation("SubmissionCreatedBy")
   updatedSubmissions Submission[]          @relation("SubmissionUpdatedBy")
+  createdVersions   Version[]              @relation("VersionCreatedBy")
+  updatedVersions   Version[]              @relation("VersionUpdatedBy")
   
   @@map("users")
 }
@@ -54,6 +56,7 @@ model Form {
   description String?
   isPublic    Boolean  @default(true) @map("is_public")
   schema      Json?
+  versionId   Int?     @map("version_id")
   createdBy   Int      @map("created_by")
   updatedBy   Int      @map("updated_by")
   createdAt   DateTime @default(now()) @map("created_at")
@@ -62,6 +65,8 @@ model Form {
   // Relations
   creator     User           @relation("FormCreatedBy", fields: [createdBy], references: [id])
   updater     User           @relation("FormUpdatedBy", fields: [updatedBy], references: [id])
+  currentVersion Version?    @relation("FormCurrentVersion", fields: [versionId], references: [id])
+  versions    Version[]      @relation("FormVersions")
   submissions Submission[]
   
   @@map("forms")
@@ -70,6 +75,7 @@ model Form {
 model Submission {
   id         Int      @id @default(autoincrement())
   formId     Int      @map("form_id")
+  versionId  Int?     @map("version_id")
   data       Json
   createdBy  Int?     @map("created_by")
   updatedBy  Int?     @map("updated_by")
@@ -78,6 +84,7 @@ model Submission {
   
   // Relations
   form       Form                @relation(fields: [formId], references: [id], onDelete: Cascade)
+  version    Version?            @relation(fields: [versionId], references: [id], onDelete: SetNull)
   creator    User?               @relation("SubmissionCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
   updater    User?               @relation("SubmissionUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
   tokens     SubmissionToken[]
@@ -97,4 +104,29 @@ model SubmissionToken {
   
   @@index([token])
   @@map("submission_tokens")
+}
+
+model Version {
+  id            Int      @id @default(autoincrement())
+  formId        Int      @map("form_id")
+  versionNumber Int      @default(0) @map("version_number")
+  title         String
+  description   String?
+  data          Json?
+  differences   Json?
+  isLive        Boolean  @default(false) @map("is_live")
+  createdBy     Int      @map("created_by")
+  updatedBy     Int      @map("updated_by")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  form          Form         @relation("FormVersions", fields: [formId], references: [id], onDelete: Cascade)
+  currentForms  Form[]       @relation("FormCurrentVersion")
+  creator       User         @relation("VersionCreatedBy", fields: [createdBy], references: [id])
+  updater       User         @relation("VersionUpdatedBy", fields: [updatedBy], references: [id])
+  submissions   Submission[]
+  
+  @@unique([formId, versionNumber])
+  @@map("versions")
 }
