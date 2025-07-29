@@ -5,6 +5,12 @@
     "build": "vite build",
     "build:ssr": "vite build && vite build --ssr",
     "dev": "vite",
+    "dev:hono": "bun run server/index.ts",
+    "dev:full": "concurrently \"bun run dev:hono\" \"npm run dev\"",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
     "format": "prettier --write resources/",
     "format:check": "prettier --check resources/",
     "lint": "eslint . --fix",
@@ -19,15 +25,22 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "prettier": "^3.4.2",
     "prettier-plugin-organize-imports": "^4.1.0",
-    "typescript-eslint": "^8.23.0"
+    "typescript-eslint": "^8.23.0",
+    "@types/bun": "latest"
   },
   "dependencies": {
     "@formio/js": "^5.2.0",
     "@formio/react": "^6.0.1",
     "@headlessui/react": "^2.2.0",
+    "@hono/node-server": "^1.17.1",
     "@hookform/resolvers": "^5.1.1",
     "@inertiajs/react": "^2.0.0",
     "@popperjs/core": "^2.11.8",
+    "@prisma/client": "^6.13.0",
+    "@tanstack/query-devtools": "^5.81.2",
+    "@tanstack/react-query": "^5.83.0",
+    "@tanstack/react-router": "^1.130.2",
+    "@tanstack/router-devtools": "^1.130.2",
     "@types/react": "^19.0.3",
     "@types/react-dom": "^19.0.2",
     "@vitejs/plugin-react": "^4.3.4",
@@ -35,9 +48,11 @@
     "clsx": "^2.1.1",
     "concurrently": "^9.0.1",
     "globals": "^15.14.0",
+    "hono": "^4.8.10",
     "laravel-vite-plugin": "^1.0",
     "lucide-react": "^0.475.0",
     "next-themes": "^0.4.6",
+    "prisma": "^6.13.0",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.0.0",
@@ -52,5 +67,9 @@
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.9.5",
     "lightningcss-linux-x64-gnu": "^1.29.1"
+  },
+  "name": "develform",
+  "peerDependencies": {
+    "typescript": "^5"
   }
 }
