@@ -5,10 +5,14 @@ import { useAuth } from './hooks/useAuth';
 import Welcome from './pages/Welcome';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/auth/Login';
+import GitHubLogin from './pages/auth/GitHubLogin';
 import FormsIndex from './pages/forms/Index';
 import FormsCreate from './pages/forms/Create';
 import FormsSubmit from './pages/forms/Submit';
 import FormsSuccess from './pages/forms/Success';
+import FormsManage from './pages/forms/Manage';
+import FormsPreview from './pages/forms/Preview';
+import FormsSchema from './pages/forms/Schema';
 import SettingsProfile from './pages/settings/Profile';
 import SettingsAppearance from './pages/settings/Appearance';
 
@@ -43,6 +47,10 @@ function App() {
         )
       } />
       
+      <Route path="/auth/github" element={
+        user ? <Navigate to="/dashboard" replace /> : <GitHubLogin />
+      } />
+      
       {/* Protected routes */}
       <Route path="/dashboard" element={
         user ? (
@@ -72,6 +80,30 @@ function App() {
         user ? (
           <AppLayout>
             <div>Edit form - to be implemented</div>
+          </AppLayout>
+        ) : <Navigate to="/login" replace />
+      } />
+      
+      <Route path="/forms/:id/manage" element={
+        user ? (
+          <AppLayout>
+            <FormsManage />
+          </AppLayout>
+        ) : <Navigate to="/login" replace />
+      } />
+      
+      <Route path="/forms/:id/preview" element={
+        user ? (
+          <AppLayout>
+            <FormsPreview />
+          </AppLayout>
+        ) : <Navigate to="/login" replace />
+      } />
+      
+      <Route path="/forms/:id/schema" element={
+        user ? (
+          <AppLayout>
+            <FormsSchema />
           </AppLayout>
         ) : <Navigate to="/login" replace />
       } />
