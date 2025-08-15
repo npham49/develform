@@ -48,7 +48,7 @@ auth.get('/github/callback', async (c) => {
       }),
     });
 
-    const tokenData = await tokenResponse.json();
+    const tokenData = await tokenResponse.json() as { access_token?: string; error?: string };
     
     if (!tokenData.access_token) {
       return c.json({ error: 'Failed to get access token' }, 400);
