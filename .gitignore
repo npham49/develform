@@ -22,3 +22,18 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Client
+/client/node_modules
+/client/dist
+/client/.env
+/client/.env.local
+/client/.env.production.local
+
+# Server
+/server/node_modules
+/server/dist
+/server/.env
+/server/.env.local
+/server/.env.production
+/server/drizzle
