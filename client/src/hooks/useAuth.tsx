@@ -6,6 +6,9 @@ interface User {
   email: string | null;
   githubId: string | null;
   avatarUrl: string | null;
+  email_verified_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AuthContextType {
