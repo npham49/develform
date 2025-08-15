@@ -1,4 +1,3 @@
-import { sql } from 'drizzle-orm';
 import { boolean, integer, jsonb, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 
 // Users table
@@ -22,8 +21,12 @@ export const forms = pgTable('forms', {
   description: text('description'),
   isPublic: boolean('is_public').default(true),
   schema: jsonb('schema'),
-  createdBy: integer('created_by').references(() => users.id).notNull(),
-  updatedBy: integer('updated_by').references(() => users.id).notNull(),
+  createdBy: integer('created_by')
+    .references(() => users.id)
+    .notNull(),
+  updatedBy: integer('updated_by')
+    .references(() => users.id)
+    .notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
@@ -31,7 +34,9 @@ export const forms = pgTable('forms', {
 // Submissions table
 export const submissions = pgTable('submissions', {
   id: serial('id').primaryKey(),
-  formId: integer('form_id').references(() => forms.id, { onDelete: 'cascade' }).notNull(),
+  formId: integer('form_id')
+    .references(() => forms.id, { onDelete: 'cascade' })
+    .notNull(),
   data: jsonb('data').notNull(),
   createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
   updatedBy: integer('updated_by').references(() => users.id, { onDelete: 'set null' }),
@@ -42,7 +47,9 @@ export const submissions = pgTable('submissions', {
 // Submission tokens table (for anonymous submissions)
 export const submissionTokens = pgTable('submission_tokens', {
   id: serial('id').primaryKey(),
-  submissionId: integer('submission_id').references(() => submissions.id, { onDelete: 'cascade' }).notNull(),
+  submissionId: integer('submission_id')
+    .references(() => submissions.id, { onDelete: 'cascade' })
+    .notNull(),
   token: text('token').unique().notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
