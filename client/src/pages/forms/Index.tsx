@@ -1,56 +1,47 @@
 import AppLayout from '@/layouts/app-layout';
-import { Link } from 'react-router-dom';
+import { type BreadcrumbItem } from '@/types';
 import { Calendar, Eye, FileText, Globe, Lock, MoreVertical, Plus, Settings } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Badge, Button, Card, Col, Container, Dropdown, Row, Table } from 'react-bootstrap';
-import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 interface Form {
   id: number;
   name: string;
   description: string | null;
-  is_public: boolean;
-  created_at: string;
-  updated_at: string;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function FormsIndex() {
   const [forms, setForms] = useState<Form[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const breadcrumbs = [
+  const breadcrumbs: BreadcrumbItem[] = [
     {
-      name: 'Manage Forms',
+      title: 'Manage Forms',
       href: '/forms',
     },
   ];
 
   useEffect(() => {
-    // TODO: Replace with actual API call
     const fetchForms = async () => {
       try {
-        // Simulate API call with mock data
-        const mockForms: Form[] = [
-          {
-            id: 1,
-            name: 'Contact Form',
-            description: 'Simple contact form for customer inquiries',
-            is_public: true,
-            created_at: '2024-01-15T10:30:00Z',
-            updated_at: '2024-01-20T14:20:00Z',
-          },
-          {
-            id: 2,
-            name: 'User Registration',
-            description: 'Registration form for new users',
-            is_public: false,
-            created_at: '2024-01-10T09:15:00Z',
-            updated_at: '2024-01-18T16:45:00Z',
-          },
-        ];
-        
-        setForms(mockForms);
+        const response = await fetch('/api/forms', {
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch forms');
+        }
+
+        const data = await response.json();
+        setForms(data.data || data);
       } catch (error) {
         console.error('Error fetching forms:', error);
+        // Fallback to empty array on error
+        setForms([]);
       } finally {
         setLoading(false);
       }
@@ -60,7 +51,7 @@ export default function FormsIndex() {
   }, []);
 
   // Sort forms by updated_at and get the 4 most recent
-  const recentForms = [...forms].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 4);
+  const recentForms = [...forms].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 4);
 
   if (loading) {
     return (
@@ -145,7 +136,7 @@ export default function FormsIndex() {
                                 <FileText size={16} className="text-primary" />
                               </div>
                               <div className="d-flex align-items-center gap-2">
-                                {form.is_public ? (
+                                {form.isPublic ? (
                                   <Badge bg="success" className="d-flex align-items-center small">
                                     <Globe size={10} className="me-1" />
                                     Public
@@ -168,7 +159,7 @@ export default function FormsIndex() {
 
                             <div className="d-flex align-items-center text-muted small mb-3">
                               <Calendar size={12} className="me-1" />
-                              Updated {new Date(form.updated_at).toLocaleDateString()}
+                              Updated {new Date(form.updatedAt).toLocaleDateString()}
                             </div>
 
                             <div className="d-flex gap-2">
@@ -231,7 +222,7 @@ export default function FormsIndex() {
                             </div>
                           </td>
                           <td className="py-3">
-                            {form.is_public ? (
+                            {form.isPublic ? (
                               <Badge bg="success" className="d-flex align-items-center w-fit">
                                 <Globe size={12} className="me-1" />
                                 Public
@@ -244,10 +235,10 @@ export default function FormsIndex() {
                             )}
                           </td>
                           <td className="py-3">
-                            <div className="text-muted small">{new Date(form.created_at).toLocaleDateString()}</div>
+                            <div className="text-muted small">{new Date(form.createdAt).toLocaleDateString()}</div>
                           </td>
                           <td className="py-3">
-                            <div className="text-muted small">{new Date(form.updated_at).toLocaleDateString()}</div>
+                            <div className="text-muted small">{new Date(form.updatedAt).toLocaleDateString()}</div>
                           </td>
                           <td className="py-3 text-end pe-4">
                             <div className="d-flex gap-2 justify-content-end">
@@ -304,7 +295,7 @@ export default function FormsIndex() {
                   <Col md={3}>
                     <div className="text-center">
                       <div className="fw-bold text-dark mb-1" style={{ fontSize: '1.5rem' }}>
-                        {forms.filter((f) => f.is_public).length}
+                        {forms.filter((f) => f.isPublic).length}
                       </div>
                       <div className="text-muted small">Public Forms</div>
                     </div>
@@ -312,7 +303,7 @@ export default function FormsIndex() {
                   <Col md={3}>
                     <div className="text-center">
                       <div className="fw-bold text-dark mb-1" style={{ fontSize: '1.5rem' }}>
-                        {forms.filter((f) => !f.is_public).length}
+                        {forms.filter((f) => !f.isPublic).length}
                       </div>
                       <div className="text-muted small">Private Forms</div>
                     </div>
@@ -320,7 +311,7 @@ export default function FormsIndex() {
                   <Col md={3}>
                     <div className="text-center">
                       <div className="fw-bold text-dark mb-1" style={{ fontSize: '1.5rem' }}>
-                        {forms.filter((f) => new Date(f.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
+                        {forms.filter((f) => new Date(f.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
                       </div>
                       <div className="text-muted small">Created This Week</div>
                     </div>

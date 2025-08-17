@@ -1,37 +1,27 @@
 import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
 import { Form } from '@/types/form';
-import { Link, useParams } from 'react-router-dom';
-import { 
-  FileText, 
-  ArrowLeft, 
-  Eye, 
-  Edit3, 
-  Send, 
-  Calendar, 
-  Globe, 
-  Lock, 
-  BarChart3, 
-  Settings 
-} from 'lucide-react';
+import { ArrowLeft, BarChart3, Calendar, Edit3, Eye, FileText, Globe, Lock, Send, Settings } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
-import { useState, useEffect } from 'react';
+import { Link, useParams } from 'react-router-dom';
 
 export default function FormsManage() {
   const { id } = useParams<{ id: string }>();
   const [form, setForm] = useState<Form | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-
   useEffect(() => {
     const fetchForm = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/forms/${id}`, {
+        const response = await fetch(`/api/forms/${id}`, {
           credentials: 'include',
         });
         if (response.ok) {
           const data = await response.json();
-          setForm(data);
+          setForm(data.data || data);
+        } else {
+          throw new Error('Failed to fetch form');
         }
       } catch (error) {
         console.error('Error fetching form:', error);
@@ -46,20 +36,28 @@ export default function FormsManage() {
   }, [id]);
 
   if (loading) {
-    return <AppLayout><div>Loading...</div></AppLayout>;
+    return (
+      <AppLayout>
+        <div>Loading...</div>
+      </AppLayout>
+    );
   }
 
   if (!form) {
-    return <AppLayout><div>Form not found</div></AppLayout>;
+    return (
+      <AppLayout>
+        <div>Form not found</div>
+      </AppLayout>
+    );
   }
 
-  const breadcrumbs = [
+  const breadcrumbs: BreadcrumbItem[] = [
     {
-      name: 'Manage Forms',
+      title: 'Manage Forms',
       href: '/forms',
     },
     {
-      name: form.name,
+      title: form.name,
       href: `/forms/${form.id}/manage`,
     },
   ];
@@ -75,9 +73,7 @@ export default function FormsManage() {
               Form Management
             </Badge>
             <h1 className="display-6 fw-bold text-dark">{form.name}</h1>
-            <p className="lead text-muted">
-              Manage your form settings, view submissions, and track performance
-            </p>
+            <p className="lead text-muted">Manage your form settings, view submissions, and track performance</p>
           </div>
 
           {/* Back Button */}
@@ -116,7 +112,7 @@ export default function FormsManage() {
                         <div className="text-muted">{form.name}</div>
                       </div>
                       <div className="d-flex align-items-center gap-2">
-                        {form.is_public ? (
+                        {form.isPublic ? (
                           <Badge bg="success" className="d-flex align-items-center">
                             <Globe size={12} className="me-1" />
                             Public
@@ -129,7 +125,7 @@ export default function FormsManage() {
                         )}
                       </div>
                     </div>
-                    
+
                     <div>
                       <div className="fw-semibold text-dark">Description</div>
                       <div className="text-muted">{form.description || 'No description provided'}</div>
@@ -140,14 +136,14 @@ export default function FormsManage() {
                         <div className="fw-semibold text-dark small">Created</div>
                         <div className="text-muted small d-flex align-items-center">
                           <Calendar size={14} className="me-1" />
-                          {new Date(form.created_at).toLocaleDateString()}
+                          {new Date(form.createdAt).toLocaleDateString()}
                         </div>
                       </div>
                       <div>
                         <div className="fw-semibold text-dark small">Last Updated</div>
                         <div className="text-muted small d-flex align-items-center">
                           <Calendar size={14} className="me-1" />
-                          {new Date(form.updated_at).toLocaleDateString()}
+                          {new Date(form.updatedAt).toLocaleDateString()}
                         </div>
                       </div>
                     </div>
@@ -281,9 +277,7 @@ export default function FormsManage() {
                       <BarChart3 size={24} className="text-muted" />
                     </div>
                     <h6 className="text-muted">No Recent Activity</h6>
-                    <p className="text-muted small mb-0">
-                      Activity and submissions will appear here once your form starts receiving responses
-                    </p>
+                    <p className="text-muted small mb-0">Activity and submissions will appear here once your form starts receiving responses</p>
                   </div>
                 </Card.Body>
               </Card>

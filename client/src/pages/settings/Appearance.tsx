@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { Palette, Monitor, Sun, Moon } from 'lucide-react';
-import { Badge, Button, Card, Container } from 'react-bootstrap';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { type BreadcrumbItem } from '@/types';
+import { Monitor, Moon, Palette, Sun } from 'lucide-react';
+import { useState } from 'react';
+import { Badge, Button, Card, Container } from 'react-bootstrap';
 
-const breadcrumbs = [
+const breadcrumbs: BreadcrumbItem[] = [
   {
-    name: 'Appearance settings',
+    title: 'Appearance settings',
     href: '/settings/appearance',
   },
 ];
@@ -59,9 +60,7 @@ export default function SettingsAppearance() {
               Appearance Settings
             </Badge>
             <h1 className="display-6 fw-bold text-dark">Customize Your Experience</h1>
-            <p className="lead text-muted">
-              Personalize your interface with themes and appearance preferences
-            </p>
+            <p className="lead text-muted">Personalize your interface with themes and appearance preferences</p>
           </div>
 
           <SettingsLayout>
@@ -86,13 +85,9 @@ export default function SettingsAppearance() {
                     {themes.map((theme) => {
                       const Icon = theme.icon;
                       const isActive = currentTheme === theme.id;
-                      
+
                       return (
-                        <Card 
-                          key={theme.id}
-                          className={`border-2 ${isActive ? 'border-primary' : 'border'}`} 
-                          style={{ width: '200px' }}
-                        >
+                        <Card key={theme.id} className={`border-2 ${isActive ? 'border-primary' : 'border'}`} style={{ width: '200px' }}>
                           <Card.Body className="p-3 text-center">
                             <div
                               className="d-inline-flex align-items-center justify-content-center rounded-circle mb-2"
@@ -102,9 +97,9 @@ export default function SettingsAppearance() {
                             </div>
                             <h6 className="fw-bold mb-1">{theme.name}</h6>
                             <p className="text-muted small mb-2">{theme.description}</p>
-                            <Button 
-                              variant={isActive ? "primary" : "outline-secondary"} 
-                              size="sm" 
+                            <Button
+                              variant={isActive ? 'primary' : 'outline-secondary'}
+                              size="sm"
                               className="w-100"
                               onClick={() => handleThemeChange(theme.id)}
                             >

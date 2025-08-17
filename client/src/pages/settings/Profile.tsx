@@ -1,13 +1,14 @@
-import { useState, FormEvent } from 'react';
-import { User, Mail, Shield, Trash2, CheckCircle, AlertTriangle } from 'lucide-react';
-import { Badge, Button, Card, Container, Row, Col } from 'react-bootstrap';
+import { useAuth } from '@/hooks/useAuth';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import { useAuth } from '@/hooks/useAuth';
+import { type BreadcrumbItem } from '@/types';
+import { AlertTriangle, CheckCircle, Mail, Shield, Trash2, User } from 'lucide-react';
+import { FormEvent, useState } from 'react';
+import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
 
-const breadcrumbs = [
+const breadcrumbs: BreadcrumbItem[] = [
   {
-    name: 'Profile settings',
+    title: 'Profile settings',
     href: '/settings/profile',
   },
 ];
@@ -36,8 +37,8 @@ export default function SettingsProfile() {
       // TODO: Replace with actual API call
       console.log('Updating profile with data:', data);
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       setRecentlySuccessful(true);
       setTimeout(() => setRecentlySuccessful(false), 3000);
     } catch (error) {
@@ -73,9 +74,7 @@ export default function SettingsProfile() {
               Profile Settings
             </Badge>
             <h1 className="display-6 fw-bold text-dark">Manage Your Profile</h1>
-            <p className="lead text-muted">
-              Update your personal information and account preferences
-            </p>
+            <p className="lead text-muted">Update your personal information and account preferences</p>
           </div>
 
           <SettingsLayout>
@@ -108,7 +107,7 @@ export default function SettingsProfile() {
                             id="name"
                             className={`form-control ps-5 ${errors.name ? 'is-invalid' : ''}`}
                             value={data.name}
-                            onChange={(e) => setData(prev => ({ ...prev, name: e.target.value }))}
+                            onChange={(e) => setData((prev) => ({ ...prev, name: e.target.value }))}
                             required
                             autoComplete="name"
                             placeholder="Enter your full name"
@@ -128,16 +127,19 @@ export default function SettingsProfile() {
                             type="email"
                             className={`form-control ps-5 ${errors.email ? 'is-invalid' : ''}`}
                             value={data.email}
-                            onChange={(e) => setData(prev => ({ ...prev, email: e.target.value }))}
+                            onChange={(e) => setData((prev) => ({ ...prev, email: e.target.value }))}
                             autoComplete="username"
-                            placeholder={data.email ? "Enter your email address" : "No email available from GitHub"}
+                            placeholder={data.email ? 'Enter your email address' : 'No email available from GitHub'}
                             disabled={!user.email}
                           />
                           <Mail size={18} className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
                           {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                           {!user.email && (
                             <div className="form-text text-muted">
-                              <small>Your GitHub account doesn't share an email address. You can update your GitHub privacy settings to make your email available.</small>
+                              <small>
+                                Your GitHub account doesn't share an email address. You can update your GitHub privacy settings to make your email
+                                available.
+                              </small>
                             </div>
                           )}
                         </div>
@@ -155,8 +157,7 @@ export default function SettingsProfile() {
                             </p>
                             {status === 'verification-link-sent' && (
                               <div className="text-success fw-semibold d-flex align-items-center">
-                                <CheckCircle size={16} className="me-1" />
-                                A new verification link has been sent to your email address.
+                                <CheckCircle size={16} className="me-1" />A new verification link has been sent to your email address.
                               </div>
                             )}
                           </div>
@@ -225,9 +226,7 @@ export default function SettingsProfile() {
                       </div>
                       <div className="d-flex align-items-center justify-content-between">
                         <span className="text-muted small">Member Since</span>
-                        <span className="small">
-                          {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
-                        </span>
+                        <span className="small">{user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}</span>
                       </div>
                     </div>
                   </Card.Body>
@@ -255,9 +254,7 @@ export default function SettingsProfile() {
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
                     <h6 className="fw-semibold text-danger mb-1">Delete Account</h6>
-                    <p className="text-muted small mb-0">
-                      This action cannot be undone. All data will be permanently removed.
-                    </p>
+                    <p className="text-muted small mb-0">This action cannot be undone. All data will be permanently removed.</p>
                   </div>
                   <Button variant="outline-danger" className="d-flex align-items-center">
                     <Trash2 size={18} className="me-2" />

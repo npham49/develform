@@ -1,11 +1,12 @@
 import AppLayout from '@/layouts/app-layout';
-import { Link } from 'react-router-dom';
-import { BarChart3, FileText, GitBranch, Users, TrendingUp, Clock } from 'lucide-react';
+import { type BreadcrumbItem } from '@/types';
+import { BarChart3, Clock, FileText, GitBranch, TrendingUp, Users } from 'lucide-react';
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
-const breadcrumbs = [
+const breadcrumbs: BreadcrumbItem[] = [
   {
-    name: 'Dashboard',
+    title: 'Dashboard',
     href: '/dashboard',
   },
 ];
@@ -156,10 +157,7 @@ export default function Dashboard() {
               <h5 className="mb-0 fw-bold">Form Performance</h5>
             </Card.Header>
             <Card.Body>
-              <div
-                className="d-flex align-items-center justify-content-center rounded"
-                style={{ minHeight: '300px', backgroundColor: '#f8f9fa' }}
-              >
+              <div className="d-flex align-items-center justify-content-center rounded" style={{ minHeight: '300px', backgroundColor: '#f8f9fa' }}>
                 <div className="text-center">
                   <BarChart3 size={48} className="text-muted mb-3" />
                   <h5 className="text-muted">Performance Charts</h5>

@@ -1,12 +1,14 @@
 import AppLayout from '@/layouts/app-layout';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, FileText, Plus, Info } from 'lucide-react';
-import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
+import { type BreadcrumbItem } from '@/types';
+import { ArrowLeft, FileText, Info, Plus } from 'lucide-react';
 import { useState } from 'react';
+import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
-const breadcrumbs = [
+const breadcrumbs: BreadcrumbItem[] = [
   {
-    name: 'Create Form',
+    title: 'Create Form',
     href: '/forms/create',
   },
 ];
@@ -25,25 +27,36 @@ export default function FormsCreate() {
     e.preventDefault();
     setProcessing(true);
     setErrors({});
-    
+
     try {
-      // TODO: Replace with actual API call
-      console.log('Creating form with data:', data);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Navigate to forms list or form builder
+      const response = await fetch('/api/forms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create form');
+      }
+
+      const result = await response.json();
+      toast.success('Form created successfully');
       navigate('/forms');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating form:', error);
-      setErrors({ general: 'Failed to create form' });
+      setErrors({ general: error.message || 'Failed to create form' });
+      toast.error('Failed to create form');
     } finally {
       setProcessing(false);
     }
   };
 
   const setFieldData = (field: string, value: any) => {
-    setData(prev => ({ ...prev, [field]: value }));
+    setData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -134,8 +147,8 @@ export default function FormsCreate() {
                                 </label>
                               </div>
                               <p className="text-muted small mb-0 mt-1">
-                                {data.is_public 
-                                  ? 'This form will be accessible to anyone with the link' 
+                                {data.is_public
+                                  ? 'This form will be accessible to anyone with the link'
                                   : 'This form will only be accessible to authenticated users'}
                               </p>
                             </div>
@@ -146,12 +159,7 @@ export default function FormsCreate() {
                     </div>
 
                     <div className="d-flex gap-3">
-                      <Button 
-                        type="submit" 
-                        disabled={processing} 
-                        variant="primary" 
-                        className="d-flex align-items-center px-4"
-                      >
+                      <Button type="submit" disabled={processing} variant="primary" className="d-flex align-items-center px-4">
                         {processing ? (
                           <>
                             <div className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
@@ -187,7 +195,7 @@ export default function FormsCreate() {
                   <div className="d-flex flex-column gap-3">
                     <div className="d-flex align-items-center">
                       <div className="me-3">
-                        <div 
+                        <div
                           className="d-flex align-items-center justify-content-center rounded-circle"
                           style={{ width: 32, height: 32, backgroundColor: '#dbeafe' }}
                         >
@@ -201,7 +209,7 @@ export default function FormsCreate() {
                     </div>
                     <div className="d-flex align-items-center">
                       <div className="me-3">
-                        <div 
+                        <div
                           className="d-flex align-items-center justify-content-center rounded-circle"
                           style={{ width: 32, height: 32, backgroundColor: '#dcfce7' }}
                         >
@@ -215,7 +223,7 @@ export default function FormsCreate() {
                     </div>
                     <div className="d-flex align-items-center">
                       <div className="me-3">
-                        <div 
+                        <div
                           className="d-flex align-items-center justify-content-center rounded-circle"
                           style={{ width: 32, height: 32, backgroundColor: '#ede9fe' }}
                         >
