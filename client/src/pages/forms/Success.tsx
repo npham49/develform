@@ -4,7 +4,7 @@ import { Form as FormioForm } from '@formio/react';
 import { CheckCircle, Copy, Download, Shield, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Badge, Button, Card, Container } from 'react-bootstrap';
-import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
 
 interface SubmitSuccessProps {
   submission_id?: number;
@@ -22,26 +22,20 @@ interface SubmitSuccessProps {
 
 export default function FormsSuccess({
   submission_id,
-  form_name,
-  submission_data,
   schema,
-  created_at,
   token,
-  is_form_owner,
-  submitter_information,
 }: SubmitSuccessProps) {
   const { formId, submissionId } = useParams<{ formId: string; submissionId: string }>();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
   const [submissionDetails, setSubmissionDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const formSchema = useRef(schema ? JSON.parse(schema) : {});
   const [formReady, setFormReady] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const actualSubmissionId = submission_id || (submissionId ? parseInt(submissionId) : null);
   const actualToken = token || searchParams.get('token');
-  const actualFormName = form_name || 'Untitled Form';
 
   useEffect(() => {
     const fetchSubmissionData = async () => {
@@ -51,59 +45,35 @@ export default function FormsSuccess({
       }
 
       try {
-        // TODO: Replace with actual API call
         console.log('Fetching submission data for:', actualSubmissionId);
-        // Simulate API call with mock data
-        const mockSubmissionData = {
-          submission_id: actualSubmissionId,
-          form_name: actualFormName,
-          submission_data: submission_data || {
-            name: 'John Doe',
-            email: 'john@example.com',
-            message: 'This is a test submission'
-          },
-          schema: schema || JSON.stringify({
-            type: 'form',
-            title: actualFormName,
-            display: 'form',
-            components: [
-              {
-                label: 'Name',
-                type: 'textfield',
-                key: 'name',
-                input: true
-              },
-              {
-                label: 'Email',
-                type: 'email',
-                key: 'email',
-                input: true
-              },
-              {
-                label: 'Message',
-                type: 'textarea',
-                key: 'message',
-                input: true
-              }
-            ]
-          }),
-          created_at: created_at || new Date().toISOString(),
-          token: actualToken,
-          submitter_information: submitter_information || (user ? { name: user.name, email: user.email || 'No email' } : undefined),
-          is_form_owner: is_form_owner || false
-        };
+        // Fetch submission data from API
+        const response = await api.submissions.get(actualSubmissionId, actualToken || undefined);
+        const submissionData = response.data;
         
-        setSubmissionDetails(mockSubmissionData);
-        formSchema.current = JSON.parse(mockSubmissionData.schema);
+        setSubmissionDetails({
+          submission_id: submissionData.id,
+          form_name: submissionData.formName,
+          submission_data: submissionData.data,
+          schema: submissionData.schema,
+          created_at: submissionData.createdAt,
+          token: submissionData.token,
+          submitter_information: submissionData.submitterInformation,
+          is_form_owner: submissionData.isFormOwner
+        });
+        
+        if (submissionData.schema) {
+          formSchema.current = submissionData.schema;
+        }
       } catch (error) {
         console.error('Error fetching submission data:', error);
+        setError(error instanceof Error ? error.message : 'Failed to load submission');
       } finally {
         setLoading(false);
       }
     };
 
     fetchSubmissionData();
-  }, [actualSubmissionId, actualToken, actualFormName, schema, submission_data, created_at, submitter_information, is_form_owner, user]);
+  }, [actualSubmissionId, actualToken]);
 
   const submissionUrl = actualToken
     ? `${window.location.origin}/forms/${formId}/submit/success/${actualSubmissionId}?token=${actualToken}`
@@ -133,13 +103,13 @@ export default function FormsSuccess({
     );
   }
 
-  if (!actualSubmissionId || !submissionDetails) {
+  if (!actualSubmissionId || !submissionDetails || error) {
     return (
       <AppLayout hideHeader>
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
           <div className="text-center">
-            <h3>Submission not found</h3>
-            <p className="text-muted">The requested submission could not be loaded.</p>
+            <h3>{error ? 'Error' : 'Submission not found'}</h3>
+            <p className="text-muted">{error || 'The requested submission could not be loaded.'}</p>
           </div>
         </div>
       </AppLayout>

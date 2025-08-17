@@ -55,6 +55,10 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+    submitToForm: (formId: number, data: any) => this.request<{ data: any }>(`/submissions/form/${formId}`, {
+      method: 'POST',
+      body: JSON.stringify({ formId, data }),
+    }),
     get: (id: number, token?: string) => {
       const params = token ? `?token=${token}` : '';
       return this.request<{ data: any }>(`/submissions/${id}${params}`);

@@ -1,10 +1,11 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import AppLayout from '@/layouts/app-layout';
 import { Form } from '@formio/react';
 import { FileText, Info, Shield, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Card, Container } from 'react-bootstrap';
 import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
 
 interface SubmitProps {
   schema?: string;
@@ -12,17 +13,19 @@ interface SubmitProps {
   form_id?: number;
 }
 
-export default function FormsSubmit({ schema, name, form_id }: SubmitProps) {
+export default function FormsSubmit({ schema, form_id }: SubmitProps) {
   const { formId } = useParams<{ formId: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [formData, setFormData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const formSchema = useRef(schema ? JSON.parse(schema) : {});
   const [formReady, setFormReady] = useState(false);
   const [submissionData, setSubmissionData] = useState<any>({});
+  const [error, setError] = useState<string | null>(null);
   
   const actualFormId = form_id || (formId ? parseInt(formId) : null);
-  const actualName = name || 'Untitled Form';
   const isLoggedIn = !!user;
 
   useEffect(() => {
@@ -33,52 +36,25 @@ export default function FormsSubmit({ schema, name, form_id }: SubmitProps) {
       }
 
       try {
-        // TODO: Replace with actual API call
+        // Fetch form data from API
         console.log('Fetching form data for form ID:', actualFormId);
-        // Simulate API call with mock data
-        const mockFormData = {
-          name: actualName,
-          schema: JSON.stringify({
-            type: 'form',
-            title: actualName,
-            display: 'form',
-            components: [
-              {
-                label: 'Name',
-                type: 'textfield',
-                key: 'name',
-                input: true,
-                validate: { required: true }
-              },
-              {
-                label: 'Email',
-                type: 'email',
-                key: 'email',
-                input: true,
-                validate: { required: true }
-              },
-              {
-                label: 'Message',
-                type: 'textarea',
-                key: 'message',
-                input: true,
-                rows: 4
-              }
-            ]
-          })
-        };
+        const response = await api.forms.getSubmitSchema(actualFormId);
+        const formInfo = response.data;
         
-        setFormData(mockFormData);
-        formSchema.current = JSON.parse(mockFormData.schema);
+        setFormData(formInfo);
+        if (formInfo.schema) {
+          formSchema.current = formInfo.schema;
+        }
       } catch (error) {
         console.error('Error fetching form data:', error);
+        setError(error instanceof Error ? error.message : 'Failed to load form');
       } finally {
         setLoading(false);
       }
     };
 
     fetchFormData();
-  }, [actualFormId, actualName]);
+  }, [actualFormId]);
 
   useEffect(() => {
     if (formData) {
@@ -97,20 +73,37 @@ export default function FormsSubmit({ schema, name, form_id }: SubmitProps) {
   };
 
   const handleSubmit = async () => {
+    if (!actualFormId) {
+      setError('Form ID is required');
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+
     try {
-      // TODO: Replace with actual API call
       console.log('Submitting form data:', {
-        form_id: actualFormId,
+        formId: actualFormId,
         data: submissionData
       });
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Call the API endpoint to submit the form
+      const response = await api.submissions.submitToForm(actualFormId, submissionData);
+
+      const submissionResult = response.data;
+      console.log('Submission successful:', submissionResult);
+
+      // Redirect to success page with submission ID and token (if anonymous)
+      const successUrl = `/forms/${actualFormId}/submit/success/${submissionResult.id}`;
+      const urlWithToken = submissionResult.token ? `${successUrl}?token=${submissionResult.token}` : successUrl;
       
-      alert('Form submitted successfully!'); // TODO: Replace with proper toast
+      navigate(urlWithToken);
+      
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('Failed to submit form'); // TODO: Replace with proper toast
+      setError(error instanceof Error ? error.message : 'Failed to submit form');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -126,13 +119,13 @@ export default function FormsSubmit({ schema, name, form_id }: SubmitProps) {
     );
   }
 
-  if (!actualFormId || !formData) {
+  if (!actualFormId || !formData || error) {
     return (
       <AppLayout hideHeader>
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
           <div className="text-center">
-            <h3>Form not found</h3>
-            <p className="text-muted">The requested form could not be loaded.</p>
+            <h3>{error ? 'Error' : 'Form not found'}</h3>
+            <p className="text-muted">{error || 'The requested form could not be loaded.'}</p>
           </div>
         </div>
       </AppLayout>
@@ -144,6 +137,16 @@ export default function FormsSubmit({ schema, name, form_id }: SubmitProps) {
       <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>
         <Container className="d-flex align-items-center justify-content-center min-vh-100">
           <div className="w-100">
+            {/* Error Alert */}
+            {error && (
+              <Alert variant="danger" className="d-flex align-items-start mb-4">
+                <Info size={20} className="me-2 mt-1 flex-shrink-0" />
+                <div>
+                  <strong>Error:</strong> {error}
+                </div>
+              </Alert>
+            )}
+
             {/* User Status Alert */}
             {!isLoggedIn ? (
               <Alert variant="info" className="d-flex align-items-start mb-4">
@@ -178,7 +181,25 @@ export default function FormsSubmit({ schema, name, form_id }: SubmitProps) {
                 </div>
               </Card.Header>
               <Card.Body className="p-4">
-                {formReady && <Form src={formSchema.current} onChange={handleChange} onSubmit={handleSubmit} />}
+                {formReady && (
+                  <Form 
+                    src={formSchema.current} 
+                    onChange={handleChange} 
+                    onSubmit={handleSubmit}
+                    options={{ 
+                      noAlerts: true,
+                      readOnly: submitting 
+                    }}
+                  />
+                )}
+                {submitting && (
+                  <div className="text-center mt-3">
+                    <div className="spinner-border text-primary me-2" role="status">
+                      <span className="visually-hidden">Submitting...</span>
+                    </div>
+                    <span>Submitting your response...</span>
+                  </div>
+                )}
               </Card.Body>
             </Card>
 
