@@ -1,9 +1,9 @@
+import { and, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
-import { eq, and } from 'drizzle-orm';
-import { db } from '../db/index.js';
-import { forms, users } from '../db/schema.js';
-import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js';
 import { z } from 'zod';
+import { db } from '../db/index.js';
+import { forms, submissions, users } from '../db/schema.js';
+import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js';
 
 const formRoutes = new Hono();
 
@@ -26,7 +26,7 @@ const updateFormSchema = z.object({
 formRoutes.get('/', authMiddleware, async (c) => {
   try {
     const user = c.get('jwtPayload').user;
-    
+
     const userForms = await db
       .select({
         id: forms.id,
@@ -56,12 +56,7 @@ formRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
       return c.json({ error: 'Invalid form ID' }, 400);
     }
 
-    const form = await db
-      .select()
-      .from(forms)
-      .leftJoin(users, eq(forms.createdBy, users.id))
-      .where(eq(forms.id, formId))
-      .limit(1);
+    const form = await db.select().from(forms).leftJoin(users, eq(forms.createdBy, users.id)).where(eq(forms.id, formId)).limit(1);
 
     if (form.length === 0) {
       return c.json({ error: 'Form not found' }, 404);
@@ -74,14 +69,16 @@ formRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
       return c.json({ error: 'Access denied' }, 403);
     }
 
-    return c.json({ 
+    return c.json({
       data: {
         ...formData.forms,
-        creator: formData.users ? {
-          id: formData.users.id,
-          name: formData.users.name,
-        } : null,
-      }
+        creator: formData.users
+          ? {
+              id: formData.users.id,
+              name: formData.users.name,
+            }
+          : null,
+      },
     });
   } catch (error) {
     console.error('Error fetching form:', error);
@@ -121,12 +118,12 @@ formRoutes.get('/:id/submit', optionalAuthMiddleware, async (c) => {
       return c.json({ error: 'Authentication required' }, 401);
     }
 
-    return c.json({ 
+    return c.json({
       data: {
         id: formData.id,
         name: formData.name,
         schema: formData.schema,
-      }
+      },
     });
   } catch (error) {
     console.error('Error fetching form schema:', error);
@@ -139,14 +136,17 @@ formRoutes.post('/', authMiddleware, async (c) => {
   try {
     const user = c.get('jwtPayload').user;
     const body = await c.req.json();
-    
+
     const validatedData = createFormSchema.parse(body);
 
-    const newForm = await db.insert(forms).values({
-      ...validatedData,
-      createdBy: user.id,
-      updatedBy: user.id,
-    }).returning();
+    const newForm = await db
+      .insert(forms)
+      .values({
+        ...validatedData,
+        createdBy: user.id,
+        updatedBy: user.id,
+      })
+      .returning();
 
     return c.json({ data: newForm[0] }, 201);
   } catch (error) {
@@ -202,6 +202,54 @@ formRoutes.patch('/:id', authMiddleware, async (c) => {
   }
 });
 
+// Update form schema specifically
+formRoutes.patch('/:id/schema', authMiddleware, async (c) => {
+  try {
+    const formId = parseInt(c.req.param('id'));
+    const user = c.get('jwtPayload').user;
+    const body = await c.req.json();
+
+    if (isNaN(formId)) {
+      return c.json({ error: 'Invalid form ID' }, 400);
+    }
+
+    const schemaSchema = z.object({
+      schema: z.any(),
+    });
+
+    const validatedData = schemaSchema.parse(body);
+
+    // Check if form exists and user owns it
+    const existingForm = await db
+      .select()
+      .from(forms)
+      .where(and(eq(forms.id, formId), eq(forms.createdBy, user.id)))
+      .limit(1);
+
+    if (existingForm.length === 0) {
+      return c.json({ error: 'Form not found or access denied' }, 404);
+    }
+
+    const updatedForm = await db
+      .update(forms)
+      .set({
+        schema: validatedData.schema,
+        updatedBy: user.id,
+        updatedAt: new Date(),
+      })
+      .where(eq(forms.id, formId))
+      .returning();
+
+    return c.json({ data: updatedForm[0] });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return c.json({ error: 'Validation failed', errors: error.errors }, 400);
+    }
+    console.error('Error updating form schema:', error);
+    return c.json({ error: 'Failed to update form schema' }, 500);
+  }
+});
+
 // Delete form
 formRoutes.delete('/:id', authMiddleware, async (c) => {
   try {
@@ -229,6 +277,59 @@ formRoutes.delete('/:id', authMiddleware, async (c) => {
   } catch (error) {
     console.error('Error deleting form:', error);
     return c.json({ error: 'Failed to delete form' }, 500);
+  }
+});
+
+// Get form submissions (form owner only)
+formRoutes.get('/:id/submissions', authMiddleware, async (c) => {
+  try {
+    const formId = parseInt(c.req.param('id'));
+    const user = c.get('jwtPayload').user;
+
+    if (isNaN(formId)) {
+      return c.json({ error: 'Invalid form ID' }, 400);
+    }
+
+    // Check if form exists and user owns it
+    const existingForm = await db
+      .select()
+      .from(forms)
+      .where(and(eq(forms.id, formId), eq(forms.createdBy, user.id)))
+      .limit(1);
+
+    if (existingForm.length === 0) {
+      return c.json({ error: 'Form not found or access denied' }, 404);
+    }
+
+    // Get submissions for this form
+    const formSubmissions = await db
+      .select({
+        id: submissions.id,
+        data: submissions.data,
+        createdAt: submissions.createdAt,
+        creator: users,
+      })
+      .from(submissions)
+      .leftJoin(users, eq(submissions.createdBy, users.id))
+      .where(eq(submissions.formId, formId));
+
+    const submissionsData = formSubmissions.map((sub) => ({
+      id: sub.id,
+      data: sub.data,
+      createdAt: sub.createdAt,
+      submitterInformation: sub.creator
+        ? {
+            name: sub.creator.name,
+            email: sub.creator.email,
+          }
+        : null,
+      isAnonymous: !sub.creator,
+    }));
+
+    return c.json({ data: submissionsData });
+  } catch (error) {
+    console.error('Error fetching form submissions:', error);
+    return c.json({ error: 'Failed to fetch form submissions' }, 500);
   }
 });
 

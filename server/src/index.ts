@@ -4,10 +4,10 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 
-import authRoutes from './routes/auth.js';
-import formRoutes from './routes/forms.js';
-import settingsRoutes from './routes/settings.js';
-import submissionRoutes from './routes/submissions.js';
+import authRoutes from './routes/auth';
+import formRoutes from './routes/forms';
+import settingsRoutes from './routes/settings';
+import submissionRoutes from './routes/submissions';
 
 dotenv.config();
 
