@@ -1,7 +1,7 @@
 import { Github, Layers } from 'lucide-react';
 import { Badge, Button, Card, Container } from 'react-bootstrap';
 import { useAuth } from '@/hooks/useAuth';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from '@tanstack/react-router';
 
 export default function GitHubLogin() {
   const { login } = useAuth();

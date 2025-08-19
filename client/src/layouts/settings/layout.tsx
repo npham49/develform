@@ -1,5 +1,5 @@
 import { type NavItem } from '@/types';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from '@tanstack/react-router';
 import { type PropsWithChildren } from 'react';
 import { User, Palette } from 'lucide-react';
 import { Card, Nav, Row, Col } from 'react-bootstrap';

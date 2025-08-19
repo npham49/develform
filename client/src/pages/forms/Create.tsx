@@ -3,7 +3,7 @@ import { type BreadcrumbItem } from '@/types';
 import { ArrowLeft, FileText, Info, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -43,9 +43,9 @@ export default function FormsCreate() {
         throw new Error(errorData.message || 'Failed to create form');
       }
 
-      const result = await response.json();
+      // const result = await response.json();
       toast.success('Form created successfully');
-      navigate('/forms');
+      navigate({ to: '/forms' });
     } catch (error: any) {
       console.error('Error creating form:', error);
       setErrors({ general: error.message || 'Failed to create form' });

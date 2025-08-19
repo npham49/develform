@@ -2,7 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { BarChart3, Clock, FileText, GitBranch, TrendingUp, Users } from 'lucide-react';
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {

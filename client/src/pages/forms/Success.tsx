@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearch } from '@tanstack/react-router';
 import AppLayout from '@/layouts/app-layout';
 import { Form as FormioForm } from '@formio/react';
 import { CheckCircle, Copy, Download, Shield, User } from 'lucide-react';
@@ -25,8 +25,8 @@ export default function FormsSuccess({
   schema,
   token,
 }: SubmitSuccessProps) {
-  const { formId, submissionId } = useParams<{ formId: string; submissionId: string }>();
-  const [searchParams] = useSearchParams();
+  const { formId, submissionId } = useParams({ from: '/forms/$formId/submit/success/$submissionId' });
+  const searchParams = useSearch({ from: '/forms/$formId/submit/success/$submissionId' });
   const [submissionDetails, setSubmissionDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +35,7 @@ export default function FormsSuccess({
   const [copied, setCopied] = useState(false);
 
   const actualSubmissionId = submission_id || (submissionId ? parseInt(submissionId) : null);
-  const actualToken = token || searchParams.get('token');
+  const actualToken = token || (searchParams as any)?.token;
 
   useEffect(() => {
     const fetchSubmissionData = async () => {

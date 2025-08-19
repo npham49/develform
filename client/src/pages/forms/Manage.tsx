@@ -4,10 +4,10 @@ import { Form } from '@/types/form';
 import { ArrowLeft, BarChart3, Calendar, Edit3, Eye, FileText, Globe, Lock, Send, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from '@tanstack/react-router';
 
 export default function FormsManage() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ from: '/forms/$id/manage' });
   const [form, setForm] = useState<Form | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -160,19 +160,19 @@ export default function FormsManage() {
                 </Card.Header>
                 <Card.Body className="p-4">
                   <div className="d-flex flex-column gap-3">
-                    <Link to={`/forms/${form.id}/schema`} className="text-decoration-none">
+                    <Link to="/forms/$id/schema" params={{ id: form.id.toString() }} className="text-decoration-none">
                       <Button variant="primary" className="w-100 d-flex align-items-center">
                         <Edit3 size={18} className="me-2" />
                         Edit Schema
                       </Button>
                     </Link>
-                    <Link to={`/forms/${form.id}/preview`} className="text-decoration-none">
+                    <Link to="/forms/$id/preview" params={{ id: form.id.toString() }} className="text-decoration-none">
                       <Button variant="outline-primary" className="w-100 d-flex align-items-center">
                         <Eye size={18} className="me-2" />
                         Preview Form
                       </Button>
                     </Link>
-                    <Link to={`/forms/${form.id}/submit`} className="text-decoration-none">
+                    <Link to="/forms/$formId/submit" params={{ formId: form.id.toString() }} className="text-decoration-none">
                       <Button variant="outline-success" className="w-100 d-flex align-items-center">
                         <Send size={18} className="me-2" />
                         Submit Form

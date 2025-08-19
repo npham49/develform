@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import AppLayout from '@/layouts/app-layout';
 import { Form } from '@formio/react';
 import { FileText, Info, Shield, User } from 'lucide-react';
@@ -14,8 +14,8 @@ interface SubmitProps {
 }
 
 export default function FormsSubmit({ schema, form_id }: SubmitProps) {
-  const { formId } = useParams<{ formId: string }>();
-  const navigate = useNavigate();
+  const { formId } = useParams({ from: '/forms/$formId/submit' });
+  const navigate = useNavigate({ from: '/forms/$formId/submit' });
   const { user } = useAuth();
   const [formData, setFormData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -97,7 +97,7 @@ export default function FormsSubmit({ schema, form_id }: SubmitProps) {
       const successUrl = `/forms/${actualFormId}/submit/success/${submissionResult.id}`;
       const urlWithToken = submissionResult.token ? `${successUrl}?token=${submissionResult.token}` : successUrl;
       
-      navigate(urlWithToken);
+      navigate({ to: urlWithToken });
       
     } catch (error) {
       console.error('Error submitting form:', error);

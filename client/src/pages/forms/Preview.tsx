@@ -5,11 +5,11 @@ import { Form as FormioForm, FormType, Submission } from '@formio/react';
 import { ArrowLeft, Eye, Info, Settings } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Badge, Button, Card, Container } from 'react-bootstrap';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from '@tanstack/react-router';
 import { toast } from 'sonner';
 
 export default function FormsPreview() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ from: '/forms/$id/preview' });
   const [form, setForm] = useState<Form | null>(null);
   const [loading, setLoading] = useState(true);
   const formSchema = useRef<FormType>(INITIAL_SCHEMA);
@@ -95,13 +95,13 @@ export default function FormsPreview() {
                   <p className="text-muted small mb-0">Return to the form editor to modify your form structure</p>
                 </div>
                 <div className="d-flex gap-2">
-                  <Link to={`/forms/${id}/manage`}>
+                  <Link to="/forms/$id/manage" params={{ id }}>
                     <Button variant="outline-primary">
                       <ArrowLeft size={16} className="me-2" />
                       Back to Manage
                     </Button>
                   </Link>
-                  <Link to={`/forms/${id}/schema`}>
+                  <Link to="/forms/$id/schema" params={{ id }}>
                     <Button variant="primary">
                       <Settings size={16} className="me-2" />
                       Edit Schema

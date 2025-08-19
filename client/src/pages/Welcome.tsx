@@ -1,5 +1,5 @@
 // src/components/FlowableLanding.tsx
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { ArrowRight, Check, GitBranch, GitCommit, GitCompare, Layers, MousePointer, Shield, Star, Users } from 'lucide-react';
 import { Badge, Button, Card, Col, Container, Nav, Navbar, Row } from 'react-bootstrap';
 
@@ -359,9 +359,9 @@ function Footer() {
             <ul className="list-unstyled text-white">
               {['Features', 'Pricing', 'Documentation', 'API'].map((item, idx) => (
                 <li key={idx} className="mb-2">
-                  <Link to="#" className="text-white text-decoration-none">
+                  <a href="#" className="text-white text-decoration-none">
                     {item}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -372,9 +372,9 @@ function Footer() {
             <ul className="list-unstyled text-white">
               {['About', 'Blog', 'Careers', 'Contact'].map((item, idx) => (
                 <li key={idx} className="mb-2">
-                  <Link to="#" className="text-white text-decoration-none">
+                  <a href="#" className="text-white text-decoration-none">
                     {item}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -385,9 +385,9 @@ function Footer() {
             <ul className="list-unstyled text-white">
               {['Help Center', 'Community', 'Status', 'Security'].map((item, idx) => (
                 <li key={idx} className="mb-2">
-                  <Link to="#" className="text-white text-decoration-none">
+                  <a href="#" className="text-white text-decoration-none">
                     {item}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>

@@ -1,5 +1,5 @@
 import { type BreadcrumbItem } from '@/types';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { type PropsWithChildren } from 'react';
 
 export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {

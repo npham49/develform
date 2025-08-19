@@ -5,14 +5,14 @@ import { FormBuilder, type FormType } from '@formio/react';
 import { ArrowLeft, Code, Eye, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from '@tanstack/react-router';
 import { toast } from 'sonner';
 
 export const INITIAL_SCHEMA = { title: '', name: '', path: '', display: 'form' as const, type: 'form' as const, components: [] };
 
 export default function FormsSchema() {
   const [builderReady, setBuilderReady] = useState(false);
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ from: '/forms/$id/schema' });
   const [form, setForm] = useState<Form | null>(null);
   const [schema, setSchema] = useState<FormType | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -130,7 +130,7 @@ export default function FormsSchema() {
                   <p className="text-muted small mb-0">Return to the form editor to modify your form structure</p>
                 </div>
                 <div className="d-flex gap-2">
-                  <Link to={`/forms/${form.id}/manage`} className="text-decoration-none">
+                  <Link to="/forms/$id/manage" params={{ id: form.id.toString() }} className="text-decoration-none">
                     <Button variant="outline-secondary" className="d-flex align-items-center">
                       <ArrowLeft size={16} className="me-2" />
                       Back to Manage
@@ -155,7 +155,7 @@ export default function FormsSchema() {
                     )}
                   </Button>
 
-                  <Link to={`/forms/${form.id}/preview`} className="text-decoration-none">
+                  <Link to="/forms/$id/preview" params={{ id: form.id.toString() }} className="text-decoration-none">
                     <Button variant="outline-primary" className="w-100 d-flex align-items-center justify-content-center">
                       <Eye size={18} className="me-2" />
                       Preview Form

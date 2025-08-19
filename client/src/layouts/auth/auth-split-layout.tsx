@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { Layers } from 'lucide-react';
 import { type PropsWithChildren } from 'react';
 

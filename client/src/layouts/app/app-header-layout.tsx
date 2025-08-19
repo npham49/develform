@@ -1,5 +1,5 @@
 import { type BreadcrumbItem } from '@/types';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { FileText, Home, Layers, LogOut, Settings as SettingsIcon, User } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { Breadcrumb, Container, Dropdown, Nav, Navbar } from 'react-bootstrap';
@@ -101,7 +101,7 @@ export default function AppHeaderLayout({
         <div className="border-bottom" style={{ backgroundColor: '#f8f9fa' }}>
           <Container fluid className="pt-2">
             <Breadcrumb className="mb-0">
-              <Breadcrumb.Item onClick={() => navigate('/dashboard')} className="d-flex align-items-center text-decoration-none">
+              <Breadcrumb.Item onClick={() => navigate({ to: '/dashboard' })} className="d-flex align-items-center text-decoration-none">
                 <Home size={14} className="me-1" />
                 Home
               </Breadcrumb.Item>
@@ -109,7 +109,7 @@ export default function AppHeaderLayout({
                 <Breadcrumb.Item
                   key={index}
                   active={index === breadcrumbs.length - 1}
-                  onClick={() => navigate(breadcrumb.href)}
+                  onClick={() => navigate({ to: breadcrumb.href })}
                   className={index === breadcrumbs.length - 1 ? 'text-dark fw-medium' : 'text-decoration-none'}
                 >
                   {breadcrumb.title}

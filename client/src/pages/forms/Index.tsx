@@ -3,7 +3,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Calendar, Eye, FileText, Globe, Lock, MoreVertical, Plus, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Badge, Button, Card, Col, Container, Dropdown, Row, Table } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 
 interface Form {
   id: number;
@@ -163,7 +163,7 @@ export default function FormsIndex() {
                             </div>
 
                             <div className="d-flex gap-2">
-                              <Link to={`/forms/${form.id}/manage`} className="flex-fill text-decoration-none">
+                              <Link to="/forms/$id/manage" params={{ id: form.id.toString() }} className="flex-fill text-decoration-none">
                                 <Button variant="outline-primary" size="sm" className="w-100 d-flex align-items-center justify-content-center">
                                   <Settings size={14} className="me-1" />
                                   Manage
@@ -242,7 +242,7 @@ export default function FormsIndex() {
                           </td>
                           <td className="py-3 text-end pe-4">
                             <div className="d-flex gap-2 justify-content-end">
-                              <Link to={`/forms/${form.id}/manage`} className="text-decoration-none">
+                              <Link to="/forms/$id/manage" params={{ id: form.id.toString() }} className="text-decoration-none">
                                 <Button variant="primary" size="sm" className="d-flex align-items-center">
                                   <Settings size={14} className="me-2" />
                                   Manage
@@ -253,13 +253,17 @@ export default function FormsIndex() {
                                   <MoreVertical size={14} />
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu className="z-1000">
-                                  <Dropdown.Item as={Link} to={`/forms/${form.id}/preview`}>
-                                    <Eye size={14} className="me-1" />
-                                    Preview
+                                  <Dropdown.Item>
+                                    <Link to="/forms/$id/preview" params={{ id: form.id.toString() }} className="text-decoration-none d-flex align-items-center">
+                                      <Eye size={14} className="me-1" />
+                                      Preview
+                                    </Link>
                                   </Dropdown.Item>
-                                  <Dropdown.Item as={Link} to={`/forms/${form.id}/submit`}>
-                                    <FileText size={14} className="me-2" />
-                                    Submit
+                                  <Dropdown.Item>
+                                    <Link to="/forms/$formId/submit" params={{ formId: form.id.toString() }} className="text-decoration-none d-flex align-items-center">
+                                      <FileText size={14} className="me-2" />
+                                      Submit
+                                    </Link>
                                   </Dropdown.Item>
                                   <Dropdown.Divider />
                                   <Dropdown.Item className="text-danger">Delete Form</Dropdown.Item>
