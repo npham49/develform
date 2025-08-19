@@ -1,34 +1,39 @@
 import type { Context, Next } from 'hono';
-import { auth } from '../auth';
-import type { User } from '../auth';
-
-declare module 'hono' {
-  interface ContextVariableMap {
-    user: User | null;
-    session: any;
-  }
-}
+import { getCookie } from 'hono/cookie';
+import { verify } from 'hono/jwt';
 
 export const authMiddleware = async (c: Context, next: Next) => {
-  const session = await auth.api.getSession({
-    headers: c.req.raw.headers,
-  });
+  const token = getCookie(c, 'auth_token') || c.req.header('Authorization')?.replace('Bearer ', '');
 
-  if (!session) {
+  if (!token) {
     return c.json({ error: 'Unauthorized' }, 401);
   }
 
-  c.set('user', session.user);
-  c.set('session', session);
-  await next();
+  try {
+    const payload = await verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    c.set('jwtPayload', payload);
+    await next();
+  } catch (error) {
+    console.error('Auth error:', error);
+    return c.json({ error: 'Invalid token' }, 401);
+  }
 };
 
 export const optionalAuthMiddleware = async (c: Context, next: Next) => {
-  const session = await auth.api.getSession({
-    headers: c.req.raw.headers,
-  });
+  const token = getCookie(c, 'auth_token') || c.req.header('Authorization')?.replace('Bearer ', '');
 
-  c.set('user', session?.user || null);
-  c.set('session', session || null);
+  if (token) {
+    try {
+      const payload = await verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      c.set('jwtPayload', payload);
+    } catch (error) {
+      console.error('Auth error:', error);
+      // Token is invalid, but we continue without authentication
+      c.set('jwtPayload', null);
+    }
+  } else {
+    c.set('jwtPayload', null);
+  }
+
   await next();
 };

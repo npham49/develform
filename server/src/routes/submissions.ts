@@ -3,7 +3,7 @@ import { and, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { db } from '../db/index.js';
-import { forms, submissions, submissionTokens, user } from '../db/schema.js';
+import { forms, submissions, submissionTokens, users } from '../db/schema.js';
 import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js';
 
 const submissionRoutes = new Hono();
@@ -19,7 +19,7 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
   try {
     const submissionId = parseInt(c.req.param('id'));
     const token = c.req.query('token');
-    const currentUser = c.get('user');
+    const user = c.get('jwtPayload')?.user;
 
     if (isNaN(submissionId)) {
       return c.json({ error: 'Invalid submission ID' }, 400);
@@ -29,11 +29,11 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
       .select({
         submission: submissions,
         form: forms,
-        creator: user,
+        creator: users,
       })
       .from(submissions)
       .leftJoin(forms, eq(submissions.formId, forms.id))
-      .leftJoin(user, eq(submissions.createdBy, user.id))
+      .leftJoin(users, eq(submissions.createdBy, users.id))
       .where(eq(submissions.id, submissionId))
       .limit(1);
 
@@ -47,11 +47,11 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
     let hasAccess = false;
 
     // Form owner can always access
-    if (user && data.form?.createdBy === currentUser!.id) {
+    if (user && data.form?.createdBy === user.id) {
       hasAccess = true;
     }
     // Submission creator can access their own submission
-    else if (user && data.submission.createdBy === currentUser!.id) {
+    else if (user && data.submission.createdBy === user.id) {
       hasAccess = true;
     }
     // Anonymous submissions can be accessed with token
@@ -79,7 +79,7 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
         data: data.submission.data,
         schema: data.form?.schema,
         createdAt: data.submission.createdAt,
-        isFormOwner: currentUser?.id === data.form?.createdBy,
+        isFormOwner: user?.id === data.form?.createdBy,
         submitterInformation: data.creator
           ? {
               name: data.creator.name,
@@ -99,7 +99,7 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
 submissionRoutes.get('/form/:formId', authMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
-    const currentUser = c.get('user');
+    const user = c.get('jwtPayload').user;
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
@@ -109,7 +109,7 @@ submissionRoutes.get('/form/:formId', authMiddleware, async (c) => {
     const form = await db
       .select()
       .from(forms)
-      .where(and(eq(forms.id, formId), eq(forms.createdBy, currentUser!.id)))
+      .where(and(eq(forms.id, formId), eq(forms.createdBy, user.id)))
       .limit(1);
 
     if (form.length === 0) {
@@ -121,10 +121,10 @@ submissionRoutes.get('/form/:formId', authMiddleware, async (c) => {
         id: submissions.id,
         data: submissions.data,
         createdAt: submissions.createdAt,
-        creator: user,
+        creator: users,
       })
       .from(submissions)
-      .leftJoin(user, eq(submissions.createdBy, user.id))
+      .leftJoin(users, eq(submissions.createdBy, users.id))
       .where(eq(submissions.formId, formId));
 
     const submissionsData = formSubmissions.map((sub) => ({
@@ -151,7 +151,7 @@ submissionRoutes.get('/form/:formId', authMiddleware, async (c) => {
 submissionRoutes.post('/form/:formId', optionalAuthMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
-    const currentUser = c.get('user');
+    const user = c.get('jwtPayload')?.user;
     const body = await c.req.json();
 
     const validatedData = createSubmissionSchema.parse(body);
@@ -176,8 +176,8 @@ submissionRoutes.post('/form/:formId', optionalAuthMiddleware, async (c) => {
       .values({
         formId: formId,
         data: validatedData.data,
-        createdBy: currentUser?.id || null,
-        updatedBy: currentUser?.id || null,
+        createdBy: user?.id || null,
+        updatedBy: user?.id || null,
       })
       .returning();
 

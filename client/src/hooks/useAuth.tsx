@@ -1,20 +1,20 @@
-import { createContext, useContext, ReactNode } from 'react';
-import { authClient } from '../lib/auth';
+import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 
 interface User {
-  id: string;
+  id: number;
   name: string;
   email: string | null;
-  image: string | null;
-  emailVerified: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  githubId: string | null;
+  avatarUrl: string | null;
+  email_verified_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (provider?: 'github') => void;
+  login: (redirectUrl?: string) => void;
   logout: () => Promise<void>;
   refetchUser: () => Promise<void>;
 }
@@ -22,14 +22,46 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // For now, let's create a simple hook-less implementation until we understand better-auth patterns
-  const login = (provider: 'github' = 'github') => {
-    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/sign-in/social/${provider}?redirect=${encodeURIComponent(window.location.origin + '/dashboard')}`;
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/user`, {
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = (redirectUrl?: string) => {
+    const url = new URL(`${API_BASE_URL}/auth/github`);
+    if (redirectUrl) {
+      url.searchParams.set('redirect', redirectUrl);
+    }
+    window.location.href = url.toString();
   };
 
   const logout = async () => {
     try {
-      await authClient.signOut();
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      setUser(null);
       window.location.href = '/';
     } catch (error) {
       console.error('Error logging out:', error);
@@ -37,12 +69,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refetchUser = async () => {
-    window.location.reload();
+    setLoading(true);
+    await fetchUser();
   };
 
-  // Temporary static values - we'll integrate properly once basic flow works
-  const user = null;
-  const loading = false;
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, refetchUser }}>

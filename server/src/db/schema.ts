@@ -1,43 +1,6 @@
 import { boolean, integer, jsonb, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 
-// Better-auth compatible Users table
-export const user = pgTable('user', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  email: text('email').unique(),
-  emailVerified: boolean('emailVerified').notNull().default(false),
-  image: text('image'),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
-});
-
-// Better-auth Sessions table
-export const session = pgTable('session', {
-  id: text('id').primaryKey(),
-  expiresAt: timestamp('expiresAt').notNull(),
-  ipAddress: text('ipAddress'),
-  userAgent: text('userAgent'),
-  userId: text('userId').notNull().references(() => user.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
-});
-
-// Better-auth Accounts table (for OAuth providers)
-export const account = pgTable('account', {
-  id: text('id').primaryKey(),
-  accountId: text('accountId').notNull(),
-  providerId: text('providerId').notNull(),
-  userId: text('userId').notNull().references(() => user.id, { onDelete: 'cascade' }),
-  accessToken: text('accessToken'),
-  refreshToken: text('refreshToken'),
-  idToken: text('idToken'),
-  expiresAt: timestamp('expiresAt'),
-  password: text('password'),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
-});
-
-// Legacy users table for migration compatibility - will be removed after migration
+// Users table
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
@@ -58,11 +21,11 @@ export const forms = pgTable('forms', {
   description: text('description'),
   isPublic: boolean('is_public').default(true),
   schema: jsonb('schema'),
-  createdBy: text('created_by')
-    .references(() => user.id)
+  createdBy: integer('created_by')
+    .references(() => users.id)
     .notNull(),
-  updatedBy: text('updated_by')
-    .references(() => user.id)
+  updatedBy: integer('updated_by')
+    .references(() => users.id)
     .notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
@@ -75,8 +38,8 @@ export const submissions = pgTable('submissions', {
     .references(() => forms.id, { onDelete: 'cascade' })
     .notNull(),
   data: jsonb('data').notNull(),
-  createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
-  updatedBy: text('updated_by').references(() => user.id, { onDelete: 'set null' }),
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  updatedBy: integer('updated_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
@@ -103,12 +66,8 @@ export const jobs = pgTable('jobs', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-export type User = typeof user.$inferSelect;
-export type NewUser = typeof user.$inferInsert;
-export type Session = typeof session.$inferSelect;
-export type NewSession = typeof session.$inferInsert;
-export type Account = typeof account.$inferSelect;
-export type NewAccount = typeof account.$inferInsert;
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
 export type Form = typeof forms.$inferSelect;
 export type NewForm = typeof forms.$inferInsert;
 export type Submission = typeof submissions.$inferSelect;

@@ -1,12 +1,16 @@
 import { Github, Layers } from 'lucide-react';
 import { Badge, Button, Card, Container } from 'react-bootstrap';
 import { useAuth } from '@/hooks/useAuth';
+import { useLocation } from '@tanstack/react-router';
 
 export default function GitHubLogin() {
   const { login } = useAuth();
+  const location = useLocation();
+  const urlParams = new URLSearchParams(location.search);
+  const redirectParam = urlParams.get('redirect');
 
   const handleGitHubLogin = () => {
-    login('github');
+    login(redirectParam || undefined);
   };
 
   return (
