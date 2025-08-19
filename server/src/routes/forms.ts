@@ -2,7 +2,7 @@ import { and, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { db } from '../db/index.js';
-import { forms, submissions, users } from '../db/schema.js';
+import { forms, submissions, user } from '../db/schema.js';
 import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js';
 
 const formRoutes = new Hono();
@@ -25,7 +25,7 @@ const updateFormSchema = z.object({
 // Get all forms for authenticated user
 formRoutes.get('/', authMiddleware, async (c) => {
   try {
-    const user = c.get('jwtPayload').user;
+    const currentUser = c.get('user');
 
     const userForms = await db
       .select({
@@ -37,7 +37,7 @@ formRoutes.get('/', authMiddleware, async (c) => {
         updatedAt: forms.updatedAt,
       })
       .from(forms)
-      .where(eq(forms.createdBy, user.id));
+      .where(eq(forms.createdBy, currentUser!.id));
 
     return c.json({ data: userForms });
   } catch (error) {
@@ -50,13 +50,13 @@ formRoutes.get('/', authMiddleware, async (c) => {
 formRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('id'));
-    const user = c.get('jwtPayload')?.user;
+    const currentUser = c.get('user');
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
     }
 
-    const form = await db.select().from(forms).leftJoin(users, eq(forms.createdBy, users.id)).where(eq(forms.id, formId)).limit(1);
+    const form = await db.select().from(forms).leftJoin(user, eq(forms.createdBy, user.id)).where(eq(forms.id, formId)).limit(1);
 
     if (form.length === 0) {
       return c.json({ error: 'Form not found' }, 404);
@@ -65,17 +65,17 @@ formRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
     const formData = form[0];
 
     // Check if user can access this form
-    if (!formData.forms.isPublic && (!user || user.id !== formData.forms.createdBy)) {
+    if (!formData.forms.isPublic && (!currentUser || currentUser!.id !== formData.forms.createdBy)) {
       return c.json({ error: 'Access denied' }, 403);
     }
 
     return c.json({
       data: {
         ...formData.forms,
-        creator: formData.users
+        creator: formData.user
           ? {
-              id: formData.users.id,
-              name: formData.users.name,
+              id: formData.user.id,
+              name: formData.user.name,
             }
           : null,
       },
@@ -90,7 +90,7 @@ formRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
 formRoutes.get('/:id/submit', optionalAuthMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('id'));
-    const user = c.get('jwtPayload')?.user;
+    const currentUser = c.get('user');
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
@@ -134,7 +134,7 @@ formRoutes.get('/:id/submit', optionalAuthMiddleware, async (c) => {
 // Create new form
 formRoutes.post('/', authMiddleware, async (c) => {
   try {
-    const user = c.get('jwtPayload').user;
+    const currentUser = c.get('user');
     const body = await c.req.json();
 
     const validatedData = createFormSchema.parse(body);
@@ -143,8 +143,8 @@ formRoutes.post('/', authMiddleware, async (c) => {
       .insert(forms)
       .values({
         ...validatedData,
-        createdBy: user.id,
-        updatedBy: user.id,
+        createdBy: currentUser!.id,
+        updatedBy: currentUser!.id,
       })
       .returning();
 
@@ -162,7 +162,7 @@ formRoutes.post('/', authMiddleware, async (c) => {
 formRoutes.patch('/:id', authMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('id'));
-    const user = c.get('jwtPayload').user;
+    const currentUser = c.get('user');
     const body = await c.req.json();
 
     if (isNaN(formId)) {
@@ -175,7 +175,7 @@ formRoutes.patch('/:id', authMiddleware, async (c) => {
     const existingForm = await db
       .select()
       .from(forms)
-      .where(and(eq(forms.id, formId), eq(forms.createdBy, user.id)))
+      .where(and(eq(forms.id, formId), eq(forms.createdBy, currentUser!.id)))
       .limit(1);
 
     if (existingForm.length === 0) {
@@ -186,7 +186,7 @@ formRoutes.patch('/:id', authMiddleware, async (c) => {
       .update(forms)
       .set({
         ...validatedData,
-        updatedBy: user.id,
+        updatedBy: currentUser!.id,
         updatedAt: new Date(),
       })
       .where(eq(forms.id, formId))
@@ -206,7 +206,7 @@ formRoutes.patch('/:id', authMiddleware, async (c) => {
 formRoutes.patch('/:id/schema', authMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('id'));
-    const user = c.get('jwtPayload').user;
+    const currentUser = c.get('user');
     const body = await c.req.json();
 
     if (isNaN(formId)) {
@@ -223,7 +223,7 @@ formRoutes.patch('/:id/schema', authMiddleware, async (c) => {
     const existingForm = await db
       .select()
       .from(forms)
-      .where(and(eq(forms.id, formId), eq(forms.createdBy, user.id)))
+      .where(and(eq(forms.id, formId), eq(forms.createdBy, currentUser!.id)))
       .limit(1);
 
     if (existingForm.length === 0) {
@@ -234,7 +234,7 @@ formRoutes.patch('/:id/schema', authMiddleware, async (c) => {
       .update(forms)
       .set({
         schema: validatedData.schema,
-        updatedBy: user.id,
+        updatedBy: currentUser!.id,
         updatedAt: new Date(),
       })
       .where(eq(forms.id, formId))
@@ -254,7 +254,7 @@ formRoutes.patch('/:id/schema', authMiddleware, async (c) => {
 formRoutes.delete('/:id', authMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('id'));
-    const user = c.get('jwtPayload').user;
+    const currentUser = c.get('user');
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
@@ -264,7 +264,7 @@ formRoutes.delete('/:id', authMiddleware, async (c) => {
     const existingForm = await db
       .select()
       .from(forms)
-      .where(and(eq(forms.id, formId), eq(forms.createdBy, user.id)))
+      .where(and(eq(forms.id, formId), eq(forms.createdBy, currentUser!.id)))
       .limit(1);
 
     if (existingForm.length === 0) {
@@ -284,7 +284,7 @@ formRoutes.delete('/:id', authMiddleware, async (c) => {
 formRoutes.get('/:id/submissions', authMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('id'));
-    const user = c.get('jwtPayload').user;
+    const currentUser = c.get('user');
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
@@ -294,7 +294,7 @@ formRoutes.get('/:id/submissions', authMiddleware, async (c) => {
     const existingForm = await db
       .select()
       .from(forms)
-      .where(and(eq(forms.id, formId), eq(forms.createdBy, user.id)))
+      .where(and(eq(forms.id, formId), eq(forms.createdBy, currentUser!.id)))
       .limit(1);
 
     if (existingForm.length === 0) {
@@ -307,10 +307,10 @@ formRoutes.get('/:id/submissions', authMiddleware, async (c) => {
         id: submissions.id,
         data: submissions.data,
         createdAt: submissions.createdAt,
-        creator: users,
+        creator: user,
       })
       .from(submissions)
-      .leftJoin(users, eq(submissions.createdBy, users.id))
+      .leftJoin(user, eq(submissions.createdBy, user.id))
       .where(eq(submissions.formId, formId));
 
     const submissionsData = formSubmissions.map((sub) => ({

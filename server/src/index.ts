@@ -4,7 +4,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 
-import authRoutes from './routes/auth';
+import { auth } from './auth';
 import formRoutes from './routes/forms';
 import settingsRoutes from './routes/settings';
 import submissionRoutes from './routes/submissions';
@@ -28,8 +28,12 @@ app.get('/', (c) => {
   return c.json({ message: 'DevelForm API is running', status: 'ok' });
 });
 
+// Better-auth routes
+app.on(['POST', 'GET'], '/api/auth/**', (c) => {
+  return auth.handler(c.req.raw);
+});
+
 // Routes
-app.route('/api/auth', authRoutes);
 app.route('/api/forms', formRoutes);
 app.route('/api/submissions', submissionRoutes);
 app.route('/api/settings', settingsRoutes);
