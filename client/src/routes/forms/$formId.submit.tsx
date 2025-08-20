@@ -21,7 +21,6 @@ function FormsSubmit({ schema, form_id }: SubmitProps = {}) {
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const formSchema = useRef(schema ? JSON.parse(schema) : (form?.schema || {}));
-  const [formReady, setFormReady] = useState(false);
   const [submissionData, setSubmissionData] = useState<any>({});
   const [error, setError] = useState<string | null>(null);
   
@@ -140,7 +139,7 @@ function FormsSubmit({ schema, form_id }: SubmitProps = {}) {
                 </div>
               </Card.Header>
               <Card.Body className="p-4">
-                {formReady && (
+                {formData && formSchema.current && (
                   <Form 
                     src={formSchema.current} 
                     onChange={handleChange} 

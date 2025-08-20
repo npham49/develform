@@ -23,7 +23,6 @@ interface SubmitSuccessProps {
 function FormsSuccess({
   submission_id,
   schema,
-  token,
 }: SubmitSuccessProps = {}) {
   const { submission } = useLoaderData({ from: '/forms/$formId/submit/success/$submissionId' });
   const { formId, submissionId } = useParams({ from: '/forms/$formId/submit/success/$submissionId' });
@@ -148,10 +147,10 @@ function FormsSuccess({
                 <h5 className="mb-0 fw-bold">Your Submission</h5>
               </Card.Header>
               <Card.Body className="p-4">
-                {formReady && (
+                {submissionDetails && (
                   <FormioForm
                     src={formSchema.current}
-                    submission={{ data: submissionDetails.submission_data }}
+                    submission={{ data: submissionDetails.submission_data || submissionDetails.data }}
                     options={{ readOnly: true }}
                   />
                 )}
@@ -174,9 +173,10 @@ function FormsSuccess({
 }
 
 export const Route = createFileRoute('/forms/$formId/submit/success/$submissionId')({
-  loader: async ({ params, search }) => {
+  loader: async ({ params, location }) => {
     try {
-      const token = search?.token;
+      const searchParams = new URLSearchParams(location.search);
+      const token = searchParams.get('token');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };

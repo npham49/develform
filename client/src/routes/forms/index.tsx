@@ -15,7 +15,7 @@ interface Form {
 }
 
 function FormsIndex() {
-  const { forms } = useLoaderData({ from: '/forms/' });
+  const { forms } = useLoaderData({ from: '/forms/' }) as { forms: Form[] };
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
