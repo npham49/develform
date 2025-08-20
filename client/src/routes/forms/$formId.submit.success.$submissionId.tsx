@@ -1,11 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useParams, useSearch } from '@tanstack/react-router';
+import { createFileRoute, useLoaderData } from '@tanstack/react-router';
+import { useParams } from '@tanstack/react-router';
 import AppLayout from '@/layouts/app-layout';
 import { Form as FormioForm } from '@formio/react';
 import { CheckCircle, Copy, Download, Shield, User } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Alert, Badge, Button, Card, Container } from 'react-bootstrap';
-import { api } from '@/lib/api';
 
 interface SubmitSuccessProps {
   submission_id?: number;
@@ -25,59 +24,17 @@ function FormsSuccess({
   submission_id,
   schema,
   token,
-}: SubmitSuccessProps) {
+}: SubmitSuccessProps = {}) {
+  const { submission } = useLoaderData({ from: '/forms/$formId/submit/success/$submissionId' });
   const { formId, submissionId } = useParams({ from: '/forms/$formId/submit/success/$submissionId' });
-  const searchParams = useSearch({ from: '/forms/$formId/submit/success/$submissionId' });
-  const [submissionDetails, setSubmissionDetails] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const formSchema = useRef(schema ? JSON.parse(schema) : {});
-  const [formReady, setFormReady] = useState(false);
+  const formSchema = useRef(schema ? JSON.parse(schema) : (submission?.schema || {}));
   const [copied, setCopied] = useState(false);
 
-  const actualSubmissionId = submission_id || (submissionId ? parseInt(submissionId) : null);
-  const actualToken = token || (searchParams as any)?.token;
+  const actualSubmissionId = submission_id || submission?.id || (submissionId ? parseInt(submissionId) : null);
+  const submissionDetails = submission;
 
-  useEffect(() => {
-    const fetchSubmissionData = async () => {
-      if (!actualSubmissionId) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        console.log('Fetching submission data for:', actualSubmissionId);
-        // Fetch submission data from API
-        const response = await api.submissions.get(actualSubmissionId, actualToken || undefined);
-        const submissionData = response.data;
-        
-        setSubmissionDetails({
-          submission_id: submissionData.id,
-          form_name: submissionData.formName,
-          submission_data: submissionData.data,
-          schema: submissionData.schema,
-          created_at: submissionData.createdAt,
-          token: submissionData.token,
-          submitter_information: submissionData.submitterInformation,
-          is_form_owner: submissionData.isFormOwner
-        });
-        
-        if (submissionData.schema) {
-          formSchema.current = submissionData.schema;
-        }
-      } catch (error) {
-        console.error('Error fetching submission data:', error);
-        setError(error instanceof Error ? error.message : 'Failed to load submission');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSubmissionData();
-  }, [actualSubmissionId, actualToken]);
-
-  const submissionUrl = actualToken
-    ? `${window.location.origin}/forms/${formId}/submit/success/${actualSubmissionId}?token=${actualToken}`
+  const submissionUrl = submission?.token
+    ? `${window.location.origin}/forms/${formId}/submit/success/${actualSubmissionId}?token=${submission.token}`
     : window.location.href;
 
   const copyToClipboard = () => {
@@ -86,31 +43,13 @@ function FormsSuccess({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  useEffect(() => {
-    if (submissionDetails) {
-      setFormReady(true);
-    }
-  }, [submissionDetails]);
-
-  if (loading) {
-    return (
-      <AppLayout hideHeader>
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      </AppLayout>
-    );
-  }
-
-  if (!actualSubmissionId || !submissionDetails || error) {
+  if (!actualSubmissionId || !submissionDetails) {
     return (
       <AppLayout hideHeader>
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
           <div className="text-center">
-            <h3>{error ? 'Error' : 'Submission not found'}</h3>
-            <p className="text-muted">{error || 'The requested submission could not be loaded.'}</p>
+            <h3>Submission not found</h3>
+            <p className="text-muted">The requested submission could not be loaded.</p>
           </div>
         </div>
       </AppLayout>
@@ -235,5 +174,32 @@ function FormsSuccess({
 }
 
 export const Route = createFileRoute('/forms/$formId/submit/success/$submissionId')({
+  loader: async ({ params, search }) => {
+    try {
+      const token = search?.token;
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`/api/submissions/${params.submissionId}`, {
+        headers,
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return { submission: data.data || data };
+      } else {
+        throw new Error('Failed to fetch submission');
+      }
+    } catch (error) {
+      console.error('Error fetching submission:', error);
+      throw error;
+    }
+  },
   component: FormsSuccess,
 });

@@ -1,9 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useLoaderData } from '@tanstack/react-router';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import AppLayout from '@/layouts/app-layout';
 import { Form } from '@formio/react';
 import { FileText, Info, Shield, User } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Alert, Card, Container } from 'react-bootstrap';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
@@ -14,58 +14,20 @@ interface SubmitProps {
   form_id?: number;
 }
 
-function FormsSubmit({ schema, form_id }: SubmitProps) {
+function FormsSubmit({ schema, form_id }: SubmitProps = {}) {
+  const { form } = useLoaderData({ from: '/forms/$formId/submit' });
   const { formId } = useParams({ from: '/forms/$formId/submit' });
   const navigate = useNavigate({ from: '/forms/$formId/submit' });
   const { user } = useAuth();
-  const [formData, setFormData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const formSchema = useRef(schema ? JSON.parse(schema) : {});
+  const formSchema = useRef(schema ? JSON.parse(schema) : (form?.schema || {}));
   const [formReady, setFormReady] = useState(false);
   const [submissionData, setSubmissionData] = useState<any>({});
   const [error, setError] = useState<string | null>(null);
   
-  const actualFormId = form_id || (formId ? parseInt(formId) : null);
+  const actualFormId = form_id || form?.id || (formId ? parseInt(formId) : null);
   const isLoggedIn = !!user;
-
-  useEffect(() => {
-    const fetchFormData = async () => {
-      if (!actualFormId) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Fetch form data from API
-        console.log('Fetching form data for form ID:', actualFormId);
-        const response = await api.forms.getSubmitSchema(actualFormId);
-        const formInfo = response.data;
-        
-        setFormData(formInfo);
-        if (formInfo.schema) {
-          formSchema.current = formInfo.schema;
-        }
-      } catch (error) {
-        console.error('Error fetching form data:', error);
-        setError(error instanceof Error ? error.message : 'Failed to load form');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFormData();
-  }, [actualFormId]);
-
-  useEffect(() => {
-    if (formData) {
-      setFormReady(true);
-    }
-
-    return () => {
-      setFormReady(false);
-    };
-  }, [formData]);
+  const formData = form;
 
   const handleChange = (value: unknown, _flags: unknown, modified: boolean) => {
     if (modified && value && typeof value === 'object' && 'data' in value) {
@@ -108,14 +70,10 @@ function FormsSubmit({ schema, form_id }: SubmitProps) {
     }
   };
 
-  if (loading) {
+  if (!formData) {
     return (
       <AppLayout hideHeader>
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
+        <div>Form not found</div>
       </AppLayout>
     );
   }
@@ -238,5 +196,21 @@ function FormsSubmit({ schema, form_id }: SubmitProps) {
 }
 
 export const Route = createFileRoute('/forms/$formId/submit')({
+  loader: async ({ params }) => {
+    try {
+      const response = await fetch(`/api/forms/${params.formId}/submit`, {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return { form: data.data || data };
+      } else {
+        throw new Error('Failed to fetch form');
+      }
+    } catch (error) {
+      console.error('Error fetching form for submission:', error);
+      throw error;
+    }
+  },
   component: FormsSubmit,
 });

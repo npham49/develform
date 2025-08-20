@@ -1,48 +1,13 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useLoaderData } from '@tanstack/react-router';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Form } from '@/types/form';
 import { ArrowLeft, BarChart3, Calendar, Edit3, Eye, FileText, Globe, Lock, Send, Settings } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
-import { Link, useParams } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 
 function FormsManage() {
-  const { id } = useParams({ from: '/forms/$id/manage' });
-  const [form, setForm] = useState<Form | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchForm = async () => {
-      try {
-        const response = await fetch(`/api/forms/${id}`, {
-          credentials: 'include',
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setForm(data.data || data);
-        } else {
-          throw new Error('Failed to fetch form');
-        }
-      } catch (error) {
-        console.error('Error fetching form:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchForm();
-    }
-  }, [id]);
-
-  if (loading) {
-    return (
-      <AppLayout>
-        <div>Loading...</div>
-      </AppLayout>
-    );
-  }
+  const { form } = useLoaderData({ from: '/forms/$id/manage' });
 
   if (!form) {
     return (
@@ -291,5 +256,21 @@ function FormsManage() {
 }
 
 export const Route = createFileRoute('/forms/$id/manage')({
+  loader: async ({ params }) => {
+    try {
+      const response = await fetch(`/api/forms/${params.id}`, {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return { form: data.data || data };
+      } else {
+        throw new Error('Failed to fetch form');
+      }
+    } catch (error) {
+      console.error('Error fetching form:', error);
+      throw error;
+    }
+  },
   component: FormsManage,
 });

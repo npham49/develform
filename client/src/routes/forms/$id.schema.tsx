@@ -249,5 +249,21 @@ function FormsSchema() {
 }
 
 export const Route = createFileRoute('/forms/$id/schema')({
+  loader: async ({ params }) => {
+    try {
+      const response = await fetch(`/api/forms/${params.id}`, {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return { form: data.data || data };
+      } else {
+        throw new Error('Failed to fetch form');
+      }
+    } catch (error) {
+      console.error('Error fetching form:', error);
+      throw error;
+    }
+  },
   component: FormsSchema,
 });

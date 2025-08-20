@@ -1,8 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useLoaderData } from '@tanstack/react-router';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Calendar, Eye, FileText, Globe, Lock, MoreVertical, Plus, Settings } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { Badge, Button, Card, Col, Container, Dropdown, Row, Table } from 'react-bootstrap';
 import { Link } from '@tanstack/react-router';
 
@@ -16,8 +15,7 @@ interface Form {
 }
 
 function FormsIndex() {
-  const [forms, setForms] = useState<Form[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { forms } = useLoaderData({ from: '/forms/' });
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -26,45 +24,8 @@ function FormsIndex() {
     },
   ];
 
-  useEffect(() => {
-    const fetchForms = async () => {
-      try {
-        const response = await fetch('/api/forms', {
-          credentials: 'include',
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch forms');
-        }
-
-        const data = await response.json();
-        setForms(data.data || data);
-      } catch (error) {
-        console.error('Error fetching forms:', error);
-        // Fallback to empty array on error
-        setForms([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchForms();
-  }, []);
-
   // Sort forms by updated_at and get the 4 most recent
   const recentForms = [...forms].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 4);
-
-  if (loading) {
-    return (
-      <AppLayout breadcrumbs={breadcrumbs}>
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      </AppLayout>
-    );
-  }
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -332,5 +293,21 @@ function FormsIndex() {
 }
 
 export const Route = createFileRoute('/forms/')({
+  loader: async () => {
+    try {
+      const response = await fetch('/api/forms', {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return { forms: data.data || data };
+      } else {
+        throw new Error('Failed to fetch forms');
+      }
+    } catch (error) {
+      console.error('Error fetching forms:', error);
+      return { forms: [] };
+    }
+  },
   component: FormsIndex,
 });
