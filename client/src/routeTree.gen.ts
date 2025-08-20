@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
@@ -25,11 +24,6 @@ import { Route as FormsIdManageRouteImport } from './routes/forms/$id.manage'
 import { Route as FormsFormIdSubmitRouteImport } from './routes/forms/$formId.submit'
 import { Route as FormsFormIdSubmitSuccessSubmissionIdRouteImport } from './routes/forms/$formId.submit.success.$submissionId'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -106,7 +100,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/dashboard': typeof DashboardRoute
-  '/login': typeof LoginRoute
   '/auth/login': typeof AuthLoginRoute
   '/forms/create': typeof FormsCreateRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
@@ -123,7 +116,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/dashboard': typeof DashboardRoute
-  '/login': typeof LoginRoute
   '/auth/login': typeof AuthLoginRoute
   '/forms/create': typeof FormsCreateRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
@@ -141,7 +133,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/dashboard': typeof DashboardRoute
-  '/login': typeof LoginRoute
   '/auth/login': typeof AuthLoginRoute
   '/forms/create': typeof FormsCreateRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
@@ -160,7 +151,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
-    | '/login'
     | '/auth/login'
     | '/forms/create'
     | '/settings/appearance'
@@ -177,7 +167,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
-    | '/login'
     | '/auth/login'
     | '/forms/create'
     | '/settings/appearance'
@@ -194,7 +183,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
-    | '/login'
     | '/auth/login'
     | '/forms/create'
     | '/settings/appearance'
@@ -212,7 +200,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   DashboardRoute: typeof DashboardRoute
-  LoginRoute: typeof LoginRoute
   FormsCreateRoute: typeof FormsCreateRoute
   SettingsAppearanceRoute: typeof SettingsAppearanceRoute
   SettingsProfileRoute: typeof SettingsProfileRoute
@@ -226,13 +213,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -360,7 +340,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   DashboardRoute: DashboardRoute,
-  LoginRoute: LoginRoute,
   FormsCreateRoute: FormsCreateRoute,
   SettingsAppearanceRoute: SettingsAppearanceRoute,
   SettingsProfileRoute: SettingsProfileRoute,
