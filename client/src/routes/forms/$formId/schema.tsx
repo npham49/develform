@@ -13,7 +13,7 @@ export const INITIAL_SCHEMA = { title: '', name: '', path: '', display: 'form' a
 
 function FormsSchema() {
   const [builderReady, setBuilderReady] = useState(false);
-  const { id } = useParams({ from: '/forms/$id/schema' });
+  const { formId } = useParams({ from: '/forms/$formId/schema' });
   const [form, setForm] = useState<Form | null>(null);
   const [schema, setSchema] = useState<FormType | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -24,7 +24,7 @@ function FormsSchema() {
   useEffect(() => {
     const fetchForm = async () => {
       try {
-        const response = await fetch(`/api/forms/${id}`, {
+        const response = await fetch(`/api/forms/${formId}`, {
           credentials: 'include',
         });
         if (response.ok) {
@@ -44,10 +44,10 @@ function FormsSchema() {
       }
     };
 
-    if (id) {
+    if (formId) {
       fetchForm();
     }
-  }, [id]);
+  }, [formId]);
 
   const handleUpdateSchema = async () => {
     if (!form || !schema) return;
@@ -131,7 +131,7 @@ function FormsSchema() {
                   <p className="text-muted small mb-0">Return to the form editor to modify your form structure</p>
                 </div>
                 <div className="d-flex gap-2">
-                  <Link to="/forms/$id/manage" params={{ id: form.id.toString() }} className="text-decoration-none">
+                  <Link to="/forms/$formId/manage" params={{ formId: form.id.toString() }} className="text-decoration-none">
                     <Button variant="outline-secondary" className="d-flex align-items-center">
                       <ArrowLeft size={16} className="me-2" />
                       Back to Manage
@@ -156,7 +156,7 @@ function FormsSchema() {
                     )}
                   </Button>
 
-                  <Link to="/forms/$id/preview" params={{ id: form.id.toString() }} className="text-decoration-none">
+                  <Link to="/forms/$formId/preview" params={{ formId: form.id.toString() }} className="text-decoration-none">
                     <Button variant="outline-primary" className="w-100 d-flex align-items-center justify-content-center">
                       <Eye size={18} className="me-2" />
                       Preview Form
@@ -248,10 +248,10 @@ function FormsSchema() {
   );
 }
 
-export const Route = createFileRoute('/forms/$id/schema')({
+export const Route = createFileRoute('/forms/$formId/schema')({
   loader: async ({ params }) => {
     try {
-      const response = await fetch(`/api/forms/${params.id}`, {
+      const response = await fetch(`/api/forms/${params.formId}`, {
         credentials: 'include',
       });
       if (response.ok) {

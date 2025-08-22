@@ -18,11 +18,11 @@ import { Route as SettingsProfileRouteImport } from './routes/settings/profile'
 import { Route as SettingsAppearanceRouteImport } from './routes/settings/appearance'
 import { Route as FormsCreateRouteImport } from './routes/forms/create'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
-import { Route as FormsIdSchemaRouteImport } from './routes/forms/$id.schema'
-import { Route as FormsIdPreviewRouteImport } from './routes/forms/$id.preview'
-import { Route as FormsIdManageRouteImport } from './routes/forms/$id.manage'
-import { Route as FormsFormIdSubmitRouteImport } from './routes/forms/$formId.submit'
-import { Route as FormsFormIdSubmitSuccessSubmissionIdRouteImport } from './routes/forms/$formId.submit.success.$submissionId'
+import { Route as FormsFormIdSubmitRouteImport } from './routes/forms/$formId/submit'
+import { Route as FormsFormIdSchemaRouteImport } from './routes/forms/$formId/schema'
+import { Route as FormsFormIdPreviewRouteImport } from './routes/forms/$formId/preview'
+import { Route as FormsFormIdManageRouteImport } from './routes/forms/$formId/manage'
+import { Route as FormsFormIdSubmitSuccessSubmissionIdRouteImport } from './routes/forms/$formId/submit.success.$submissionId'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
@@ -69,24 +69,24 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRoute,
 } as any)
-const FormsIdSchemaRoute = FormsIdSchemaRouteImport.update({
-  id: '/forms/$id/schema',
-  path: '/forms/$id/schema',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FormsIdPreviewRoute = FormsIdPreviewRouteImport.update({
-  id: '/forms/$id/preview',
-  path: '/forms/$id/preview',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FormsIdManageRoute = FormsIdManageRouteImport.update({
-  id: '/forms/$id/manage',
-  path: '/forms/$id/manage',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const FormsFormIdSubmitRoute = FormsFormIdSubmitRouteImport.update({
   id: '/forms/$formId/submit',
   path: '/forms/$formId/submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FormsFormIdSchemaRoute = FormsFormIdSchemaRouteImport.update({
+  id: '/forms/$formId/schema',
+  path: '/forms/$formId/schema',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FormsFormIdPreviewRoute = FormsFormIdPreviewRouteImport.update({
+  id: '/forms/$formId/preview',
+  path: '/forms/$formId/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FormsFormIdManageRoute = FormsFormIdManageRouteImport.update({
+  id: '/forms/$formId/manage',
+  path: '/forms/$formId/manage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FormsFormIdSubmitSuccessSubmissionIdRoute =
@@ -106,10 +106,10 @@ export interface FileRoutesByFullPath {
   '/settings/profile': typeof SettingsProfileRoute
   '/forms': typeof FormsIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/forms/$formId/manage': typeof FormsFormIdManageRoute
+  '/forms/$formId/preview': typeof FormsFormIdPreviewRoute
+  '/forms/$formId/schema': typeof FormsFormIdSchemaRoute
   '/forms/$formId/submit': typeof FormsFormIdSubmitRouteWithChildren
-  '/forms/$id/manage': typeof FormsIdManageRoute
-  '/forms/$id/preview': typeof FormsIdPreviewRoute
-  '/forms/$id/schema': typeof FormsIdSchemaRoute
   '/forms/$formId/submit/success/$submissionId': typeof FormsFormIdSubmitSuccessSubmissionIdRoute
 }
 export interface FileRoutesByTo {
@@ -122,10 +122,10 @@ export interface FileRoutesByTo {
   '/settings/profile': typeof SettingsProfileRoute
   '/forms': typeof FormsIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/forms/$formId/manage': typeof FormsFormIdManageRoute
+  '/forms/$formId/preview': typeof FormsFormIdPreviewRoute
+  '/forms/$formId/schema': typeof FormsFormIdSchemaRoute
   '/forms/$formId/submit': typeof FormsFormIdSubmitRouteWithChildren
-  '/forms/$id/manage': typeof FormsIdManageRoute
-  '/forms/$id/preview': typeof FormsIdPreviewRoute
-  '/forms/$id/schema': typeof FormsIdSchemaRoute
   '/forms/$formId/submit/success/$submissionId': typeof FormsFormIdSubmitSuccessSubmissionIdRoute
 }
 export interface FileRoutesById {
@@ -139,10 +139,10 @@ export interface FileRoutesById {
   '/settings/profile': typeof SettingsProfileRoute
   '/forms/': typeof FormsIndexRoute
   '/settings/': typeof SettingsIndexRoute
+  '/forms/$formId/manage': typeof FormsFormIdManageRoute
+  '/forms/$formId/preview': typeof FormsFormIdPreviewRoute
+  '/forms/$formId/schema': typeof FormsFormIdSchemaRoute
   '/forms/$formId/submit': typeof FormsFormIdSubmitRouteWithChildren
-  '/forms/$id/manage': typeof FormsIdManageRoute
-  '/forms/$id/preview': typeof FormsIdPreviewRoute
-  '/forms/$id/schema': typeof FormsIdSchemaRoute
   '/forms/$formId/submit/success/$submissionId': typeof FormsFormIdSubmitSuccessSubmissionIdRoute
 }
 export interface FileRouteTypes {
@@ -157,10 +157,10 @@ export interface FileRouteTypes {
     | '/settings/profile'
     | '/forms'
     | '/settings'
+    | '/forms/$formId/manage'
+    | '/forms/$formId/preview'
+    | '/forms/$formId/schema'
     | '/forms/$formId/submit'
-    | '/forms/$id/manage'
-    | '/forms/$id/preview'
-    | '/forms/$id/schema'
     | '/forms/$formId/submit/success/$submissionId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -173,10 +173,10 @@ export interface FileRouteTypes {
     | '/settings/profile'
     | '/forms'
     | '/settings'
+    | '/forms/$formId/manage'
+    | '/forms/$formId/preview'
+    | '/forms/$formId/schema'
     | '/forms/$formId/submit'
-    | '/forms/$id/manage'
-    | '/forms/$id/preview'
-    | '/forms/$id/schema'
     | '/forms/$formId/submit/success/$submissionId'
   id:
     | '__root__'
@@ -189,10 +189,10 @@ export interface FileRouteTypes {
     | '/settings/profile'
     | '/forms/'
     | '/settings/'
+    | '/forms/$formId/manage'
+    | '/forms/$formId/preview'
+    | '/forms/$formId/schema'
     | '/forms/$formId/submit'
-    | '/forms/$id/manage'
-    | '/forms/$id/preview'
-    | '/forms/$id/schema'
     | '/forms/$formId/submit/success/$submissionId'
   fileRoutesById: FileRoutesById
 }
@@ -205,10 +205,10 @@ export interface RootRouteChildren {
   SettingsProfileRoute: typeof SettingsProfileRoute
   FormsIndexRoute: typeof FormsIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
+  FormsFormIdManageRoute: typeof FormsFormIdManageRoute
+  FormsFormIdPreviewRoute: typeof FormsFormIdPreviewRoute
+  FormsFormIdSchemaRoute: typeof FormsFormIdSchemaRoute
   FormsFormIdSubmitRoute: typeof FormsFormIdSubmitRouteWithChildren
-  FormsIdManageRoute: typeof FormsIdManageRoute
-  FormsIdPreviewRoute: typeof FormsIdPreviewRoute
-  FormsIdSchemaRoute: typeof FormsIdSchemaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -276,32 +276,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/forms/$id/schema': {
-      id: '/forms/$id/schema'
-      path: '/forms/$id/schema'
-      fullPath: '/forms/$id/schema'
-      preLoaderRoute: typeof FormsIdSchemaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forms/$id/preview': {
-      id: '/forms/$id/preview'
-      path: '/forms/$id/preview'
-      fullPath: '/forms/$id/preview'
-      preLoaderRoute: typeof FormsIdPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forms/$id/manage': {
-      id: '/forms/$id/manage'
-      path: '/forms/$id/manage'
-      fullPath: '/forms/$id/manage'
-      preLoaderRoute: typeof FormsIdManageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/forms/$formId/submit': {
       id: '/forms/$formId/submit'
       path: '/forms/$formId/submit'
       fullPath: '/forms/$formId/submit'
       preLoaderRoute: typeof FormsFormIdSubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forms/$formId/schema': {
+      id: '/forms/$formId/schema'
+      path: '/forms/$formId/schema'
+      fullPath: '/forms/$formId/schema'
+      preLoaderRoute: typeof FormsFormIdSchemaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forms/$formId/preview': {
+      id: '/forms/$formId/preview'
+      path: '/forms/$formId/preview'
+      fullPath: '/forms/$formId/preview'
+      preLoaderRoute: typeof FormsFormIdPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forms/$formId/manage': {
+      id: '/forms/$formId/manage'
+      path: '/forms/$formId/manage'
+      fullPath: '/forms/$formId/manage'
+      preLoaderRoute: typeof FormsFormIdManageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forms/$formId/submit/success/$submissionId': {
@@ -345,10 +345,10 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsProfileRoute: SettingsProfileRoute,
   FormsIndexRoute: FormsIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
+  FormsFormIdManageRoute: FormsFormIdManageRoute,
+  FormsFormIdPreviewRoute: FormsFormIdPreviewRoute,
+  FormsFormIdSchemaRoute: FormsFormIdSchemaRoute,
   FormsFormIdSubmitRoute: FormsFormIdSubmitRouteWithChildren,
-  FormsIdManageRoute: FormsIdManageRoute,
-  FormsIdPreviewRoute: FormsIdPreviewRoute,
-  FormsIdSchemaRoute: FormsIdSchemaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -6,7 +6,7 @@ import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
 import { Link } from '@tanstack/react-router';
 
 function FormsManage() {
-  const { form } = useLoaderData({ from: '/forms/$id/manage' });
+  const { form } = useLoaderData({ from: '/forms/$formId/manage' });
 
   if (!form) {
     return (
@@ -125,13 +125,13 @@ function FormsManage() {
                 </Card.Header>
                 <Card.Body className="p-4">
                   <div className="d-flex flex-column gap-3">
-                    <Link to="/forms/$id/schema" params={{ id: form.id.toString() }} className="text-decoration-none">
+                    <Link to="/forms/$formId/schema" params={{ formId: form.id.toString() }} className="text-decoration-none">
                       <Button variant="primary" className="w-100 d-flex align-items-center">
                         <Edit3 size={18} className="me-2" />
                         Edit Schema
                       </Button>
                     </Link>
-                    <Link to="/forms/$id/preview" params={{ id: form.id.toString() }} className="text-decoration-none">
+                    <Link to="/forms/$formId/preview" params={{ formId: form.id.toString() }} className="text-decoration-none">
                       <Button variant="outline-primary" className="w-100 d-flex align-items-center">
                         <Eye size={18} className="me-2" />
                         Preview Form
@@ -254,10 +254,10 @@ function FormsManage() {
   );
 }
 
-export const Route = createFileRoute('/forms/$id/manage')({
+export const Route = createFileRoute('/forms/$formId/manage')({
   loader: async ({ params }) => {
     try {
-      const response = await fetch(`/api/forms/${params.id}`, {
+      const response = await fetch(`/api/forms/${params.formId}`, {
         credentials: 'include',
       });
       if (response.ok) {

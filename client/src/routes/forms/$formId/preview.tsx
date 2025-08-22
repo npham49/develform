@@ -10,7 +10,7 @@ import { Link, useParams } from '@tanstack/react-router';
 import { toast } from 'sonner';
 
 function FormsPreview() {
-  const { id } = useParams({ from: '/forms/$id/preview' });
+  const { formId } = useParams({ from: '/forms/$formId/preview' });
   const [form, setForm] = useState<Form | null>(null);
   const [loading, setLoading] = useState(true);
   const formSchema = useRef<FormType>(INITIAL_SCHEMA);
@@ -22,7 +22,7 @@ function FormsPreview() {
   useEffect(() => {
     const fetchForm = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/forms/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/forms/${formId}`, {
           credentials: 'include',
         });
         if (response.ok) {
@@ -40,10 +40,10 @@ function FormsPreview() {
       }
     };
 
-    if (id) {
+    if (formId) {
       fetchForm();
     }
-  }, [id]);
+  }, [formId]);
 
   const handleSubmit = (submission: Submission) => {
     if (previewRef.current) {
@@ -96,13 +96,13 @@ function FormsPreview() {
                   <p className="text-muted small mb-0">Return to the form editor to modify your form structure</p>
                 </div>
                 <div className="d-flex gap-2">
-                  <Link to="/forms/$id/manage" params={{ id }}>
+                  <Link to="/forms/$formId/manage" params={{ formId }}>
                     <Button variant="outline-primary">
                       <ArrowLeft size={16} className="me-2" />
                       Back to Manage
                     </Button>
                   </Link>
-                  <Link to="/forms/$id/schema" params={{ id }}>
+                  <Link to="/forms/$formId/schema" params={{ formId }}>
                     <Button variant="primary">
                       <Settings size={16} className="me-2" />
                       Edit Schema
@@ -164,10 +164,10 @@ function FormsPreview() {
   );
 }
 
-export const Route = createFileRoute('/forms/$id/preview')({
+export const Route = createFileRoute('/forms/$formId/preview')({
   loader: async ({ params }) => {
     try {
-      const response = await fetch(`/api/forms/${params.id}`, {
+      const response = await fetch(`/api/forms/${params.formId}`, {
         credentials: 'include',
       });
       if (response.ok) {
