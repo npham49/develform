@@ -36,4 +36,3 @@ yarn-error.log
 /server/.env
 /server/.env.local
 /server/.env.production
-/server/drizzle

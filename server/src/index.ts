@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import * as migrate from './db/migrate';
 
 import authRoutes from './routes/auth';
 import formRoutes from './routes/forms';
