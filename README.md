@@ -28,6 +28,7 @@ A modern form builder application with a React frontend and Hono backend, suppor
 ### Environment Setup
 
 1. **Server Configuration** (`server/.env`):
+
    ```env
    DATABASE_URL=postgresql://username:password@localhost:5432/develform
    JWT_SECRET=your-super-secret-jwt-key
@@ -55,11 +56,13 @@ A modern form builder application with a React frontend and Hono backend, suppor
 ### Development
 
 Start both frontend and backend in development mode:
+
 ```bash
 npm run dev
 ```
 
 Or start them separately:
+
 ```bash
 # Frontend only (port 3000)
 npm run dev:client
@@ -77,12 +80,14 @@ npm run build
 ## API Endpoints
 
 ### Authentication
+
 - `GET /api/auth/github` - Redirect to GitHub OAuth
 - `GET /api/auth/github/callback` - Handle OAuth callback
 - `GET /api/auth/user` - Get current user
 - `POST /api/auth/logout` - Logout user
 
 ### Forms
+
 - `GET /api/forms` - List user's forms
 - `POST /api/forms` - Create new form
 - `GET /api/forms/:id` - Get form details
@@ -91,11 +96,13 @@ npm run build
 - `GET /api/forms/:id/submit` - Get form schema for submission
 
 ### Submissions
+
 - `POST /api/submissions` - Submit form data
 - `GET /api/submissions/:id` - Get submission details
 - `GET /api/submissions/form/:formId` - Get all submissions for form
 
 ### Settings
+
 - `GET /api/settings/profile` - Get user profile
 - `PATCH /api/settings/profile` - Update user profile
 - `DELETE /api/settings/profile` - Delete user account

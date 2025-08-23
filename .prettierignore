@@ -1,3 +1,6 @@
-resources/js/components/ui/*
-resources/js/ziggy.js
-resources/views/mail/*
+client/src/components/ui/*
+client/src/routeTree.gen.ts
+client/src/ziggy.js
+client/src/views/mail/*
+
+**.gen.ts

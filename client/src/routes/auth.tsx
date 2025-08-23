@@ -1,5 +1,5 @@
+import { useAuth } from '@/hooks/use-auth';
 import { createFileRoute, Navigate, Outlet } from '@tanstack/react-router';
-import { useAuth } from '../hooks/useAuth';
 
 export const Route = createFileRoute('/auth')({
   component: AuthLayout,

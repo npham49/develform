@@ -1,8 +1,8 @@
 import { type NavItem } from '@/types';
 import { Link, useLocation } from '@tanstack/react-router';
+import { Palette, User } from 'lucide-react';
 import { type PropsWithChildren } from 'react';
-import { User, Palette } from 'lucide-react';
-import { Card, Nav, Row, Col } from 'react-bootstrap';
+import { Card, Col, Nav, Row } from 'react-bootstrap';
 
 const sidebarNavItems: NavItem[] = [
   {
@@ -40,21 +40,14 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                     as={Link}
                     to={item.href}
                     className={`d-flex align-items-center py-3 px-4 border-0 text-decoration-none ${
-                      isActive 
-                        ? 'bg-primary text-white' 
-                        : 'text-muted hover-bg-light'
+                      isActive ? 'bg-primary text-white' : 'text-muted hover-bg-light'
                     }`}
-                    style={{ 
+                    style={{
                       borderRadius: '0',
                       transition: 'all 0.2s ease',
                     }}
                   >
-                    {IconComponent && (
-                      <IconComponent 
-                        size={18} 
-                        className={`me-3 ${isActive ? 'text-white' : 'text-muted'}`} 
-                      />
-                    )}
+                    {IconComponent && <IconComponent size={18} className={`me-3 ${isActive ? 'text-white' : 'text-muted'}`} />}
                     <span className="fw-medium">{item.title}</span>
                   </Nav.Link>
                 );
