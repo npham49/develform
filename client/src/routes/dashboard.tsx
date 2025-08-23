@@ -1,9 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
+
+import { PageHeader } from '@/components/page-header';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { BarChart3, Clock, FileText, GitBranch, TrendingUp, Users } from 'lucide-react';
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
-import { Link } from '@tanstack/react-router';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -17,17 +18,11 @@ function Dashboard() {
     <AppLayout breadcrumbs={breadcrumbs}>
       <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>
         <Container className="py-5">
-          {/* Hero Section */}
-          <div className="text-center mb-5">
-            <Badge bg="secondary" className="mb-3 d-inline-flex align-items-center">
-              <TrendingUp size={16} className="me-2" />
-              Dashboard Overview
-            </Badge>
-            <h1 className="display-5 fw-bold text-dark">Welcome to Your Dashboard</h1>
-            <p className="lead text-muted mx-auto" style={{ maxWidth: '600px' }}>
-              Manage your forms, track submissions, and monitor your form performance from one central location.
-            </p>
-          </div>
+          <PageHeader
+            badge={{ icon: TrendingUp, text: 'Dashboard Overview' }}
+            title="Welcome to Your Dashboard"
+            description="Manage your forms, track submissions, and monitor your form performance from one central location."
+          />
 
           {/* Stats Cards */}
           <Row className="g-4 mb-5">

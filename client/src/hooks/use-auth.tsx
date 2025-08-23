@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 interface User {
   id: number;
@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await fetch(`${API_BASE_URL}/auth/user`, {
         credentials: 'include',
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
@@ -77,11 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchUser();
   }, []);
 
-  return (
-    <AuthContext.Provider value={{ user, loading, login, logout, refetchUser }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, loading, login, logout, refetchUser }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

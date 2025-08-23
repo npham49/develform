@@ -1,30 +1,41 @@
-import { createFileRoute, useLoaderData } from '@tanstack/react-router';
-import { useParams, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useLoaderData, useNavigate, useParams } from '@tanstack/react-router';
+import { useRef, useState } from 'react';
+
+import { IconCard } from '@/components/icon-card';
+import { useAuth } from '@/hooks/use-auth';
 import AppLayout from '@/layouts/app-layout';
+import { api } from '@/lib/api';
+import type { FormSchema } from '@/types/api';
 import { Form } from '@formio/react';
 import { FileText, Info, Shield, User } from 'lucide-react';
-import { useRef, useState } from 'react';
 import { Alert, Card, Container } from 'react-bootstrap';
-import { useAuth } from '@/hooks/useAuth';
-import { api } from '@/lib/api';
 
-interface SubmitProps {
-  schema?: string;
-  name?: string;
-  form_id?: number;
-}
+export const Route = createFileRoute('/forms/$formId/submit')({
+  loader: async ({ params }) => {
+    try {
+      const response = await api.forms.getSubmitSchema(parseInt(params.formId));
+      return { form: response.data };
+    } catch (error) {
+      console.error('Error fetching form for submission:', error);
+      throw error;
+    }
+  },
+  staleTime: 0, // Always refetch
+  gcTime: 0, // Don't cache
+  component: FormsSubmit,
+});
 
-function FormsSubmit({ schema, form_id }: SubmitProps = {}) {
-  const { form } = useLoaderData({ from: '/forms/$formId/submit' });
+function FormsSubmit() {
+  const { form } = useLoaderData({ from: '/forms/$formId/submit' }) as { form: FormSchema };
   const { formId } = useParams({ from: '/forms/$formId/submit' });
   const navigate = useNavigate({ from: '/forms/$formId/submit' });
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
-  const formSchema = useRef(schema ? JSON.parse(schema) : (form?.schema || {}));
-  const [submissionData, setSubmissionData] = useState<any>({});
+  const formSchema = useRef(form?.schema || { components: [] });
+  const [submissionData, setSubmissionData] = useState<Record<string, unknown>>({});
   const [error, setError] = useState<string | null>(null);
-  
-  const actualFormId = form_id || form?.id || (formId ? parseInt(formId) : null);
+
+  const actualFormId = form?.id || (formId ? parseInt(formId) : null);
   const isLoggedIn = !!user;
   const formData = form;
 
@@ -46,9 +57,9 @@ function FormsSubmit({ schema, form_id }: SubmitProps = {}) {
     try {
       console.log('Submitting form data:', {
         formId: actualFormId,
-        data: submissionData
+        data: submissionData,
       });
-      
+
       // Call the API endpoint to submit the form
       const response = await api.submissions.submitToForm(actualFormId, submissionData);
 
@@ -56,11 +67,10 @@ function FormsSubmit({ schema, form_id }: SubmitProps = {}) {
       console.log('Submission successful:', submissionResult);
 
       // Redirect to success page with submission ID and token (if anonymous)
-      const successUrl = `/forms/${actualFormId}/submit/success/${submissionResult.id}`;
+      const successUrl = `/forms/${actualFormId}/success/${submissionResult.id}`;
       const urlWithToken = submissionResult.token ? `${successUrl}?token=${submissionResult.token}` : successUrl;
-      
+
       navigate({ to: urlWithToken });
-      
     } catch (error) {
       console.error('Error submitting form:', error);
       setError(error instanceof Error ? error.message : 'Failed to submit form');
@@ -125,28 +135,23 @@ function FormsSubmit({ schema, form_id }: SubmitProps = {}) {
             {/* Form Card */}
             <Card className="shadow-sm border-0">
               <Card.Header className="bg-white py-4">
-                <div className="d-flex align-items-center">
-                  <div
-                    className="d-inline-flex align-items-center justify-content-center rounded-circle me-3"
-                    style={{ width: 40, height: 40, backgroundColor: '#dbeafe' }}
-                  >
-                    <FileText size={20} className="text-primary" />
-                  </div>
-                  <div>
-                    <h5 className="mb-0 fw-bold">{formData.name}</h5>
-                    <p className="text-muted small mb-0">Complete all required fields and submit your response</p>
-                  </div>
-                </div>
+                <IconCard
+                  icon={FileText}
+                  iconColor="text-primary"
+                  iconBg="#dbeafe"
+                  title={formData.name}
+                  description="Complete all required fields and submit your response"
+                />
               </Card.Header>
               <Card.Body className="p-4">
                 {formData && formSchema.current && (
-                  <Form 
-                    src={formSchema.current} 
-                    onChange={handleChange} 
+                  <Form
+                    src={formSchema.current}
+                    onChange={handleChange}
                     onSubmit={handleSubmit}
-                    options={{ 
+                    options={{
                       noAlerts: true,
-                      readOnly: submitting 
+                      readOnly: submitting,
                     }}
                   />
                 )}
@@ -193,23 +198,3 @@ function FormsSubmit({ schema, form_id }: SubmitProps = {}) {
     </AppLayout>
   );
 }
-
-export const Route = createFileRoute('/forms/$formId/submit')({
-  loader: async ({ params }) => {
-    try {
-      const response = await fetch(`/api/forms/${params.formId}/submit`, {
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return { form: data.data || data };
-      } else {
-        throw new Error('Failed to fetch form');
-      }
-    } catch (error) {
-      console.error('Error fetching form for submission:', error);
-      throw error;
-    }
-  },
-  component: FormsSubmit,
-});

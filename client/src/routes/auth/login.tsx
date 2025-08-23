@@ -1,8 +1,12 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useLocation } from '@tanstack/react-router';
+
+import { useAuth } from '@/hooks/use-auth';
 import { Github, Layers } from 'lucide-react';
 import { Badge, Button, Card, Container } from 'react-bootstrap';
-import { useAuth } from '@/hooks/useAuth';
-import { useLocation } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/auth/login')({
+  component: GitHubLogin,
+});
 
 function GitHubLogin() {
   const { login } = useAuth();
@@ -33,9 +37,7 @@ function GitHubLogin() {
             <Card.Body className="p-4">
               <div className="text-center mb-4">
                 <h1 className="h4 text-dark fw-semibold mb-2">Welcome back</h1>
-                <p className="text-muted mb-0">
-                  Sign in to your account using GitHub
-                </p>
+                <p className="text-muted mb-0">Sign in to your account using GitHub</p>
               </div>
 
               <div className="d-grid gap-3">
@@ -54,9 +56,13 @@ function GitHubLogin() {
               <div className="text-center mt-4">
                 <p className="text-muted small mb-0">
                   By signing in, you agree to our{' '}
-                  <a href="#" className="text-decoration-none">Terms of Service</a>{' '}
+                  <a href="#" className="text-decoration-none">
+                    Terms of Service
+                  </a>{' '}
                   and{' '}
-                  <a href="#" className="text-decoration-none">Privacy Policy</a>
+                  <a href="#" className="text-decoration-none">
+                    Privacy Policy
+                  </a>
                 </p>
               </div>
             </Card.Body>
@@ -64,16 +70,10 @@ function GitHubLogin() {
 
           {/* Footer */}
           <div className="text-center mt-4">
-            <p className="text-muted small">
-              Secure login powered by GitHub OAuth
-            </p>
+            <p className="text-muted small">Secure login powered by GitHub OAuth</p>
           </div>
         </div>
       </Container>
     </div>
   );
 }
-
-export const Route = createFileRoute('/auth/login')({
-  component: GitHubLogin,
-});

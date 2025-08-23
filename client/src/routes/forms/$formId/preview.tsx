@@ -1,49 +1,36 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router';
+import { useRef } from 'react';
+import { toast } from 'sonner';
+
+import { LoadingSpinner } from '@/components/loading-spinner';
+import { PageHeader } from '@/components/page-header';
+import { api } from '@/lib/api';
 import { INITIAL_SCHEMA } from '@/lib/constants';
-import { Form } from '@/types/form';
+import type { FormWithCreator } from '@/types/api';
 import { Webform } from '@formio/js';
 import { Form as FormioForm, FormType, Submission } from '@formio/react';
 import { ArrowLeft, Eye, Info, Settings } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { Alert, Badge, Button, Card, Container } from 'react-bootstrap';
-import { Link, useParams } from '@tanstack/react-router';
-import { toast } from 'sonner';
+import { Alert, Button, Card, Container } from 'react-bootstrap';
+
+export const Route = createFileRoute('/forms/$formId/preview')({
+  loader: async ({ params }) => {
+    try {
+      const response = await api.forms.get(parseInt(params.formId));
+      return { form: response.data };
+    } catch (error) {
+      console.error('Error fetching form:', error);
+      throw error;
+    }
+  },
+  staleTime: 0, // Always refetch
+  gcTime: 0, // Don't cache
+  component: FormsPreview,
+});
 
 function FormsPreview() {
-  const { formId } = useParams({ from: '/forms/$formId/preview' });
-  const [form, setForm] = useState<Form | null>(null);
-  const [loading, setLoading] = useState(true);
-  const formSchema = useRef<FormType>(INITIAL_SCHEMA);
+  const { form } = useLoaderData({ from: '/forms/$formId/preview' }) as { form: FormWithCreator };
+  const formSchema = useRef<FormType>(form?.schema || INITIAL_SCHEMA);
   const previewRef = useRef<Webform>(null);
-  const [formReady, setFormReady] = useState(false);
-
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-
-  useEffect(() => {
-    const fetchForm = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/forms/${formId}`, {
-          credentials: 'include',
-        });
-        if (response.ok) {
-          const data = await response.json();
-          const formData = data.data || data;
-          setForm(formData);
-          formSchema.current = formData.schema ? formData.schema : INITIAL_SCHEMA;
-          setFormReady(true);
-        }
-      } catch (error) {
-        console.error('Error fetching form:', error);
-      } finally {
-        setLoading(false);
-        setFormReady(true);
-      }
-    };
-
-    if (formId) {
-      fetchForm();
-    }
-  }, [formId]);
 
   const handleSubmit = (submission: Submission) => {
     if (previewRef.current) {
@@ -53,31 +40,19 @@ function FormsPreview() {
     }
   };
 
-  const handleFormReady = (form: Webform) => {
-    previewRef.current = form;
+  const handleFormReady = (formInstance: Webform) => {
+    previewRef.current = formInstance;
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   if (!form) {
-    return <div>Form not found</div>;
+    return <LoadingSpinner text="Form not found" />;
   }
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>
       <Container className="d-flex align-items-center justify-content-center min-vh-100">
         <div className="w-100">
-          {/* Header */}
-          <div className="text-center mb-5">
-            <Badge bg="secondary" className="mb-3 d-inline-flex align-items-center">
-              <Eye size={16} className="me-2" />
-              Form Preview
-            </Badge>
-            <h1 className="display-6 fw-bold text-dark">{form.name}</h1>
-            <p className="lead text-muted">Preview your form as it will appear to users</p>
-          </div>
+          <PageHeader badge={{ icon: Eye, text: 'Form Preview' }} title={form.name} description="Preview your form as it will appear to users" />
 
           {/* Preview Notice */}
           <Alert variant="info" className="d-flex align-items-start mb-4">
@@ -96,13 +71,13 @@ function FormsPreview() {
                   <p className="text-muted small mb-0">Return to the form editor to modify your form structure</p>
                 </div>
                 <div className="d-flex gap-2">
-                  <Link to="/forms/$formId/manage" params={{ formId }}>
+                  <Link to="/forms/$formId/manage" params={{ formId: form.id.toString() }}>
                     <Button variant="outline-primary">
                       <ArrowLeft size={16} className="me-2" />
                       Back to Manage
                     </Button>
                   </Link>
-                  <Link to="/forms/$formId/schema" params={{ formId }}>
+                  <Link to="/forms/$formId/schema" params={{ formId: form.id.toString() }}>
                     <Button variant="primary">
                       <Settings size={16} className="me-2" />
                       Edit Schema
@@ -129,7 +104,7 @@ function FormsPreview() {
               </div>
             </Card.Header>
             <Card.Body className="p-4">
-              {formReady && <FormioForm src={formSchema.current} onSubmit={handleSubmit} onFormReady={handleFormReady} />}
+              <FormioForm src={formSchema.current} onSubmit={handleSubmit} onFormReady={handleFormReady} />
             </Card.Body>
           </Card>
 
@@ -163,23 +138,3 @@ function FormsPreview() {
     </div>
   );
 }
-
-export const Route = createFileRoute('/forms/$formId/preview')({
-  loader: async ({ params }) => {
-    try {
-      const response = await fetch(`/api/forms/${params.formId}`, {
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return { form: data.data || data };
-      } else {
-        throw new Error('Failed to fetch form');
-      }
-    } catch (error) {
-      console.error('Error fetching form:', error);
-      throw error;
-    }
-  },
-  component: FormsPreview,
-});

@@ -1,16 +1,18 @@
 import { Octokit } from '@octokit/rest';
-import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { deleteCookie, setCookie } from 'hono/cookie';
 import { sign } from 'hono/jwt';
 import { db } from '../db/index';
-import { users } from '../db/schema';
 import { authMiddleware } from '../middleware/auth';
+import * as authService from '../services/auth';
 import type { AuthUser } from '../types/index';
 
 const auth = new Hono();
 
-// GitHub OAuth - redirect to GitHub
+/**
+ * Initiates GitHub OAuth flow by redirecting to GitHub authorization
+ * Constructs OAuth URL with client ID and redirect URI from environment
+ */
 auth.get('/github', async (c) => {
   const clientId = process.env.GITHUB_CLIENT_ID;
   const redirectUri = encodeURIComponent(process.env.GITHUB_REDIRECT_URI || 'http://localhost:3001/api/auth/github/callback');
@@ -24,7 +26,11 @@ auth.get('/github', async (c) => {
   return c.redirect(githubUrl);
 });
 
-// GitHub OAuth callback
+/**
+ * Handles GitHub OAuth callback after user authorization
+ * Exchanges code for access token, fetches user data, creates/updates user record
+ * Sets JWT cookie and redirects to dashboard on success
+ */
 auth.get('/github/callback', async (c) => {
   const code = c.req.query('code');
   const clientId = process.env.GITHUB_CLIENT_ID;
@@ -63,49 +69,39 @@ auth.get('/github/callback', async (c) => {
     const { data: githubUser } = await octokit.rest.users.getAuthenticated();
 
     // Find or create user in database
-    let user = await db.select().from(users).where(eq(users.githubId, githubUser.id.toString())).limit(1);
+    let user = await authService.findUserByGithubId(db, githubUser.id.toString());
 
     if (user.length === 0) {
       // Check if user exists by email
       if (githubUser.email) {
-        const existingUser = await db.select().from(users).where(eq(users.email, githubUser.email)).limit(1);
+        const existingUser = await authService.findUserByEmail(db, githubUser.email);
 
         if (existingUser.length > 0) {
           // Update existing user with GitHub data
-          await db
-            .update(users)
-            .set({
-              githubId: githubUser.id.toString(),
-              avatarUrl: githubUser.avatar_url,
-              updatedAt: new Date(),
-            })
-            .where(eq(users.id, existingUser[0].id));
+          await authService.updateUserWithGithubData(db, existingUser[0].id, {
+            githubId: githubUser.id.toString(),
+            avatarUrl: githubUser.avatar_url,
+          });
 
           user = existingUser;
         } else {
           // Create new user
-          const newUser = await db
-            .insert(users)
-            .values({
-              name: githubUser.name || githubUser.login,
-              email: githubUser.email,
-              githubId: githubUser.id.toString(),
-              avatarUrl: githubUser.avatar_url,
-            })
-            .returning();
+          const newUser = await authService.createUser(db, {
+            name: githubUser.name || githubUser.login,
+            email: githubUser.email,
+            githubId: githubUser.id.toString(),
+            avatarUrl: githubUser.avatar_url,
+          });
 
           user = newUser;
         }
       } else {
         // Create new user without email
-        const newUser = await db
-          .insert(users)
-          .values({
-            name: githubUser.name || githubUser.login,
-            githubId: githubUser.id.toString(),
-            avatarUrl: githubUser.avatar_url,
-          })
-          .returning();
+        const newUser = await authService.createUser(db, {
+          name: githubUser.name || githubUser.login,
+          githubId: githubUser.id.toString(),
+          avatarUrl: githubUser.avatar_url,
+        });
 
         user = newUser;
       }
@@ -145,7 +141,10 @@ auth.get('/github/callback', async (c) => {
   }
 });
 
-// Get current user
+/**
+ * Retrieves current authenticated user information
+ * Returns user data from JWT payload for client-side state management
+ */
 auth.get('/user', authMiddleware, async (c) => {
   const payload = c.get('jwtPayload');
 
@@ -157,7 +156,10 @@ auth.get('/user', authMiddleware, async (c) => {
   return c.json({ user: payload.user });
 });
 
-// Logout
+/**
+ * Logs out the current user by clearing the auth cookie
+ * Client should redirect to login page after successful logout
+ */
 auth.post('/logout', authMiddleware, async (c) => {
   deleteCookie(c, 'auth_token');
   return c.json({ message: 'Logged out successfully' });

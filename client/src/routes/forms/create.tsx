@@ -1,11 +1,19 @@
-import { createFileRoute } from '@tanstack/react-router';
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { ArrowLeft, FileText, Info, Plus } from 'lucide-react';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
-import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
-import { Link, useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
+import { z } from 'zod';
+
+import { PageHeader } from '@/components/page-header';
+import AppLayout from '@/layouts/app-layout';
+import { api } from '@/lib/api';
+import { type BreadcrumbItem } from '@/types';
+import type { CreateFormRequest } from '@/types/api';
+import { ArrowLeft, FileText, Info, Plus } from 'lucide-react';
+import { Button, Card, Col, Container, Row } from 'react-bootstrap';
+
+export const Route = createFileRoute('/forms/create')({
+  component: FormsCreate,
+});
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -14,15 +22,23 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
+const createFormSchema = z.object({
+  name: z.string().min(1, 'Form name is required'),
+  description: z.string().optional(),
+  isPublic: z.boolean().default(false),
+});
+
+type CreateFormData = z.infer<typeof createFormSchema>;
+
 function FormsCreate() {
   const navigate = useNavigate();
-  const [data, setData] = useState({
+  const [data, setData] = useState<CreateFormData>({
     name: '',
     description: '',
-    is_public: false,
+    isPublic: false,
   });
   const [processing, setProcessing] = useState(false);
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -30,33 +46,31 @@ function FormsCreate() {
     setErrors({});
 
     try {
-      const response = await fetch('/api/forms', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
+      const validatedData = createFormSchema.parse(data);
+      await api.forms.create(validatedData as CreateFormRequest);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create form');
-      }
-
-      // const result = await response.json();
       toast.success('Form created successfully');
       navigate({ to: '/forms' });
-    } catch (error: any) {
-      console.error('Error creating form:', error);
-      setErrors({ general: error.message || 'Failed to create form' });
-      toast.error('Failed to create form');
+    } catch (error: unknown) {
+      if (error instanceof z.ZodError) {
+        const fieldErrors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path.length > 0) {
+            fieldErrors[err.path[0] as string] = err.message;
+          }
+        });
+        setErrors(fieldErrors);
+      } else {
+        console.error('Error creating form:', error);
+        setErrors({ general: (error as Error).message || 'Failed to create form' });
+        toast.error('Failed to create form');
+      }
     } finally {
       setProcessing(false);
     }
   };
 
-  const setFieldData = (field: string, value: any) => {
+  const setFieldData = (field: keyof CreateFormData, value: string | boolean) => {
     setData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -64,17 +78,11 @@ function FormsCreate() {
     <AppLayout breadcrumbs={breadcrumbs}>
       <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>
         <Container className="py-5">
-          {/* Hero Section */}
-          <div className="text-center mb-5">
-            <Badge bg="secondary" className="mb-3 d-inline-flex align-items-center">
-              <Plus size={16} className="me-2" />
-              Create New Form
-            </Badge>
-            <h1 className="display-5 fw-bold text-dark">Create Your Form</h1>
-            <p className="lead text-muted mx-auto" style={{ maxWidth: '600px' }}>
-              Start building your form with our intuitive form builder. Add fields, customize styling, and configure validation.
-            </p>
-          </div>
+          <PageHeader
+            badge={{ icon: Plus, text: 'Create New Form' }}
+            title="Create Your Form"
+            description="Start building your form with our intuitive form builder. Add fields, customize styling, and configure validation."
+          />
 
           {/* Main Form */}
           <Row className="justify-content-center">
@@ -137,18 +145,18 @@ function FormsCreate() {
                               <div className="form-check">
                                 <input
                                   type="checkbox"
-                                  name="is_public"
-                                  checked={data.is_public}
-                                  onChange={(e) => setFieldData('is_public', e.target.checked)}
+                                  name="isPublic"
+                                  checked={data.isPublic}
+                                  onChange={(e) => setFieldData('isPublic', e.target.checked)}
                                   className="form-check-input"
-                                  id="is_public"
+                                  id="isPublic"
                                 />
-                                <label className="form-check-label" htmlFor="is_public">
+                                <label className="form-check-label" htmlFor="isPublic">
                                   <strong>Make this form public</strong>
                                 </label>
                               </div>
                               <p className="text-muted small mb-0 mt-1">
-                                {data.is_public
+                                {data.isPublic
                                   ? 'This form will be accessible to anyone with the link'
                                   : 'This form will only be accessible to authenticated users'}
                               </p>
@@ -156,7 +164,7 @@ function FormsCreate() {
                           </div>
                         </Card.Body>
                       </Card>
-                      {errors.is_public && <div className="text-danger small mt-1">{errors.is_public}</div>}
+                      {errors.isPublic && <div className="text-danger small mt-1">{errors.isPublic}</div>}
                     </div>
 
                     <div className="d-flex gap-3">
@@ -246,7 +254,3 @@ function FormsCreate() {
     </AppLayout>
   );
 }
-
-export const Route = createFileRoute('/forms/create')({
-  component: FormsCreate,
-});

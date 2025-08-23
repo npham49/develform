@@ -1,21 +1,31 @@
-import { createFileRoute, useLoaderData } from '@tanstack/react-router';
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Calendar, Eye, FileText, Globe, Lock, MoreVertical, Plus, Settings } from 'lucide-react';
-import { Badge, Button, Card, Col, Container, Dropdown, Row, Table } from 'react-bootstrap';
-import { Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router';
 
-interface Form {
-  id: number;
-  name: string;
-  description: string | null;
-  isPublic: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import { PageHeader } from '@/components/page-header';
+import { StatusBadge } from '@/components/status-badge';
+import AppLayout from '@/layouts/app-layout';
+import { api } from '@/lib/api';
+import { type BreadcrumbItem } from '@/types';
+import type { FormSummary } from '@/types/api';
+import { Calendar, Eye, FileText, MoreVertical, Plus, Settings } from 'lucide-react';
+import { Badge, Button, Card, Col, Container, Dropdown, Row, Table } from 'react-bootstrap';
+
+export const Route = createFileRoute('/forms/')({
+  loader: async () => {
+    try {
+      const response = await api.forms.list();
+      return { forms: response.data };
+    } catch (error) {
+      console.error('Error fetching forms:', error);
+      return { forms: [] };
+    }
+  },
+  staleTime: 0, // Always refetch
+  gcTime: 0, // Don't cache
+  component: FormsIndex,
+});
 
 function FormsIndex() {
-  const { forms } = useLoaderData({ from: '/forms/' }) as { forms: Form[] };
+  const { forms } = useLoaderData({ from: '/forms/' }) as { forms: FormSummary[] };
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -31,17 +41,11 @@ function FormsIndex() {
     <AppLayout breadcrumbs={breadcrumbs}>
       <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>
         <Container className="py-5">
-          {/* Hero Section */}
-          <div className="text-center mb-5">
-            <Badge bg="secondary" className="mb-3 d-inline-flex align-items-center">
-              <FileText size={16} className="me-2" />
-              Form Management
-            </Badge>
-            <h1 className="display-5 fw-bold text-dark">Your Forms</h1>
-            <p className="lead text-muted mx-auto" style={{ maxWidth: '600px' }}>
-              Create, edit, and manage all your forms from one central location. Track submissions and monitor performance.
-            </p>
-          </div>
+          <PageHeader
+            badge={{ icon: FileText, text: 'Form Management' }}
+            title="Your Forms"
+            description="Create, edit, and manage all your forms from one central location. Track submissions and monitor performance."
+          />
 
           {/* Action Bar */}
           <div className="d-flex justify-content-between align-items-center mb-4">
@@ -97,19 +101,7 @@ function FormsIndex() {
                               >
                                 <FileText size={16} className="text-primary" />
                               </div>
-                              <div className="d-flex align-items-center gap-2">
-                                {form.isPublic ? (
-                                  <Badge bg="success" className="d-flex align-items-center small">
-                                    <Globe size={10} className="me-1" />
-                                    Public
-                                  </Badge>
-                                ) : (
-                                  <Badge bg="secondary" className="d-flex align-items-center small">
-                                    <Lock size={10} className="me-1" />
-                                    Private
-                                  </Badge>
-                                )}
-                              </div>
+                              <StatusBadge isPublic={form.isPublic} size="small" />
                             </div>
 
                             <h6 className="fw-bold text-dark mb-2" style={{ fontSize: '0.9rem' }}>
@@ -125,7 +117,7 @@ function FormsIndex() {
                             </div>
 
                             <div className="d-flex gap-2">
-                              <Link to="/forms/$id/manage" params={{ id: form.id.toString() }} className="flex-fill text-decoration-none">
+                              <Link to="/forms/$formId/manage" params={{ formId: form.id.toString() }} className="flex-fill text-decoration-none">
                                 <Button variant="outline-primary" size="sm" className="w-100 d-flex align-items-center justify-content-center">
                                   <Settings size={14} className="me-1" />
                                   Manage
@@ -184,17 +176,7 @@ function FormsIndex() {
                             </div>
                           </td>
                           <td className="py-3">
-                            {form.isPublic ? (
-                              <Badge bg="success" className="d-flex align-items-center w-fit">
-                                <Globe size={12} className="me-1" />
-                                Public
-                              </Badge>
-                            ) : (
-                              <Badge bg="secondary" className="d-flex align-items-center w-fit">
-                                <Lock size={12} className="me-1" />
-                                Private
-                              </Badge>
-                            )}
+                            <StatusBadge isPublic={form.isPublic} />
                           </td>
                           <td className="py-3">
                             <div className="text-muted small">{new Date(form.createdAt).toLocaleDateString()}</div>
@@ -204,7 +186,7 @@ function FormsIndex() {
                           </td>
                           <td className="py-3 text-end pe-4">
                             <div className="d-flex gap-2 justify-content-end">
-                              <Link to="/forms/$id/manage" params={{ id: form.id.toString() }} className="text-decoration-none">
+                              <Link to="/forms/$formId/manage" params={{ formId: form.id.toString() }} className="text-decoration-none">
                                 <Button variant="primary" size="sm" className="d-flex align-items-center">
                                   <Settings size={14} className="me-2" />
                                   Manage
@@ -216,13 +198,21 @@ function FormsIndex() {
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu className="z-1000">
                                   <Dropdown.Item>
-                                    <Link to="/forms/$id/preview" params={{ id: form.id.toString() }} className="text-decoration-none d-flex align-items-center">
+                                    <Link
+                                      to="/forms/$formId/preview"
+                                      params={{ formId: form.id.toString() }}
+                                      className="text-decoration-none d-flex align-items-center"
+                                    >
                                       <Eye size={14} className="me-1" />
                                       Preview
                                     </Link>
                                   </Dropdown.Item>
                                   <Dropdown.Item>
-                                    <Link to="/forms/$formId/submit" params={{ formId: form.id.toString() }} className="text-decoration-none d-flex align-items-center">
+                                    <Link
+                                      to="/forms/$formId/submit"
+                                      params={{ formId: form.id.toString() }}
+                                      className="text-decoration-none d-flex align-items-center"
+                                    >
                                       <FileText size={14} className="me-2" />
                                       Submit
                                     </Link>
@@ -291,23 +281,3 @@ function FormsIndex() {
     </AppLayout>
   );
 }
-
-export const Route = createFileRoute('/forms/')({
-  loader: async () => {
-    try {
-      const response = await fetch('/api/forms', {
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return { forms: data.data || data };
-      } else {
-        throw new Error('Failed to fetch forms');
-      }
-    } catch (error) {
-      console.error('Error fetching forms:', error);
-      return { forms: [] };
-    }
-  },
-  component: FormsIndex,
-});

@@ -1,8 +1,8 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import * as schema from './schema.js';
+import * as schema from './schema';
 
-const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/develform';
+const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/develform';
 
 // Disable prefetch as it is not supported for "Transaction" pool mode
 const client = postgres(connectionString, { prepare: false });

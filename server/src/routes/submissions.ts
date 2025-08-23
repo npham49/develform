@@ -1,20 +1,23 @@
 import { randomBytes } from 'crypto';
-import { and, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { db } from '../db/index.js';
-import { forms, submissions, submissionTokens, users } from '../db/schema.js';
 import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js';
+import * as formsService from '../services/forms.js';
+import * as submissionsService from '../services/submissions.js';
 
 const submissionRoutes = new Hono();
 
-// Validation schema
+// Validation schema for new submissions
 const createSubmissionSchema = z.object({
   formId: z.number(),
   data: z.any(),
 });
 
-// Get submission details
+/**
+ * Retrieves detailed submission data with access control
+ * Allows access to form owners, submission creators, or via anonymous token
+ */
 submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
   try {
     const submissionId = parseInt(c.req.param('id'));
@@ -25,17 +28,7 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
       return c.json({ error: 'Invalid submission ID' }, 400);
     }
 
-    const submission = await db
-      .select({
-        submission: submissions,
-        form: forms,
-        creator: users,
-      })
-      .from(submissions)
-      .leftJoin(forms, eq(submissions.formId, forms.id))
-      .leftJoin(users, eq(submissions.createdBy, users.id))
-      .where(eq(submissions.id, submissionId))
-      .limit(1);
+    const submission = await submissionsService.getSubmissionById(db, submissionId);
 
     if (submission.length === 0) {
       return c.json({ error: 'Submission not found' }, 404);
@@ -56,11 +49,7 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
     }
     // Anonymous submissions can be accessed with token
     else if (!data.submission.createdBy && token) {
-      const submissionToken = await db
-        .select()
-        .from(submissionTokens)
-        .where(and(eq(submissionTokens.submissionId, submissionId), eq(submissionTokens.token, token)))
-        .limit(1);
+      const submissionToken = await submissionsService.getSubmissionToken(db, submissionId, token);
 
       if (submissionToken.length > 0) {
         hasAccess = true;
@@ -95,7 +84,10 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
   }
 });
 
-// Get submissions for a form (form owner only) - matches Laravel route GET /forms/{form}/submissions
+/**
+ * Retrieves all submissions for a specific form (owner access only)
+ * Returns submission data with creator information for analysis
+ */
 submissionRoutes.get('/form/:formId', authMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
@@ -106,26 +98,13 @@ submissionRoutes.get('/form/:formId', authMiddleware, async (c) => {
     }
 
     // Check if user owns the form
-    const form = await db
-      .select()
-      .from(forms)
-      .where(and(eq(forms.id, formId), eq(forms.createdBy, user.id)))
-      .limit(1);
+    const form = await formsService.getFormByIdAndOwner(db, formId, user.id);
 
     if (form.length === 0) {
       return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
-    const formSubmissions = await db
-      .select({
-        id: submissions.id,
-        data: submissions.data,
-        createdAt: submissions.createdAt,
-        creator: users,
-      })
-      .from(submissions)
-      .leftJoin(users, eq(submissions.createdBy, users.id))
-      .where(eq(submissions.formId, formId));
+    const formSubmissions = await submissionsService.getFormSubmissionsByOwner(db, formId);
 
     const submissionsData = formSubmissions.map((sub) => ({
       id: sub.id,
@@ -147,7 +126,10 @@ submissionRoutes.get('/form/:formId', authMiddleware, async (c) => {
   }
 });
 
-// Submit form data for specific form (matches Laravel route POST /forms/{form}/submit)
+/**
+ * Creates a new submission for a form (public endpoint)
+ * Supports both authenticated and anonymous submissions with token generation
+ */
 submissionRoutes.post('/form/:formId', optionalAuthMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
@@ -157,7 +139,7 @@ submissionRoutes.post('/form/:formId', optionalAuthMiddleware, async (c) => {
     const validatedData = createSubmissionSchema.parse(body);
 
     // Check if form exists and user can submit
-    const form = await db.select().from(forms).where(eq(forms.id, formId)).limit(1);
+    const form = await submissionsService.getFormByIdForSubmission(db, formId);
 
     if (form.length === 0) {
       return c.json({ error: 'Form not found' }, 404);
@@ -171,15 +153,12 @@ submissionRoutes.post('/form/:formId', optionalAuthMiddleware, async (c) => {
     }
 
     // Create submission
-    const newSubmission = await db
-      .insert(submissions)
-      .values({
-        formId: formId,
-        data: validatedData.data,
-        createdBy: user?.id || null,
-        updatedBy: user?.id || null,
-      })
-      .returning();
+    const newSubmission = await submissionsService.createSubmission(db, {
+      formId: formId,
+      data: validatedData.data,
+      createdBy: user?.id || null,
+      updatedBy: user?.id || null,
+    });
 
     const submission = newSubmission[0];
 
@@ -187,7 +166,7 @@ submissionRoutes.post('/form/:formId', optionalAuthMiddleware, async (c) => {
     let token = null;
     if (!user) {
       const tokenValue = randomBytes(32).toString('hex');
-      await db.insert(submissionTokens).values({
+      await submissionsService.createSubmissionToken(db, {
         submissionId: submission.id,
         token: tokenValue,
       });

@@ -1,10 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
+
+import { PageHeader } from '@/components/page-header';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
 import { Monitor, Moon, Palette, Sun } from 'lucide-react';
-import { useState } from 'react';
-import { Badge, Button, Card, Container } from 'react-bootstrap';
+import { Button, Card, Container } from 'react-bootstrap';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -55,14 +57,11 @@ function SettingsAppearance() {
     <AppLayout breadcrumbs={breadcrumbs}>
       <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>
         <Container className="py-5">
-          <div className="text-center mb-5">
-            <Badge bg="secondary" className="mb-3 d-inline-flex align-items-center">
-              <Palette size={16} className="me-2" />
-              Appearance Settings
-            </Badge>
-            <h1 className="display-6 fw-bold text-dark">Customize Your Experience</h1>
-            <p className="lead text-muted">Personalize your interface with themes and appearance preferences</p>
-          </div>
+          <PageHeader
+            badge={{ icon: Palette, text: 'Appearance Settings' }}
+            title="Customize Your Experience"
+            description="Personalize your interface with themes and appearance preferences"
+          />
 
           <SettingsLayout>
             <Card className="shadow-sm border-0">

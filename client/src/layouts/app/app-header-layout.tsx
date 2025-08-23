@@ -1,9 +1,9 @@
+import { useAuth } from '@/hooks/use-auth';
 import { type BreadcrumbItem } from '@/types';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { FileText, Home, Layers, LogOut, Settings as SettingsIcon, User } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { Breadcrumb, Container, Dropdown, Nav, Navbar } from 'react-bootstrap';
-import { useAuth } from '@/hooks/useAuth';
 
 export default function AppHeaderLayout({
   children,

@@ -1,7 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { Link } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
+
 import { ArrowRight, Check, GitBranch, GitCommit, GitCompare, Layers, MousePointer, Shield, Star, Users } from 'lucide-react';
 import { Badge, Button, Card, Col, Container, Nav, Navbar, Row } from 'react-bootstrap';
+
+export const Route = createFileRoute('/')({
+  component: FlowableLanding,
+});
 
 function FlowableLanding() {
   return (
@@ -398,7 +402,3 @@ function Footer() {
     </footer>
   );
 }
-
-export const Route = createFileRoute('/')({
-  component: FlowableLanding,
-});

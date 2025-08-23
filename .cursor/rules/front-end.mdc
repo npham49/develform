@@ -1,0 +1,12 @@
+---
+description: React rules
+globs: client/*
+alwaysApply: false
+---
+
+- always use kebab-case for component casing.
+- if a snippet is used twice, refactor component into `components` folder.
+- if a snippet is static and does not use any data, refactor component into `components` folder.
+- use common components whenever possible.
+- always document common components, and add comments for how >300 lines components run.
+- do not modify `routeTree.hen.ts`

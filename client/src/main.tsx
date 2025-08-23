@@ -8,7 +8,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './css/app.css';
 import { initializeTheme } from './hooks/use-appearance';
-import { AuthProvider } from './hooks/useAuth';
+import { AuthProvider } from './hooks/use-auth';
 
 // Import the generated route tree
 import { routeTree } from './routeTree.gen';

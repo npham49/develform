@@ -1,3 +1,26 @@
+import type {
+  CreateFormRequest,
+  CreateFormResponse,
+  CreateSubmissionResponse,
+  DeleteAccountResponse,
+  DeleteFormResponse,
+  GetFormResponse,
+  GetFormSchemaResponse,
+  GetFormsResponse,
+  GetFormSubmissionsResponse,
+  GetProfileResponse,
+  GetSubmissionResponse,
+  GetSubmissionsByFormResponse,
+  GetUserResponse,
+  LogoutResponse,
+  UpdateFormRequest,
+  UpdateFormResponse,
+  UpdateFormSchemaRequest,
+  UpdateFormSchemaResponse,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
+} from '../types/api';
+
 class ApiClient {
   private baseURL: string;
 
@@ -7,7 +30,7 @@ class ApiClient {
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const response = await fetch(url, {
       credentials: 'include',
       headers: {
@@ -27,55 +50,63 @@ class ApiClient {
 
   // Auth methods
   auth = {
-    getUser: () => this.request<{ user: any }>('/auth/user'),
-    logout: () => this.request<{ message: string }>('/auth/logout', { method: 'POST' }),
+    getUser: () => this.request<GetUserResponse>('/auth/user'),
+    logout: () => this.request<LogoutResponse>('/auth/logout', { method: 'POST' }),
   };
 
   // Forms methods
   forms = {
-    list: () => this.request<{ data: any[] }>('/forms'),
-    get: (id: number) => this.request<{ data: any }>(`/forms/${id}`),
-    getSubmitSchema: (id: number) => this.request<{ data: any }>(`/forms/${id}/submit`),
-    create: (data: any) => this.request<{ data: any }>('/forms', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-    update: (id: number, data: any) => this.request<{ data: any }>(`/forms/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
-    delete: (id: number) => this.request<{ message: string }>(`/forms/${id}`, {
-      method: 'DELETE',
-    }),
+    list: () => this.request<GetFormsResponse>('/forms'),
+    get: (id: number) => this.request<GetFormResponse>(`/forms/${id}`),
+    getSubmitSchema: (id: number) => this.request<GetFormSchemaResponse>(`/forms/${id}/submit`),
+    create: (data: CreateFormRequest) =>
+      this.request<CreateFormResponse>('/forms', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: number, data: UpdateFormRequest) =>
+      this.request<UpdateFormResponse>(`/forms/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    updateSchema: (id: number, data: UpdateFormSchemaRequest) =>
+      this.request<UpdateFormSchemaResponse>(`/forms/${id}/schema`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: number) =>
+      this.request<DeleteFormResponse>(`/forms/${id}`, {
+        method: 'DELETE',
+      }),
+    getSubmissions: (id: number) => this.request<GetFormSubmissionsResponse>(`/forms/${id}/submissions`),
   };
 
   // Submissions methods
   submissions = {
-    create: (data: any) => this.request<{ data: any }>('/submissions', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-    submitToForm: (formId: number, data: any) => this.request<{ data: any }>(`/submissions/form/${formId}`, {
-      method: 'POST',
-      body: JSON.stringify({ formId, data }),
-    }),
+    submitToForm: (formId: number, data: unknown) =>
+      this.request<CreateSubmissionResponse>(`/submissions/form/${formId}`, {
+        method: 'POST',
+        body: JSON.stringify({ formId, data }),
+      }),
     get: (id: number, token?: string) => {
       const params = token ? `?token=${token}` : '';
-      return this.request<{ data: any }>(`/submissions/${id}${params}`);
+      return this.request<GetSubmissionResponse>(`/submissions/${id}${params}`);
     },
-    getByForm: (formId: number) => this.request<{ data: any[] }>(`/submissions/form/${formId}`),
+    getByForm: (formId: number) => this.request<GetSubmissionsByFormResponse>(`/submissions/form/${formId}`),
   };
 
   // Settings methods
   settings = {
-    getProfile: () => this.request<{ data: any }>('/settings/profile'),
-    updateProfile: (data: any) => this.request<{ data: any }>('/settings/profile', {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
-    deleteAccount: () => this.request<{ message: string }>('/settings/profile', {
-      method: 'DELETE',
-    }),
+    getProfile: () => this.request<GetProfileResponse>('/settings/profile'),
+    updateProfile: (data: UpdateProfileRequest) =>
+      this.request<UpdateProfileResponse>('/settings/profile', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    deleteAccount: () =>
+      this.request<DeleteAccountResponse>('/settings/profile', {
+        method: 'DELETE',
+      }),
   };
 }
 

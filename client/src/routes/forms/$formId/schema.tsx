@@ -1,74 +1,48 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router';
+import { useRef, useState } from 'react';
+import { toast } from 'sonner';
+
+import { LoadingSpinner } from '@/components/loading-spinner';
+import { PageHeader } from '@/components/page-header';
 import AppLayout from '@/layouts/app-layout';
+import { api } from '@/lib/api';
 import { type BreadcrumbItem } from '@/types';
-import { Form } from '@/types/form';
+import type { FormWithCreator } from '@/types/api';
 import { FormBuilder, type FormType } from '@formio/react';
 import { ArrowLeft, Code, Eye, Save } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
-import { Link, useParams } from '@tanstack/react-router';
-import { toast } from 'sonner';
+import { Button, Card, Col, Container, Row } from 'react-bootstrap';
 
 export const INITIAL_SCHEMA = { title: '', name: '', path: '', display: 'form' as const, type: 'form' as const, components: [] };
 
-function FormsSchema() {
-  const [builderReady, setBuilderReady] = useState(false);
-  const { formId } = useParams({ from: '/forms/$formId/schema' });
-  const [form, setForm] = useState<Form | null>(null);
-  const [schema, setSchema] = useState<FormType | null>(null);
-  const [processing, setProcessing] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const initialBuilderSchema = useRef<FormType>(INITIAL_SCHEMA);
-
-  useEffect(() => {
-    const fetchForm = async () => {
-      try {
-        const response = await fetch(`/api/forms/${formId}`, {
-          credentials: 'include',
-        });
-        if (response.ok) {
-          const data = await response.json();
-          const formData = data.data || data;
-          setForm(formData);
-          setSchema(formData.schema || '{}');
-          initialBuilderSchema.current = formData.schema ? formData.schema : INITIAL_SCHEMA;
-          setBuilderReady(true);
-        } else {
-          throw new Error('Failed to fetch form');
-        }
-      } catch (error) {
-        console.error('Error fetching form:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (formId) {
-      fetchForm();
+export const Route = createFileRoute('/forms/$formId/schema')({
+  loader: async ({ params }) => {
+    try {
+      const response = await api.forms.get(parseInt(params.formId));
+      return { form: response.data };
+    } catch (error) {
+      console.error('Error fetching form:', error);
+      throw error;
     }
-  }, [formId]);
+  },
+  staleTime: 0, // Always refetch
+  gcTime: 0, // Don't cache
+  component: FormsSchema,
+});
+
+function FormsSchema() {
+  const { form } = useLoaderData({ from: '/forms/$formId/schema' }) as { form: FormWithCreator };
+  const [schema, setSchema] = useState<FormType | null>(form?.schema || INITIAL_SCHEMA);
+  const [processing, setProcessing] = useState(false);
+
+  const initialBuilderSchema = useRef<FormType>(form?.schema || INITIAL_SCHEMA);
 
   const handleUpdateSchema = async () => {
     if (!form || !schema) return;
     setProcessing(true);
 
     try {
-      const response = await fetch(`/api/forms/${form.id}/schema`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ schema }),
-      });
-
-      if (response.ok) {
-        toast.success('Schema updated successfully');
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update schema');
-      }
+      await api.forms.updateSchema(form.id, { schema });
+      toast.success('Schema updated successfully');
     } catch (error: unknown) {
       console.error('Error updating schema:', error);
       toast.error((error as Error).message || 'Failed to update schema');
@@ -77,18 +51,10 @@ function FormsSchema() {
     }
   };
 
-  if (loading) {
-    return (
-      <AppLayout>
-        <div>Loading...</div>
-      </AppLayout>
-    );
-  }
-
   if (!form) {
     return (
       <AppLayout>
-        <div>Form not found</div>
+        <LoadingSpinner text="Form not found" />
       </AppLayout>
     );
   }
@@ -112,15 +78,11 @@ function FormsSchema() {
     <AppLayout breadcrumbs={breadcrumbs}>
       <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>
         <Container className="py-4">
-          {/* Header */}
-          <div className="text-center mb-5">
-            <Badge bg="secondary" className="mb-3 d-inline-flex align-items-center">
-              <Code size={16} className="me-2" />
-              Form Builder
-            </Badge>
-            <h1 className="display-6 fw-bold text-dark">Design Your Form</h1>
-            <p className="lead text-muted">Use our drag-and-drop builder to create and customize your form</p>
-          </div>
+          <PageHeader
+            badge={{ icon: Code, text: 'Form Builder' }}
+            title="Design Your Form"
+            description="Use our drag-and-drop builder to create and customize your form"
+          />
 
           {/* Actions Card */}
           <Card className="shadow-sm border-0 mb-4">
@@ -185,7 +147,7 @@ function FormsSchema() {
             </Card.Header>
             <Card.Body className="px-2">
               <div style={{ minHeight: '600px' }}>
-                {builderReady && <FormBuilder initialForm={initialBuilderSchema.current} onChange={(form) => setSchema(form)} />}
+                <FormBuilder initialForm={initialBuilderSchema.current} onChange={(form) => setSchema(form)} />
               </div>
             </Card.Body>
           </Card>
@@ -247,23 +209,3 @@ function FormsSchema() {
     </AppLayout>
   );
 }
-
-export const Route = createFileRoute('/forms/$formId/schema')({
-  loader: async ({ params }) => {
-    try {
-      const response = await fetch(`/api/forms/${params.formId}`, {
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return { form: data.data || data };
-      } else {
-        throw new Error('Failed to fetch form');
-      }
-    } catch (error) {
-      console.error('Error fetching form:', error);
-      throw error;
-    }
-  },
-  component: FormsSchema,
-});

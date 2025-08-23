@@ -1,10 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useAuth } from '@/hooks/useAuth';
+import { FormEvent, useState } from 'react';
+
+import { LoadingSpinner } from '@/components/loading-spinner';
+import { PageHeader } from '@/components/page-header';
+import { useAuth } from '@/hooks/use-auth';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
 import { AlertTriangle, CheckCircle, Mail, Shield, Trash2, User } from 'lucide-react';
-import { FormEvent, useState } from 'react';
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -26,7 +29,7 @@ function SettingsProfile() {
     email: user?.email || '',
   });
   const [processing, setProcessing] = useState(false);
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [recentlySuccessful, setRecentlySuccessful] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -56,11 +59,7 @@ function SettingsProfile() {
   if (!user) {
     return (
       <AppLayout breadcrumbs={breadcrumbs}>
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
+        <LoadingSpinner />
       </AppLayout>
     );
   }
@@ -69,14 +68,11 @@ function SettingsProfile() {
     <AppLayout breadcrumbs={breadcrumbs}>
       <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>
         <Container className="py-5">
-          <div className="text-center mb-5">
-            <Badge bg="secondary" className="mb-3 d-inline-flex align-items-center">
-              <User size={16} className="me-2" />
-              Profile Settings
-            </Badge>
-            <h1 className="display-6 fw-bold text-dark">Manage Your Profile</h1>
-            <p className="lead text-muted">Update your personal information and account preferences</p>
-          </div>
+          <PageHeader
+            badge={{ icon: User, text: 'Profile Settings' }}
+            title="Manage Your Profile"
+            description="Update your personal information and account preferences"
+          />
 
           <SettingsLayout>
             <Row className="g-4">

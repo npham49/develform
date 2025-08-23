@@ -1,0 +1,10 @@
+---
+description: Server rules
+globs: server/**
+alwaysApply: false
+---
+
+- if a db access call is new or needed, look in the `services` folder for any data access functions preexisting, if does not exist then add it
+- always use functional programming and do not use classes
+- always declare handlers in routes functions, as is Hono's best practices
+- if common functions across multiple files needed, declare a new helper in `lib`

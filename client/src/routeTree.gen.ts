@@ -22,7 +22,7 @@ import { Route as FormsFormIdSubmitRouteImport } from './routes/forms/$formId/su
 import { Route as FormsFormIdSchemaRouteImport } from './routes/forms/$formId/schema'
 import { Route as FormsFormIdPreviewRouteImport } from './routes/forms/$formId/preview'
 import { Route as FormsFormIdManageRouteImport } from './routes/forms/$formId/manage'
-import { Route as FormsFormIdSubmitSuccessSubmissionIdRouteImport } from './routes/forms/$formId/submit.success.$submissionId'
+import { Route as FormsFormIdSuccessSubmissionIdRouteImport } from './routes/forms/$formId/success.$submissionId'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
@@ -89,11 +89,11 @@ const FormsFormIdManageRoute = FormsFormIdManageRouteImport.update({
   path: '/forms/$formId/manage',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FormsFormIdSubmitSuccessSubmissionIdRoute =
-  FormsFormIdSubmitSuccessSubmissionIdRouteImport.update({
-    id: '/success/$submissionId',
-    path: '/success/$submissionId',
-    getParentRoute: () => FormsFormIdSubmitRoute,
+const FormsFormIdSuccessSubmissionIdRoute =
+  FormsFormIdSuccessSubmissionIdRouteImport.update({
+    id: '/forms/$formId/success/$submissionId',
+    path: '/forms/$formId/success/$submissionId',
+    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -109,8 +109,8 @@ export interface FileRoutesByFullPath {
   '/forms/$formId/manage': typeof FormsFormIdManageRoute
   '/forms/$formId/preview': typeof FormsFormIdPreviewRoute
   '/forms/$formId/schema': typeof FormsFormIdSchemaRoute
-  '/forms/$formId/submit': typeof FormsFormIdSubmitRouteWithChildren
-  '/forms/$formId/submit/success/$submissionId': typeof FormsFormIdSubmitSuccessSubmissionIdRoute
+  '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
+  '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -125,8 +125,8 @@ export interface FileRoutesByTo {
   '/forms/$formId/manage': typeof FormsFormIdManageRoute
   '/forms/$formId/preview': typeof FormsFormIdPreviewRoute
   '/forms/$formId/schema': typeof FormsFormIdSchemaRoute
-  '/forms/$formId/submit': typeof FormsFormIdSubmitRouteWithChildren
-  '/forms/$formId/submit/success/$submissionId': typeof FormsFormIdSubmitSuccessSubmissionIdRoute
+  '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
+  '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,8 +142,8 @@ export interface FileRoutesById {
   '/forms/$formId/manage': typeof FormsFormIdManageRoute
   '/forms/$formId/preview': typeof FormsFormIdPreviewRoute
   '/forms/$formId/schema': typeof FormsFormIdSchemaRoute
-  '/forms/$formId/submit': typeof FormsFormIdSubmitRouteWithChildren
-  '/forms/$formId/submit/success/$submissionId': typeof FormsFormIdSubmitSuccessSubmissionIdRoute
+  '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
+  '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,7 +161,7 @@ export interface FileRouteTypes {
     | '/forms/$formId/preview'
     | '/forms/$formId/schema'
     | '/forms/$formId/submit'
-    | '/forms/$formId/submit/success/$submissionId'
+    | '/forms/$formId/success/$submissionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -177,7 +177,7 @@ export interface FileRouteTypes {
     | '/forms/$formId/preview'
     | '/forms/$formId/schema'
     | '/forms/$formId/submit'
-    | '/forms/$formId/submit/success/$submissionId'
+    | '/forms/$formId/success/$submissionId'
   id:
     | '__root__'
     | '/'
@@ -193,7 +193,7 @@ export interface FileRouteTypes {
     | '/forms/$formId/preview'
     | '/forms/$formId/schema'
     | '/forms/$formId/submit'
-    | '/forms/$formId/submit/success/$submissionId'
+    | '/forms/$formId/success/$submissionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -208,7 +208,8 @@ export interface RootRouteChildren {
   FormsFormIdManageRoute: typeof FormsFormIdManageRoute
   FormsFormIdPreviewRoute: typeof FormsFormIdPreviewRoute
   FormsFormIdSchemaRoute: typeof FormsFormIdSchemaRoute
-  FormsFormIdSubmitRoute: typeof FormsFormIdSubmitRouteWithChildren
+  FormsFormIdSubmitRoute: typeof FormsFormIdSubmitRoute
+  FormsFormIdSuccessSubmissionIdRoute: typeof FormsFormIdSuccessSubmissionIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -304,12 +305,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FormsFormIdManageRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forms/$formId/submit/success/$submissionId': {
-      id: '/forms/$formId/submit/success/$submissionId'
-      path: '/success/$submissionId'
-      fullPath: '/forms/$formId/submit/success/$submissionId'
-      preLoaderRoute: typeof FormsFormIdSubmitSuccessSubmissionIdRouteImport
-      parentRoute: typeof FormsFormIdSubmitRoute
+    '/forms/$formId/success/$submissionId': {
+      id: '/forms/$formId/success/$submissionId'
+      path: '/forms/$formId/success/$submissionId'
+      fullPath: '/forms/$formId/success/$submissionId'
+      preLoaderRoute: typeof FormsFormIdSuccessSubmissionIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -324,18 +325,6 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
-interface FormsFormIdSubmitRouteChildren {
-  FormsFormIdSubmitSuccessSubmissionIdRoute: typeof FormsFormIdSubmitSuccessSubmissionIdRoute
-}
-
-const FormsFormIdSubmitRouteChildren: FormsFormIdSubmitRouteChildren = {
-  FormsFormIdSubmitSuccessSubmissionIdRoute:
-    FormsFormIdSubmitSuccessSubmissionIdRoute,
-}
-
-const FormsFormIdSubmitRouteWithChildren =
-  FormsFormIdSubmitRoute._addFileChildren(FormsFormIdSubmitRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
@@ -348,7 +337,8 @@ const rootRouteChildren: RootRouteChildren = {
   FormsFormIdManageRoute: FormsFormIdManageRoute,
   FormsFormIdPreviewRoute: FormsFormIdPreviewRoute,
   FormsFormIdSchemaRoute: FormsFormIdSchemaRoute,
-  FormsFormIdSubmitRoute: FormsFormIdSubmitRouteWithChildren,
+  FormsFormIdSubmitRoute: FormsFormIdSubmitRoute,
+  FormsFormIdSuccessSubmissionIdRoute: FormsFormIdSuccessSubmissionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,39 +1,44 @@
-import { createFileRoute, useLoaderData } from '@tanstack/react-router';
-import { useParams } from '@tanstack/react-router';
+import { createFileRoute, useLoaderData, useParams } from '@tanstack/react-router';
+import { useRef, useState } from 'react';
+
+import { PageHeader } from '@/components/page-header';
 import AppLayout from '@/layouts/app-layout';
+import { api } from '@/lib/api';
+import type { SubmissionDetail } from '@/types/api';
 import { Form as FormioForm } from '@formio/react';
 import { CheckCircle, Copy, Download, Shield, User } from 'lucide-react';
-import { useRef, useState } from 'react';
 import { Alert, Badge, Button, Card, Container } from 'react-bootstrap';
 
-interface SubmitSuccessProps {
-  submission_id?: number;
-  form_name?: string;
-  submission_data?: Record<string, unknown>;
-  schema?: string;
-  created_at?: string;
-  token?: string;
-  submitter_information?: {
-    name: string;
-    email: string;
-  };
-  is_form_owner?: boolean;
-}
+export const Route = createFileRoute('/forms/$formId/success/$submissionId')({
+  loader: async ({ params, location }) => {
+    try {
+      const searchParams = new URLSearchParams(location.search);
+      const token = searchParams.get('token') || undefined;
 
-function FormsSuccess({
-  submission_id,
-  schema,
-}: SubmitSuccessProps = {}) {
-  const { submission } = useLoaderData({ from: '/forms/$formId/submit/success/$submissionId' });
-  const { formId, submissionId } = useParams({ from: '/forms/$formId/submit/success/$submissionId' });
-  const formSchema = useRef(schema ? JSON.parse(schema) : (submission?.schema || {}));
+      const response = await api.submissions.get(parseInt(params.submissionId), token);
+
+      return { submission: response.data };
+    } catch (error) {
+      console.error('Error fetching submission:', error);
+      throw error;
+    }
+  },
+  staleTime: 0, // Always refetch
+  gcTime: 0, // Don't cache
+  component: FormsSuccess,
+});
+
+function FormsSuccess() {
+  const { submission } = useLoaderData({ from: '/forms/$formId/success/$submissionId' }) as { submission: SubmissionDetail };
+  const { formId, submissionId } = useParams({ from: '/forms/$formId/success/$submissionId' });
+  const formSchema = useRef(submission?.schema || { components: [] });
   const [copied, setCopied] = useState(false);
 
-  const actualSubmissionId = submission_id || submission?.id || (submissionId ? parseInt(submissionId) : null);
+  const actualSubmissionId = submission?.id || (submissionId ? parseInt(submissionId) : null);
   const submissionDetails = submission;
 
   const submissionUrl = submission?.token
-    ? `${window.location.origin}/forms/${formId}/submit/success/${actualSubmissionId}?token=${submission.token}`
+    ? `${window.location.origin}/forms/${formId}/success/${actualSubmissionId}?token=${submission.token}`
     : window.location.href;
 
   const copyToClipboard = () => {
@@ -60,29 +65,22 @@ function FormsSuccess({
       <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>
         <Container className="d-flex align-items-center justify-content-center min-vh-100">
           <div className="w-100">
-            {/* Success Header */}
-            <div className="text-center mb-2">
-              <Badge bg="success" className="my-3 d-inline-flex align-items-center">
-                <CheckCircle size={16} className="me-2" />
-                Submission Successful
-              </Badge>
-              <h1 className="display-6 fw-bold text-dark">Thank You!</h1>
-            </div>
+            <PageHeader badge={{ icon: CheckCircle, text: 'Submission Successful', variant: 'success' }} title="Thank You!" />
             {/* Status Alerts */}
             <div className="mt-4">
               <Alert variant="success" className="d-flex align-items-start">
                 <CheckCircle size={20} className="me-2 flex-shrink-0" />
                 <div>
-                  <strong>Submission Confirmed:</strong> Your response for {submissionDetails.form_name} has been successfully recorded and processed.
+                  <strong>Submission Confirmed:</strong> Your response for {submissionDetails.formName} has been successfully recorded and processed.
                 </div>
               </Alert>
 
-              {submissionDetails.is_form_owner && (
+              {submissionDetails.isFormOwner && (
                 <Alert variant="info" className="d-flex align-items-start">
                   <User size={20} className="me-2 mt-1 flex-shrink-0" />
                   <div>
-                    <strong>Form Owner Notice:</strong> This submission was made by {submissionDetails.submitter_information?.name ?? 'Anonymous'} (
-                    {submissionDetails.submitter_information?.email ?? 'Anonymous'})
+                    <strong>Form Owner Notice:</strong> This submission was made by {submissionDetails.submitterInformation?.name ?? 'Anonymous'} (
+                    {submissionDetails.submitterInformation?.email ?? 'Anonymous'})
                   </div>
                 </Alert>
               )}
@@ -102,7 +100,11 @@ function FormsSuccess({
                 <div className="d-flex align-items-center">
                   <span className="text-muted">Submission ID:</span>
                   <Badge bg="light" text="dark" className="fw-bold">
-                    #{submissionDetails.submission_id}
+                    #{submissionDetails.id}
+                  </Badge>
+                  <span className="text-muted">for Form:</span>
+                  <Badge bg="light" text="dark" className="fw-bold">
+                    {submissionDetails.formName}
                   </Badge>
                 </div>
               </Card.Header>
@@ -121,12 +123,12 @@ function FormsSuccess({
                       <div className="text-muted small mt-1">Bookmark this link to access your submission later</div>
                     </div>
                   )}
-                  {submissionDetails.submitter_information && (
+                  {submissionDetails.submitterInformation && (
                     <div className="d-flex justify-content-between align-items-center">
                       <span className="text-muted">Submitter</span>
                       <div className="text-end">
-                        <div className="fw-semibold text-dark">{submissionDetails.submitter_information.name}</div>
-                        <div className="text-muted small">{submissionDetails.submitter_information.email}</div>
+                        <div className="fw-semibold text-dark">{submissionDetails.submitterInformation.name}</div>
+                        <div className="text-muted small">{submissionDetails.submitterInformation.email}</div>
                       </div>
                     </div>
                   )}
@@ -148,17 +150,13 @@ function FormsSuccess({
               </Card.Header>
               <Card.Body className="p-4">
                 {submissionDetails && (
-                  <FormioForm
-                    src={formSchema.current}
-                    submission={{ data: submissionDetails.submission_data || submissionDetails.data }}
-                    options={{ readOnly: true }}
-                  />
+                  <FormioForm src={formSchema.current} submission={{ data: submissionDetails.data }} options={{ readOnly: true }} />
                 )}
               </Card.Body>
             </Card>
             <div className="d-flex justify-content-end align-items-center">
               <span className="text-muted">Created at: </span>
-              <span className="text-dark">{new Date(submissionDetails.created_at).toLocaleString()}</span>
+              <span className="text-dark">{new Date(submissionDetails.createdAt).toLocaleString()}</span>
             </div>
 
             {/* Footer */}
@@ -171,35 +169,3 @@ function FormsSuccess({
     </AppLayout>
   );
 }
-
-export const Route = createFileRoute('/forms/$formId/submit/success/$submissionId')({
-  loader: async ({ params, location }) => {
-    try {
-      const searchParams = new URLSearchParams(location.search);
-      const token = searchParams.get('token');
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
-      const response = await fetch(`/api/submissions/${params.submissionId}`, {
-        headers,
-        credentials: 'include',
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        return { submission: data.data || data };
-      } else {
-        throw new Error('Failed to fetch submission');
-      }
-    } catch (error) {
-      console.error('Error fetching submission:', error);
-      throw error;
-    }
-  },
-  component: FormsSuccess,
-});

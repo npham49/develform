@@ -1,35 +1,26 @@
 import { Hono } from 'hono';
-import { eq } from 'drizzle-orm';
-import { db } from '../db/index.js';
-import { users } from '../db/schema.js';
-import { authMiddleware } from '../middleware/auth.js';
 import { z } from 'zod';
+import { db } from '../db/index.js';
+import { authMiddleware } from '../middleware/auth.js';
+import * as authService from '../services/auth.js';
 
 const settingsRoutes = new Hono();
 
-// Validation schemas
+// Validation schema for profile updates
 const updateProfileSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email').optional(),
 });
 
-// Get user profile
+/**
+ * Retrieves current user's profile information
+ * Returns safe user data for settings page display
+ */
 settingsRoutes.get('/profile', authMiddleware, async (c) => {
   try {
     const user = c.get('jwtPayload').user;
-    
-    const userProfile = await db
-      .select({
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        githubId: users.githubId,
-        avatarUrl: users.avatarUrl,
-        createdAt: users.createdAt,
-      })
-      .from(users)
-      .where(eq(users.id, user.id))
-      .limit(1);
+
+    const userProfile = await authService.getUserProfile(db, user.id);
 
     if (userProfile.length === 0) {
       return c.json({ error: 'User not found' }, 404);
@@ -42,28 +33,18 @@ settingsRoutes.get('/profile', authMiddleware, async (c) => {
   }
 });
 
-// Update user profile
+/**
+ * Updates user profile information (name and email)
+ * Validates input and returns updated data for immediate UI refresh
+ */
 settingsRoutes.patch('/profile', authMiddleware, async (c) => {
   try {
     const user = c.get('jwtPayload').user;
     const body = await c.req.json();
-    
+
     const validatedData = updateProfileSchema.parse(body);
 
-    const updatedUser = await db
-      .update(users)
-      .set({
-        ...validatedData,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, user.id))
-      .returning({
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        githubId: users.githubId,
-        avatarUrl: users.avatarUrl,
-      });
+    const updatedUser = await authService.updateUserProfile(db, user.id, validatedData);
 
     return c.json({ data: updatedUser[0] });
   } catch (error) {
@@ -75,14 +56,17 @@ settingsRoutes.patch('/profile', authMiddleware, async (c) => {
   }
 });
 
-// Delete user account
+/**
+ * Permanently deletes the user account and all associated data
+ * This action is irreversible and removes all forms and submissions
+ */
 settingsRoutes.delete('/profile', authMiddleware, async (c) => {
   try {
     const user = c.get('jwtPayload').user;
 
     // Note: In a real application, you might want to handle this more gracefully
     // by anonymizing data instead of hard deleting, depending on your data retention policies
-    await db.delete(users).where(eq(users.id, user.id));
+    await authService.deleteUser(db, user.id);
 
     return c.json({ message: 'Account deleted successfully' });
   } catch (error) {
