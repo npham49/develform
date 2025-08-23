@@ -5,9 +5,9 @@ services:
     container_name: flowableforms_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_DATABASE}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: develform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - '${DB_PORT:-5432}:5432'
@@ -17,33 +17,13 @@ services:
     networks:
       - flowableforms_network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}']
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d develform']
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Redis Cache/Store
-  redis:
-    image: redis:8-alpine
-    container_name: flowableforms_redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
-    ports:
-      - '${REDIS_PORT}:6379'
-    volumes:
-      - redis_data:/data
-    networks:
-      - flowableforms_network
-    healthcheck:
-      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
-      interval: 10s
-      timeout: 3s
-      retries: 5
-
 volumes:
   postgres_data:
-    driver: local
-  redis_data:
     driver: local
 
 networks:
