@@ -11,6 +11,7 @@ const submissionRoutes = new Hono();
 // Validation schema for new submissions
 const createSubmissionSchema = z.object({
   formId: z.number(),
+  versionSha: z.string(),
   data: z.any(),
 });
 
@@ -66,7 +67,14 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
         formId: data.submission.formId,
         formName: data.form?.name,
         data: data.submission.data,
-        schema: data.form?.schema,
+        schema: data.version?.schema || data.form?.schema,
+        versionSha: data.submission.versionSha,
+        version: data.version
+          ? {
+              sha: data.version.versionSha,
+              description: data.version.description,
+            }
+          : null,
         createdAt: data.submission.createdAt,
         isFormOwner: user?.id === data.form?.createdBy,
         submitterInformation: data.creator
@@ -155,6 +163,7 @@ submissionRoutes.post('/form/:formId', optionalAuthMiddleware, async (c) => {
     // Create submission
     const newSubmission = await submissionsService.createSubmission(db, {
       formId: formId,
+      versionSha: validatedData.versionSha,
       data: validatedData.data,
       createdBy: user?.id || null,
       updatedBy: user?.id || null,
@@ -186,7 +195,7 @@ submissionRoutes.post('/form/:formId', optionalAuthMiddleware, async (c) => {
     );
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return c.json({ error: 'Validation failed', errors: error.errors }, 400);
+      return c.json({ error: 'Validation failed', errors: error.issues }, 400);
     }
     console.error('Error creating submission:', error);
     return c.json({ error: 'Failed to create submission' }, 500);

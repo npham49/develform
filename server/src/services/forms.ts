@@ -1,6 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 import type { Database } from '../db/index';
-import { forms, submissions, users } from '../db/schema';
+import { forms, formVersions, submissions, users } from '../db/schema';
+import { createVersion } from './versions';
 
 /**
  * Retrieves all forms created by a specific user
@@ -29,25 +30,31 @@ export const getFormById = async (db: Database, formId: number) => {
 };
 
 /**
- * Retrieves form data needed for public submission
- * Returns only essential fields: id, name, schema, and visibility
+ * Retrieves form data needed for public submission with live version schema
+ * Returns form info with current published version schema and SHA
  */
 export const getFormForSubmission = async (db: Database, formId: number) => {
   return await db
     .select({
       id: forms.id,
       name: forms.name,
-      schema: forms.schema,
       isPublic: forms.isPublic,
+      liveVersionId: forms.liveVersionId,
+      liveVersion: {
+        id: formVersions.id,
+        versionSha: formVersions.versionSha,
+        schema: formVersions.schema,
+      },
     })
     .from(forms)
+    .leftJoin(formVersions, eq(forms.liveVersionId, formVersions.id))
     .where(eq(forms.id, formId))
     .limit(1);
 };
 
 /**
- * Creates a new form with the authenticated user as owner
- * Sets both createdBy and updatedBy to current user ID
+ * Creates a new form with the authenticated user as owner and initial version
+ * Sets both createdBy and updatedBy to current user ID, creates first version
  */
 export const createForm = async (
   db: Database,
@@ -59,14 +66,50 @@ export const createForm = async (
   },
   userId: number,
 ) => {
-  return await db
-    .insert(forms)
-    .values({
-      ...formData,
-      createdBy: userId,
-      updatedBy: userId,
-    })
-    .returning();
+  return await db.transaction(async (tx) => {
+    // Create the form without schema (stored in versions)
+    const newForm = await tx
+      .insert(forms)
+      .values({
+        name: formData.name,
+        description: formData.description,
+        isPublic: formData.isPublic,
+        createdBy: userId,
+        updatedBy: userId,
+      })
+      .returning();
+
+    if (newForm.length === 0) {
+      throw new Error('Failed to create form');
+    }
+
+    // Create initial version if schema is provided
+    if (formData.schema) {
+      const initialVersion = await createVersion(
+        tx,
+        {
+          formId: newForm[0].id,
+          description: 'Initial version',
+          schema: formData.schema,
+          isPublished: true,
+        },
+        userId,
+      );
+
+      // Update form with live version reference
+      await tx
+        .update(forms)
+        .set({
+          liveVersionId: initialVersion[0].id,
+          updatedAt: new Date(),
+        })
+        .where(eq(forms.id, newForm[0].id));
+
+      return newForm;
+    }
+
+    return newForm;
+  });
 };
 
 /**
@@ -108,19 +151,20 @@ export const updateForm = async (
 };
 
 /**
- * Updates only the form schema/structure
- * Separate endpoint for schema updates to handle large JSON payloads
+ * Creates a new version with updated schema
+ * Schema updates now create new versions instead of modifying forms directly
  */
-export const updateFormSchema = async (db: Database, formId: number, userId: number, schema: unknown) => {
-  return await db
-    .update(forms)
-    .set({
+export const updateFormSchema = async (db: Database, formId: number, userId: number, schema: unknown, description?: string, publish = false) => {
+  return await createVersion(
+    db,
+    {
+      formId,
+      description: description || 'Schema update',
       schema,
-      updatedBy: userId,
-      updatedAt: new Date(),
-    })
-    .where(eq(forms.id, formId))
-    .returning();
+      isPublished: publish,
+    },
+    userId,
+  );
 };
 
 /**

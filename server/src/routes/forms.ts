@@ -111,7 +111,8 @@ formRoutes.get('/:id/submit', optionalAuthMiddleware, async (c) => {
       data: {
         id: formData.id,
         name: formData.name,
-        schema: formData.schema,
+        schema: formData.liveVersion?.schema || null,
+        versionSha: formData.liveVersion?.versionSha || null,
       },
     });
   } catch (error) {
@@ -136,7 +137,7 @@ formRoutes.post('/', authMiddleware, async (c) => {
     return c.json({ data: newForm[0] }, 201);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return c.json({ error: 'Validation failed', errors: error.errors }, 400);
+      return c.json({ error: 'Validation failed', errors: error.issues }, 400);
     }
     console.error('Error creating form:', error);
     return c.json({ error: 'Failed to create form' }, 500);
@@ -171,7 +172,7 @@ formRoutes.patch('/:id', authMiddleware, async (c) => {
     return c.json({ data: updatedForm[0] });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return c.json({ error: 'Validation failed', errors: error.errors }, 400);
+      return c.json({ error: 'Validation failed', errors: error.issues }, 400);
     }
     console.error('Error updating form:', error);
     return c.json({ error: 'Failed to update form' }, 500);
@@ -210,7 +211,7 @@ formRoutes.patch('/:id/schema', authMiddleware, async (c) => {
     return c.json({ data: updatedForm[0] });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return c.json({ error: 'Validation failed', errors: error.errors }, 400);
+      return c.json({ error: 'Validation failed', errors: error.issues }, 400);
     }
     console.error('Error updating form schema:', error);
     return c.json({ error: 'Failed to update form schema' }, 500);

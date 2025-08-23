@@ -49,7 +49,7 @@ settingsRoutes.patch('/profile', authMiddleware, async (c) => {
     return c.json({ data: updatedUser[0] });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return c.json({ error: 'Validation failed', errors: error.errors }, 400);
+      return c.json({ error: 'Validation failed', errors: error.issues }, 400);
     }
     console.error('Error updating profile:', error);
     return c.json({ error: 'Failed to update profile' }, 500);

@@ -8,6 +8,7 @@ import authRoutes from './routes/auth';
 import formRoutes from './routes/forms';
 import settingsRoutes from './routes/settings';
 import submissionRoutes from './routes/submissions';
+import versionRoutes from './routes/versions';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.route('/api/auth', authRoutes);
 app.route('/api/forms', formRoutes);
 app.route('/api/submissions', submissionRoutes);
 app.route('/api/settings', settingsRoutes);
+app.route('/api', versionRoutes);
 
 const port = parseInt(process.env.PORT || '3001');
 

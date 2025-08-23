@@ -1,10 +1,10 @@
 import { and, eq } from 'drizzle-orm';
 import type { Database } from '../db/index';
-import { forms, submissions, submissionTokens, users } from '../db/schema';
+import { forms, formVersions, submissions, submissionTokens, users } from '../db/schema';
 
 /**
- * Retrieves a submission with associated form and creator data
- * Used for displaying submission details with full context
+ * Retrieves a submission with associated form, version, and creator data
+ * Used for displaying submission details with full context including version info
  */
 export const getSubmissionById = async (db: Database, submissionId: number) => {
   return await db
@@ -12,10 +12,17 @@ export const getSubmissionById = async (db: Database, submissionId: number) => {
       submission: submissions,
       form: forms,
       creator: users,
+      version: {
+        id: formVersions.id,
+        versionSha: formVersions.versionSha,
+        description: formVersions.description,
+        schema: formVersions.schema,
+      },
     })
     .from(submissions)
     .leftJoin(forms, eq(submissions.formId, forms.id))
     .leftJoin(users, eq(submissions.createdBy, users.id))
+    .leftJoin(formVersions, eq(submissions.versionSha, formVersions.versionSha))
     .where(eq(submissions.id, submissionId))
     .limit(1);
 };
@@ -58,13 +65,14 @@ export const getFormByIdForSubmission = async (db: Database, formId: number) => 
 };
 
 /**
- * Creates a new form submission
- * Links to user if authenticated, allows anonymous submissions
+ * Creates a new form submission with version tracking
+ * Links to user if authenticated, requires version SHA for audit trail
  */
 export const createSubmission = async (
   db: Database,
   submissionData: {
     formId: number;
+    versionSha: string;
     data: unknown;
     createdBy?: number | null;
     updatedBy?: number | null;
