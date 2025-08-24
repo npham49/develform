@@ -32,6 +32,28 @@ export interface UserProfile {
   createdAt: string;
 }
 
+// Version types
+export interface FormVersion {
+  id: number;
+  versionSha: string;
+  schema: FormType | undefined;
+  description: string | null;
+  isPublished: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  author: {
+    id: number;
+    name: string;
+    email: string | null;
+    avatarUrl: string | null;
+  };
+}
+
+export interface FormVersionWithSchema extends FormVersion {
+  schema: FormType;
+}
+
 // Form types
 export interface FormSummary {
   id: number;
@@ -62,6 +84,7 @@ export interface FormSchema {
   id: number;
   name: string;
   schema: FormType | undefined;
+  versionSha: string | null;
 }
 
 export interface Form {
@@ -96,6 +119,11 @@ export interface SubmissionDetail {
   formName: string | null;
   data: Submission | undefined;
   schema: FormType | undefined;
+  versionSha: string | null;
+  version: {
+    sha: string;
+    description: string | null;
+  } | null;
   createdAt: string;
   isFormOwner: boolean;
   submitterInformation: SubmitterInformation | null;
@@ -151,6 +179,38 @@ export interface DeleteFormResponse {
 
 export interface GetFormSubmissionsResponse {
   data: SubmissionSummary[];
+}
+
+// Version endpoints
+export interface GetFormVersionsResponse {
+  data: {
+    versions: FormVersion[];
+    liveVersion: string | null;
+  };
+}
+
+export interface CreateVersionResponse {
+  data: {
+    version: FormVersionWithSchema;
+    sha: string;
+  };
+}
+
+export interface UpdateVersionResponse {
+  data: FormVersion;
+}
+
+export interface DeleteVersionResponse {
+  message: string;
+}
+
+export interface PublishVersionResponse {
+  data: FormVersion;
+}
+
+export interface RevertVersionResponse {
+  data: FormVersion[];
+  message: string;
 }
 
 // Submission endpoints
@@ -242,10 +302,28 @@ export interface UpdateFormSchemaRequest {
 
 export interface CreateSubmissionRequest {
   formId: number;
+  versionSha: string;
   data: unknown;
 }
 
 export interface UpdateProfileRequest {
   name: string;
   email?: string;
+}
+
+// Version request types
+export interface CreateVersionRequest {
+  description?: string;
+  schema?: FormType; // Optional - server will determine base schema if not provided
+  publish?: boolean;
+  baseVersionSha?: string; // Optional base version to copy schema from
+}
+
+export interface UpdateVersionRequest {
+  description?: string;
+  schema?: unknown;
+}
+
+export interface RevertVersionRequest {
+  description?: string;
 }

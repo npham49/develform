@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { FormEvent, useState } from 'react';
 
-import { LoadingSpinner } from '@/components/loading-spinner';
-import { PageHeader } from '@/components/page-header';
+import { LoadingSpinner } from '@/components/common/loading-spinner';
+import { PageHeader } from '@/components/common/page-header';
 import { useAuth } from '@/hooks/use-auth';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';

@@ -19,10 +19,10 @@ import { Route as SettingsAppearanceRouteImport } from './routes/settings/appear
 import { Route as FormsCreateRouteImport } from './routes/forms/create'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as FormsFormIdSubmitRouteImport } from './routes/forms/$formId/submit'
-import { Route as FormsFormIdSchemaRouteImport } from './routes/forms/$formId/schema'
-import { Route as FormsFormIdPreviewRouteImport } from './routes/forms/$formId/preview'
 import { Route as FormsFormIdManageRouteImport } from './routes/forms/$formId/manage'
 import { Route as FormsFormIdSuccessSubmissionIdRouteImport } from './routes/forms/$formId/success.$submissionId'
+import { Route as FormsFormIdVersionsVersionIdPreviewRouteImport } from './routes/forms/$formId/versions/$versionId/preview'
+import { Route as FormsFormIdVersionsVersionIdEditRouteImport } from './routes/forms/$formId/versions/$versionId/edit'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
@@ -74,16 +74,6 @@ const FormsFormIdSubmitRoute = FormsFormIdSubmitRouteImport.update({
   path: '/forms/$formId/submit',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FormsFormIdSchemaRoute = FormsFormIdSchemaRouteImport.update({
-  id: '/forms/$formId/schema',
-  path: '/forms/$formId/schema',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FormsFormIdPreviewRoute = FormsFormIdPreviewRouteImport.update({
-  id: '/forms/$formId/preview',
-  path: '/forms/$formId/preview',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const FormsFormIdManageRoute = FormsFormIdManageRouteImport.update({
   id: '/forms/$formId/manage',
   path: '/forms/$formId/manage',
@@ -93,6 +83,18 @@ const FormsFormIdSuccessSubmissionIdRoute =
   FormsFormIdSuccessSubmissionIdRouteImport.update({
     id: '/forms/$formId/success/$submissionId',
     path: '/forms/$formId/success/$submissionId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FormsFormIdVersionsVersionIdPreviewRoute =
+  FormsFormIdVersionsVersionIdPreviewRouteImport.update({
+    id: '/forms/$formId/versions/$versionId/preview',
+    path: '/forms/$formId/versions/$versionId/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FormsFormIdVersionsVersionIdEditRoute =
+  FormsFormIdVersionsVersionIdEditRouteImport.update({
+    id: '/forms/$formId/versions/$versionId/edit',
+    path: '/forms/$formId/versions/$versionId/edit',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -107,10 +109,10 @@ export interface FileRoutesByFullPath {
   '/forms': typeof FormsIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/forms/$formId/manage': typeof FormsFormIdManageRoute
-  '/forms/$formId/preview': typeof FormsFormIdPreviewRoute
-  '/forms/$formId/schema': typeof FormsFormIdSchemaRoute
   '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
   '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute
+  '/forms/$formId/versions/$versionId/edit': typeof FormsFormIdVersionsVersionIdEditRoute
+  '/forms/$formId/versions/$versionId/preview': typeof FormsFormIdVersionsVersionIdPreviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -123,10 +125,10 @@ export interface FileRoutesByTo {
   '/forms': typeof FormsIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/forms/$formId/manage': typeof FormsFormIdManageRoute
-  '/forms/$formId/preview': typeof FormsFormIdPreviewRoute
-  '/forms/$formId/schema': typeof FormsFormIdSchemaRoute
   '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
   '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute
+  '/forms/$formId/versions/$versionId/edit': typeof FormsFormIdVersionsVersionIdEditRoute
+  '/forms/$formId/versions/$versionId/preview': typeof FormsFormIdVersionsVersionIdPreviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -140,10 +142,10 @@ export interface FileRoutesById {
   '/forms/': typeof FormsIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/forms/$formId/manage': typeof FormsFormIdManageRoute
-  '/forms/$formId/preview': typeof FormsFormIdPreviewRoute
-  '/forms/$formId/schema': typeof FormsFormIdSchemaRoute
   '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
   '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute
+  '/forms/$formId/versions/$versionId/edit': typeof FormsFormIdVersionsVersionIdEditRoute
+  '/forms/$formId/versions/$versionId/preview': typeof FormsFormIdVersionsVersionIdPreviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -158,10 +160,10 @@ export interface FileRouteTypes {
     | '/forms'
     | '/settings'
     | '/forms/$formId/manage'
-    | '/forms/$formId/preview'
-    | '/forms/$formId/schema'
     | '/forms/$formId/submit'
     | '/forms/$formId/success/$submissionId'
+    | '/forms/$formId/versions/$versionId/edit'
+    | '/forms/$formId/versions/$versionId/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -174,10 +176,10 @@ export interface FileRouteTypes {
     | '/forms'
     | '/settings'
     | '/forms/$formId/manage'
-    | '/forms/$formId/preview'
-    | '/forms/$formId/schema'
     | '/forms/$formId/submit'
     | '/forms/$formId/success/$submissionId'
+    | '/forms/$formId/versions/$versionId/edit'
+    | '/forms/$formId/versions/$versionId/preview'
   id:
     | '__root__'
     | '/'
@@ -190,10 +192,10 @@ export interface FileRouteTypes {
     | '/forms/'
     | '/settings/'
     | '/forms/$formId/manage'
-    | '/forms/$formId/preview'
-    | '/forms/$formId/schema'
     | '/forms/$formId/submit'
     | '/forms/$formId/success/$submissionId'
+    | '/forms/$formId/versions/$versionId/edit'
+    | '/forms/$formId/versions/$versionId/preview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -206,10 +208,10 @@ export interface RootRouteChildren {
   FormsIndexRoute: typeof FormsIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
   FormsFormIdManageRoute: typeof FormsFormIdManageRoute
-  FormsFormIdPreviewRoute: typeof FormsFormIdPreviewRoute
-  FormsFormIdSchemaRoute: typeof FormsFormIdSchemaRoute
   FormsFormIdSubmitRoute: typeof FormsFormIdSubmitRoute
   FormsFormIdSuccessSubmissionIdRoute: typeof FormsFormIdSuccessSubmissionIdRoute
+  FormsFormIdVersionsVersionIdEditRoute: typeof FormsFormIdVersionsVersionIdEditRoute
+  FormsFormIdVersionsVersionIdPreviewRoute: typeof FormsFormIdVersionsVersionIdPreviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -284,20 +286,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FormsFormIdSubmitRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forms/$formId/schema': {
-      id: '/forms/$formId/schema'
-      path: '/forms/$formId/schema'
-      fullPath: '/forms/$formId/schema'
-      preLoaderRoute: typeof FormsFormIdSchemaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forms/$formId/preview': {
-      id: '/forms/$formId/preview'
-      path: '/forms/$formId/preview'
-      fullPath: '/forms/$formId/preview'
-      preLoaderRoute: typeof FormsFormIdPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/forms/$formId/manage': {
       id: '/forms/$formId/manage'
       path: '/forms/$formId/manage'
@@ -310,6 +298,20 @@ declare module '@tanstack/react-router' {
       path: '/forms/$formId/success/$submissionId'
       fullPath: '/forms/$formId/success/$submissionId'
       preLoaderRoute: typeof FormsFormIdSuccessSubmissionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forms/$formId/versions/$versionId/preview': {
+      id: '/forms/$formId/versions/$versionId/preview'
+      path: '/forms/$formId/versions/$versionId/preview'
+      fullPath: '/forms/$formId/versions/$versionId/preview'
+      preLoaderRoute: typeof FormsFormIdVersionsVersionIdPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forms/$formId/versions/$versionId/edit': {
+      id: '/forms/$formId/versions/$versionId/edit'
+      path: '/forms/$formId/versions/$versionId/edit'
+      fullPath: '/forms/$formId/versions/$versionId/edit'
+      preLoaderRoute: typeof FormsFormIdVersionsVersionIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -335,10 +337,11 @@ const rootRouteChildren: RootRouteChildren = {
   FormsIndexRoute: FormsIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
   FormsFormIdManageRoute: FormsFormIdManageRoute,
-  FormsFormIdPreviewRoute: FormsFormIdPreviewRoute,
-  FormsFormIdSchemaRoute: FormsFormIdSchemaRoute,
   FormsFormIdSubmitRoute: FormsFormIdSubmitRoute,
   FormsFormIdSuccessSubmissionIdRoute: FormsFormIdSuccessSubmissionIdRoute,
+  FormsFormIdVersionsVersionIdEditRoute: FormsFormIdVersionsVersionIdEditRoute,
+  FormsFormIdVersionsVersionIdPreviewRoute:
+    FormsFormIdVersionsVersionIdPreviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,15 +1,41 @@
-import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect, useLoaderData } from '@tanstack/react-router';
 
-import { PageHeader } from '@/components/page-header';
-import { StatusBadge } from '@/components/status-badge';
+import { PageHeader } from '@/components/common/page-header';
+import { StatusBadge } from '@/components/common/status-badge';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
 import { type BreadcrumbItem } from '@/types';
 import type { FormSummary } from '@/types/api';
-import { Calendar, Eye, FileText, MoreVertical, Plus, Settings } from 'lucide-react';
+import { Calendar, FileText, MoreVertical, Plus, Settings } from 'lucide-react';
 import { Badge, Button, Card, Col, Container, Dropdown, Row, Table } from 'react-bootstrap';
 
 export const Route = createFileRoute('/forms/')({
+  beforeLoad: async () => {
+    // Check if user is authenticated by calling the auth API
+    try {
+      const response = await fetch('/api/auth/user', {
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw redirect({
+          to: '/auth/login',
+          search: {
+            redirect: '/forms',
+          },
+        });
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('redirect')) {
+        throw error; // Re-throw redirect
+      }
+      throw redirect({
+        to: '/auth/login',
+        search: {
+          redirect: '/forms',
+        },
+      });
+    }
+  },
   loader: async () => {
     try {
       const response = await api.forms.list();
@@ -197,16 +223,6 @@ function FormsIndex() {
                                   <MoreVertical size={14} />
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu className="z-1000">
-                                  <Dropdown.Item>
-                                    <Link
-                                      to="/forms/$formId/preview"
-                                      params={{ formId: form.id.toString() }}
-                                      className="text-decoration-none d-flex align-items-center"
-                                    >
-                                      <Eye size={14} className="me-1" />
-                                      Preview
-                                    </Link>
-                                  </Dropdown.Item>
                                   <Dropdown.Item>
                                     <Link
                                       to="/forms/$formId/submit"

@@ -1,7 +1,7 @@
 import { createFileRoute, useLoaderData, useParams } from '@tanstack/react-router';
 import { useRef, useState } from 'react';
 
-import { PageHeader } from '@/components/page-header';
+import { PageHeader } from '@/components/common/page-header';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
 import type { SubmissionDetail } from '@/types/api';

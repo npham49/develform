@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { PageHeader } from '@/components/page-header';
+import { PageHeader } from '@/components/common/page-header';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
 import { type BreadcrumbItem } from '@/types';
