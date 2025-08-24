@@ -1,15 +1,15 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { db } from '../db/index.js';
-import { authMiddleware } from '../middleware/auth.js';
-import * as authService from '../services/auth.js';
+import { db } from '../db/index';
+import { authMiddleware } from '../middleware/auth';
+import * as authService from '../services/auth';
 
 const settingsRoutes = new Hono();
 
 // Validation schema for profile updates
 const updateProfileSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email').optional(),
+  email: z.email('Invalid email').optional(),
 });
 
 /**

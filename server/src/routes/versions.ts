@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { db } from '../db/index.js';
-import { authMiddleware } from '../middleware/auth.js';
-import * as formsService from '../services/forms.js';
-import * as versionsService from '../services/versions.js';
+import { db } from '../db/index';
+import { authMiddleware } from '../middleware/auth';
+import { formWriteCheckMiddleware } from '../middleware/role';
+import * as versionsService from '../services/versions';
 
 const versionRoutes = new Hono();
 
@@ -35,20 +35,12 @@ const revertVersionSchema = z.object({
  *
  * Response: { versions: FormVersion[], liveVersion: string | null }
  */
-versionRoutes.get('/forms/:formId/versions', authMiddleware, async (c) => {
+versionRoutes.get('/forms/:formId/versions', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
-    const user = c.get('jwtPayload').user;
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
-    }
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
     const versions = await versionsService.getFormVersions(db, formId);
@@ -77,11 +69,10 @@ versionRoutes.get('/forms/:formId/versions', authMiddleware, async (c) => {
  *
  * Response: FormVersion with full schema data
  */
-versionRoutes.get('/forms/:formId/versions/:sha', authMiddleware, async (c) => {
+versionRoutes.get('/forms/:formId/versions/:sha', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
     const versionSha = c.req.param('sha');
-    const user = c.get('jwtPayload').user;
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
@@ -89,13 +80,6 @@ versionRoutes.get('/forms/:formId/versions/:sha', authMiddleware, async (c) => {
 
     if (!versionSha) {
       return c.json({ error: 'Version SHA is required' }, 400);
-    }
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
     const version = await versionsService.getVersionBySha(db, formId, versionSha);
@@ -124,7 +108,7 @@ versionRoutes.get('/forms/:formId/versions/:sha', authMiddleware, async (c) => {
  * Body: { description?, schema?, publish?, baseVersionSha? }
  * Response: { data: { version: FormVersion, sha: string } }
  */
-versionRoutes.post('/forms/:formId/versions', authMiddleware, async (c) => {
+versionRoutes.post('/forms/:formId/versions', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
     const user = c.get('jwtPayload').user;
@@ -135,13 +119,6 @@ versionRoutes.post('/forms/:formId/versions', authMiddleware, async (c) => {
     }
 
     const validatedData = createVersionSchema.parse(body);
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
-    }
 
     let baseSchema;
 
@@ -234,11 +211,10 @@ versionRoutes.post('/forms/:formId/versions', authMiddleware, async (c) => {
  * Body: { description?, schema? }
  * Response: { data: FormVersion }
  */
-versionRoutes.put('/forms/:formId/versions/:sha', authMiddleware, async (c) => {
+versionRoutes.put('/forms/:formId/versions/:sha', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
     const versionSha = c.req.param('sha');
-    const user = c.get('jwtPayload').user;
     const body = await c.req.json();
 
     if (isNaN(formId)) {
@@ -246,13 +222,6 @@ versionRoutes.put('/forms/:formId/versions/:sha', authMiddleware, async (c) => {
     }
 
     const validatedData = updateVersionSchema.parse(body);
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
-    }
 
     const updatedVersion = await versionsService.updateVersion(db, formId, versionSha, validatedData);
 
@@ -281,21 +250,13 @@ versionRoutes.put('/forms/:formId/versions/:sha', authMiddleware, async (c) => {
  *
  * Response: { data: { deleted: true } }
  */
-versionRoutes.delete('/forms/:formId/versions/:sha', authMiddleware, async (c) => {
+versionRoutes.delete('/forms/:formId/versions/:sha', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
     const versionSha = c.req.param('sha');
-    const user = c.get('jwtPayload').user;
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
-    }
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
     const result = await versionsService.deleteVersion(db, formId, versionSha);
@@ -322,21 +283,13 @@ versionRoutes.delete('/forms/:formId/versions/:sha', authMiddleware, async (c) =
  *
  * Response: { data: FormVersion }
  */
-versionRoutes.post('/forms/:formId/versions/:sha/publish', authMiddleware, async (c) => {
+versionRoutes.post('/forms/:formId/versions/:sha/publish', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
     const versionSha = c.req.param('sha');
-    const user = c.get('jwtPayload').user;
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
-    }
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
     const publishedVersion = await versionsService.publishVersion(db, formId, versionSha);
@@ -365,21 +318,13 @@ versionRoutes.post('/forms/:formId/versions/:sha/publish', authMiddleware, async
  * Body: { description? }
  * Response: { data: { message: string, deletedCount: number } }
  */
-versionRoutes.post('/forms/:formId/versions/:sha/force-reset', authMiddleware, async (c) => {
+versionRoutes.post('/forms/:formId/versions/:sha/force-reset', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
     const versionSha = c.req.param('sha');
-    const user = c.get('jwtPayload').user;
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
-    }
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
     const result = await versionsService.forceResetToVersion(db, formId, versionSha);
@@ -405,21 +350,13 @@ versionRoutes.post('/forms/:formId/versions/:sha/force-reset', authMiddleware, a
  *
  * Response: { data: FormVersion, message: string }
  */
-versionRoutes.post('/forms/:formId/versions/:sha/make-live', authMiddleware, async (c) => {
+versionRoutes.post('/forms/:formId/versions/:sha/make-live', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
     const versionSha = c.req.param('sha');
-    const user = c.get('jwtPayload').user;
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
-    }
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
     const result = await versionsService.makeVersionLive(db, formId, versionSha);
@@ -446,7 +383,7 @@ versionRoutes.post('/forms/:formId/versions/:sha/make-live', authMiddleware, asy
  * Body: { description? }
  * Response: { data: FormVersion[] }
  */
-versionRoutes.post('/forms/:formId/versions/:sha/make-latest', authMiddleware, async (c) => {
+versionRoutes.post('/forms/:formId/versions/:sha/make-latest', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
     const versionSha = c.req.param('sha');
@@ -458,13 +395,6 @@ versionRoutes.post('/forms/:formId/versions/:sha/make-latest', authMiddleware, a
     }
 
     const validatedData = revertVersionSchema.parse(body);
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
-    }
 
     const newVersion = await versionsService.makeVersionLatest(db, formId, versionSha, user.id, validatedData.description);
 

@@ -1,8 +1,9 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { db } from '../db/index.js';
-import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js';
-import * as formsService from '../services/forms.js';
+import { db } from '../db/index';
+import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth';
+import { formWriteCheckMiddleware } from '../middleware/role';
+import * as formsService from '../services/forms';
 
 const formRoutes = new Hono();
 
@@ -178,7 +179,7 @@ formRoutes.post('/', authMiddleware, async (c) => {
  * Body: { name?, description?, isPublic? }
  * Response: Updated form object
  */
-formRoutes.patch('/:id', authMiddleware, async (c) => {
+formRoutes.patch('/:id', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('id'));
     const user = c.get('jwtPayload').user;
@@ -189,13 +190,6 @@ formRoutes.patch('/:id', authMiddleware, async (c) => {
     }
 
     const validatedData = updateFormSchema.parse(body);
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
-    }
 
     const updatedForm = await formsService.updateForm(db, formId, user.id, validatedData);
 
@@ -213,20 +207,12 @@ formRoutes.patch('/:id', authMiddleware, async (c) => {
  * Permanently deletes a form and all associated data
  * Verifies ownership and handles cascading deletions
  */
-formRoutes.delete('/:id', authMiddleware, async (c) => {
+formRoutes.delete('/:id', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('id'));
-    const user = c.get('jwtPayload').user;
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
-    }
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
     await formsService.deleteForm(db, formId);
@@ -242,20 +228,12 @@ formRoutes.delete('/:id', authMiddleware, async (c) => {
  * Retrieves all submissions for a form (owner access only)
  * Returns submission data with submitter information when available
  */
-formRoutes.get('/:id/submissions', authMiddleware, async (c) => {
+formRoutes.get('/:id/submissions', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('id'));
-    const user = c.get('jwtPayload').user;
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
-    }
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
     // Get submissions for this form

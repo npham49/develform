@@ -1,10 +1,10 @@
 import { randomBytes } from 'crypto';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { db } from '../db/index.js';
-import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js';
-import * as formsService from '../services/forms.js';
-import * as submissionsService from '../services/submissions.js';
+import { db } from '../db/index';
+import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth';
+import { formWriteCheckMiddleware } from '../middleware/role';
+import * as submissionsService from '../services/submissions';
 
 const submissionRoutes = new Hono();
 
@@ -104,20 +104,12 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
  * Retrieves all submissions for a specific form (owner access only)
  * Returns submission data with creator information for analysis
  */
-submissionRoutes.get('/form/:formId', authMiddleware, async (c) => {
+submissionRoutes.get('/form/:formId', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
-    const user = c.get('jwtPayload').user;
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
-    }
-
-    // Check if user owns the form
-    const form = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (form.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
     const formSubmissions = await submissionsService.getFormSubmissionsByOwner(db, formId);
