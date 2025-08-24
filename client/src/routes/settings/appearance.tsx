@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { PageHeader } from '@/components/common/page-header';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { requireAuth } from '@/lib/auth-utils';
 import { type BreadcrumbItem } from '@/types';
 import { Monitor, Moon, Palette, Sun } from 'lucide-react';
 import { Button, Card, Container } from 'react-bootstrap';
@@ -128,6 +129,9 @@ function SettingsAppearance() {
 }
 
 export const Route = createFileRoute('/settings/appearance')({
+  beforeLoad: ({ context }) => {
+    requireAuth(context, '/settings/appearance');
+  },
   loader: async () => {
     try {
       const response = await fetch('/api/user/appearance', {

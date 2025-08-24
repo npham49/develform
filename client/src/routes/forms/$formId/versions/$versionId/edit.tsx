@@ -7,6 +7,7 @@ import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { PageHeader } from '@/components/common/page-header';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
+import { requireAuth } from '@/lib/auth-utils';
 import { createDebounce } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
 
@@ -17,6 +18,9 @@ import { Button, Card, Col, Container, Row } from 'react-bootstrap';
 export const INITIAL_SCHEMA = { title: '', name: '', path: '', display: 'form' as const, type: 'form' as const, components: [] };
 
 export const Route = createFileRoute('/forms/$formId/versions/$versionId/edit')({
+  beforeLoad: ({ context }) => {
+    requireAuth(context, window.location.pathname);
+  },
   loader: async ({ params }) => {
     try {
       const formId = parseInt(params.formId);

@@ -6,12 +6,16 @@ import { z } from 'zod';
 import { PageHeader } from '@/components/common/page-header';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
+import { requireAuth } from '@/lib/auth-utils';
 import { type BreadcrumbItem } from '@/types';
 import type { CreateFormRequest } from '@/types/api';
 import { ArrowLeft, FileText, Info, Plus } from 'lucide-react';
 import { Button, Card, Col, Container, Row } from 'react-bootstrap';
 
 export const Route = createFileRoute('/forms/create')({
+  beforeLoad: ({ context }) => {
+    requireAuth(context, '/forms/create');
+  },
   component: FormsCreate,
 });
 

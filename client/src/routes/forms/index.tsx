@@ -1,40 +1,18 @@
-import { createFileRoute, Link, redirect, useLoaderData } from '@tanstack/react-router';
+import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router';
 
 import { PageHeader } from '@/components/common/page-header';
 import { StatusBadge } from '@/components/common/status-badge';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
+import { requireAuth } from '@/lib/auth-utils';
 import { type BreadcrumbItem } from '@/types';
 import type { FormSummary } from '@/types/api';
 import { Calendar, FileText, MoreVertical, Plus, Settings } from 'lucide-react';
 import { Badge, Button, Card, Col, Container, Dropdown, Row, Table } from 'react-bootstrap';
 
 export const Route = createFileRoute('/forms/')({
-  beforeLoad: async () => {
-    // Check if user is authenticated by calling the auth API
-    try {
-      const response = await fetch('/api/auth/user', {
-        credentials: 'include',
-      });
-      if (!response.ok) {
-        throw redirect({
-          to: '/auth/login',
-          search: {
-            redirect: '/forms',
-          },
-        });
-      }
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('redirect')) {
-        throw error; // Re-throw redirect
-      }
-      throw redirect({
-        to: '/auth/login',
-        search: {
-          redirect: '/forms',
-        },
-      });
-    }
+  beforeLoad: ({ context }) => {
+    requireAuth(context, '/forms');
   },
   loader: async () => {
     try {

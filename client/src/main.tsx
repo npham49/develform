@@ -8,7 +8,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './css/app.css';
 import { initializeTheme } from './hooks/use-appearance';
-import { AuthProvider } from './hooks/use-auth';
+import { AuthProvider, useAuth } from './hooks/use-auth';
 
 // Import the generated route tree
 import { routeTree } from './routeTree.gen';
@@ -19,19 +19,20 @@ initializeTheme();
 // Create a query client
 const queryClient = new QueryClient();
 
-// Create a new router instance
-const router = createRouter({
-  routeTree,
-  context: {
-    queryClient,
-  },
-});
+// Router component that has access to auth context
+function RouterWithAuth() {
+  const auth = useAuth();
+  
+  // Create a new router instance with auth context
+  const router = createRouter({
+    routeTree,
+    context: {
+      queryClient,
+      auth,
+    },
+  });
 
-// Register the router instance for type safety
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router;
-  }
+  return <RouterProvider router={router} />;
 }
 
 const root = createRoot(document.getElementById('root')!);
@@ -41,7 +42,7 @@ root.render(
     <QueryClientProvider client={queryClient}>
       <FormioProvider projectUrl={Formio.projectUrl}>
         <AuthProvider>
-          <RouterProvider router={router} />
+          <RouterWithAuth />
         </AuthProvider>
       </FormioProvider>
     </QueryClientProvider>

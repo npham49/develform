@@ -1,7 +1,8 @@
-import { createFileRoute, Link, redirect } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 
 import { PageHeader } from '@/components/common/page-header';
 import AppLayout from '@/layouts/app-layout';
+import { requireAuth } from '@/lib/auth-utils';
 import { type BreadcrumbItem } from '@/types';
 import { BarChart3, Clock, FileText, GitBranch, TrendingUp, Users } from 'lucide-react';
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
@@ -169,31 +170,8 @@ function Dashboard() {
 }
 
 export const Route = createFileRoute('/dashboard')({
-  beforeLoad: async () => {
-    // Check if user is authenticated by calling the auth API
-    try {
-      const response = await fetch('/api/auth/user', {
-        credentials: 'include',
-      });
-      if (!response.ok) {
-        throw redirect({
-          to: '/auth/login',
-          search: {
-            redirect: '/dashboard',
-          },
-        });
-      }
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('redirect')) {
-        throw error; // Re-throw redirect
-      }
-      throw redirect({
-        to: '/auth/login',
-        search: {
-          redirect: '/dashboard',
-        },
-      });
-    }
+  beforeLoad: ({ context }) => {
+    requireAuth(context, '/dashboard');
   },
   loader: async () => {
     try {
