@@ -1,22 +1,31 @@
 import { randomBytes } from 'crypto';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { db } from '../db/index.js';
-import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js';
-import * as formsService from '../services/forms.js';
-import * as submissionsService from '../services/submissions.js';
+import { db } from '../db/index';
+import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth';
+import { formWriteCheckMiddleware } from '../middleware/role';
+import * as submissionsService from '../services/submissions';
 
 const submissionRoutes = new Hono();
 
 // Validation schema for new submissions
 const createSubmissionSchema = z.object({
   formId: z.number(),
+  versionSha: z.string(),
   data: z.any(),
 });
 
 /**
+ * GET /api/submissions/:id
+ *
  * Retrieves detailed submission data with access control
  * Allows access to form owners, submission creators, or via anonymous token
+ *
+ * Access: Form owner, submission creator, or anonymous with token
+ * Auth Required: Optional (depends on access method)
+ *
+ * Query: ?token=<string> (for anonymous access)
+ * Response: SubmissionDetail with form schema and submission data
  */
 submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
   try {
@@ -66,7 +75,14 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
         formId: data.submission.formId,
         formName: data.form?.name,
         data: data.submission.data,
-        schema: data.form?.schema,
+        schema: data.version?.schema || data.form?.schema,
+        versionSha: data.submission.versionSha,
+        version: data.version
+          ? {
+              sha: data.version.versionSha,
+              description: data.version.description,
+            }
+          : null,
         createdAt: data.submission.createdAt,
         isFormOwner: user?.id === data.form?.createdBy,
         submitterInformation: data.creator
@@ -88,20 +104,12 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
  * Retrieves all submissions for a specific form (owner access only)
  * Returns submission data with creator information for analysis
  */
-submissionRoutes.get('/form/:formId', authMiddleware, async (c) => {
+submissionRoutes.get('/form/:formId', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('formId'));
-    const user = c.get('jwtPayload').user;
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
-    }
-
-    // Check if user owns the form
-    const form = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (form.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
     const formSubmissions = await submissionsService.getFormSubmissionsByOwner(db, formId);
@@ -127,8 +135,16 @@ submissionRoutes.get('/form/:formId', authMiddleware, async (c) => {
 });
 
 /**
+ * POST /api/submissions/form/:formId
+ *
  * Creates a new submission for a form (public endpoint)
  * Supports both authenticated and anonymous submissions with token generation
+ *
+ * Access: Anyone for public forms, authenticated users for private forms
+ * Auth Required: Optional (required for private forms)
+ *
+ * Body: { formId, versionSha, data }
+ * Response: { id, token?, formId, submittedAt }
  */
 submissionRoutes.post('/form/:formId', optionalAuthMiddleware, async (c) => {
   try {
@@ -155,6 +171,7 @@ submissionRoutes.post('/form/:formId', optionalAuthMiddleware, async (c) => {
     // Create submission
     const newSubmission = await submissionsService.createSubmission(db, {
       formId: formId,
+      versionSha: validatedData.versionSha,
       data: validatedData.data,
       createdBy: user?.id || null,
       updatedBy: user?.id || null,
@@ -186,7 +203,7 @@ submissionRoutes.post('/form/:formId', optionalAuthMiddleware, async (c) => {
     );
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return c.json({ error: 'Validation failed', errors: error.errors }, 400);
+      return c.json({ error: 'Validation failed', errors: error.issues }, 400);
     }
     console.error('Error creating submission:', error);
     return c.json({ error: 'Failed to create submission' }, 500);

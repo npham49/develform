@@ -1,4 +1,4 @@
-import { boolean, integer, jsonb, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import { boolean, index, integer, jsonb, pgTable, serial, text, timestamp, unique } from 'drizzle-orm/pg-core';
 
 // Users table
 export const users = pgTable('users', {
@@ -21,6 +21,7 @@ export const forms = pgTable('forms', {
   description: text('description'),
   isPublic: boolean('is_public').default(true),
   schema: jsonb('schema'),
+  liveVersionId: integer('live_version_id'),
   createdBy: integer('created_by')
     .references(() => users.id)
     .notNull(),
@@ -31,12 +32,40 @@ export const forms = pgTable('forms', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+// Form versions table
+export const formVersions = pgTable(
+  'form_versions',
+  {
+    id: serial('id').primaryKey(),
+    formId: integer('form_id')
+      .references(() => forms.id, { onDelete: 'cascade' })
+      .notNull(),
+    versionSha: text('version_sha').notNull(),
+    description: text('description'),
+    schema: jsonb('schema').notNull(),
+    isPublished: boolean('is_published').default(false),
+    publishedAt: timestamp('published_at'),
+    metadata: jsonb('metadata'),
+    createdBy: integer('created_by')
+      .references(() => users.id)
+      .notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  (table) => [
+    index('idx_form_versions_form_id').on(table.formId),
+    index('idx_form_versions_published').on(table.formId, table.isPublished),
+    unique('form_versions_version_sha_unique').on(table.versionSha),
+  ],
+);
+
 // Submissions table
 export const submissions = pgTable('submissions', {
   id: serial('id').primaryKey(),
   formId: integer('form_id')
     .references(() => forms.id, { onDelete: 'cascade' })
     .notNull(),
+  versionSha: text('version_sha').references(() => formVersions.versionSha),
   data: jsonb('data').notNull(),
   createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
   updatedBy: integer('updated_by').references(() => users.id, { onDelete: 'set null' }),
@@ -70,6 +99,8 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Form = typeof forms.$inferSelect;
 export type NewForm = typeof forms.$inferInsert;
+export type FormVersion = typeof formVersions.$inferSelect;
+export type NewFormVersion = typeof formVersions.$inferInsert;
 export type Submission = typeof submissions.$inferSelect;
 export type NewSubmission = typeof submissions.$inferInsert;
 export type SubmissionToken = typeof submissionTokens.$inferSelect;

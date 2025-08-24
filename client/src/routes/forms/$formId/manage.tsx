@@ -1,22 +1,56 @@
-import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect, useLoaderData } from '@tanstack/react-router';
 
-import { IconCard } from '@/components/icon-card';
-import { PageHeader } from '@/components/page-header';
-import { StatusBadge } from '@/components/status-badge';
+import { IconCard } from '@/components/common/icon-card';
+import { PageHeader } from '@/components/common/page-header';
+import { StatusBadge } from '@/components/common/status-badge';
+import { CreateVersionButton } from '@/components/versions/create-version-button';
+import { EnhancedVersionHistoryTree } from '@/components/versions/enhanced-version-history-tree';
+import { VersionAnalyticsDashboard } from '@/components/versions/version-analytics-dashboard';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
 import { type BreadcrumbItem } from '@/types';
-import type { FormWithCreator } from '@/types/api';
+import type { FormVersion, FormWithCreator } from '@/types/api';
 import { ArrowLeft, BarChart3, Calendar, Edit3, Eye, FileText, Send, Settings } from 'lucide-react';
 import { Button, Card, Col, Container, Row } from 'react-bootstrap';
 
 export const Route = createFileRoute('/forms/$formId/manage')({
+  beforeLoad: async () => {
+    // Check if user is authenticated by calling the auth API
+    try {
+      const response = await fetch('/api/auth/user', {
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw redirect({
+          to: '/auth/login',
+          search: {
+            redirect: window.location.pathname,
+          },
+        });
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('redirect')) {
+        throw error; // Re-throw redirect
+      }
+      throw redirect({
+        to: '/auth/login',
+        search: {
+          redirect: window.location.pathname,
+        },
+      });
+    }
+  },
   loader: async ({ params }) => {
     try {
-      const response = await api.forms.get(parseInt(params.formId));
-      return { form: response.data };
+      const formId = parseInt(params.formId);
+      const [formResponse, versionsResponse] = await Promise.all([api.forms.get(formId), api.versions.list(formId)]);
+      return {
+        form: formResponse.data,
+        versions: versionsResponse.data.versions,
+        liveVersionSha: versionsResponse.data.liveVersion,
+      };
     } catch (error) {
-      console.error('Error fetching form:', error);
+      console.error('Error fetching form data:', error);
       throw error;
     }
   },
@@ -26,7 +60,11 @@ export const Route = createFileRoute('/forms/$formId/manage')({
 });
 
 function FormsManage() {
-  const { form } = useLoaderData({ from: '/forms/$formId/manage' }) as { form: FormWithCreator };
+  const { form, versions, liveVersionSha } = useLoaderData({ from: '/forms/$formId/manage' }) as {
+    form: FormWithCreator;
+    versions: FormVersion[];
+    liveVersionSha: string | null;
+  };
 
   if (!form) {
     return (
@@ -124,18 +162,50 @@ function FormsManage() {
                 </Card.Header>
                 <Card.Body className="p-4">
                   <div className="d-flex flex-column gap-3">
-                    <Link to="/forms/$formId/schema" params={{ formId: form.id.toString() }} className="text-decoration-none">
-                      <Button variant="primary" className="w-100 d-flex align-items-center">
-                        <Edit3 size={18} className="me-2" />
-                        Edit Schema
-                      </Button>
-                    </Link>
-                    <Link to="/forms/$formId/preview" params={{ formId: form.id.toString() }} className="text-decoration-none">
-                      <Button variant="outline-primary" className="w-100 d-flex align-items-center">
-                        <Eye size={18} className="me-2" />
-                        Preview Form
-                      </Button>
-                    </Link>
+                    <div className="d-flex flex-column gap-2">
+                      {(() => {
+                        // Find the latest version by creation date
+                        const latestVersion = versions.reduce((latest, current) =>
+                          new Date(current.createdAt).getTime() > new Date(latest.createdAt).getTime() ? current : latest,
+                        );
+                        const isLatestDraft = latestVersion && !latestVersion.isPublished;
+
+                        if (isLatestDraft) {
+                          // Latest version is a draft - show edit and create new version options
+                          return (
+                            <>
+                              <Link
+                                to="/forms/$formId/versions/$versionId/edit"
+                                params={{
+                                  formId: form.id.toString(),
+                                  versionId: latestVersion.versionSha,
+                                }}
+                                className="text-decoration-none"
+                              >
+                                <Button variant="primary" className="w-100 d-flex align-items-center">
+                                  <Edit3 size={18} className="me-2" />
+                                  Edit Latest Draft
+                                </Button>
+                              </Link>
+                              <CreateVersionButton formId={form.id} baseVersion={latestVersion} variant="outline-secondary" size="lg">
+                                Create New Version
+                              </CreateVersionButton>
+                            </>
+                          );
+                        } else if (latestVersion) {
+                          // Latest version is published - only show create new version
+                          return (
+                            <CreateVersionButton formId={form.id} baseVersion={latestVersion} variant="primary" size="lg">
+                              Create New Version
+                            </CreateVersionButton>
+                          );
+                        } else {
+                          // No versions exist - show create initial version
+                          return <CreateVersionButton formId={form.id} />;
+                        }
+                      })()}
+                    </div>
+
                     <Link to="/forms/$formId/submit" params={{ formId: form.id.toString() }} className="text-decoration-none">
                       <Button variant="outline-success" className="w-100 d-flex align-items-center">
                         <Send size={18} className="me-2" />
@@ -225,26 +295,23 @@ function FormsManage() {
             </Col>
           </Row>
 
-          {/* Recent Activity */}
+          {/* Version Analytics Dashboard */}
           <Row className="g-4 mt-4">
-            <Col lg={12}>
-              <Card className="shadow-sm border-0">
-                <Card.Header className="bg-white py-3">
-                  <h5 className="mb-0 fw-bold">Recent Activity</h5>
-                </Card.Header>
-                <Card.Body className="p-4">
-                  <div className="text-center py-5">
-                    <div
-                      className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
-                      style={{ width: 64, height: 64, backgroundColor: '#f8f9fa' }}
-                    >
-                      <BarChart3 size={24} className="text-muted" />
-                    </div>
-                    <h6 className="text-muted">No Recent Activity</h6>
-                    <p className="text-muted small mb-0">Activity and submissions will appear here once your form starts receiving responses</p>
-                  </div>
-                </Card.Body>
-              </Card>
+            <Col>
+              <VersionAnalyticsDashboard
+                versions={versions}
+                submissionStats={{
+                  totalSubmissions: 0, // TODO: Fetch from API
+                  versionBreakdown: [], // TODO: Fetch from API
+                }}
+              />
+            </Col>
+          </Row>
+
+          {/* Enhanced Version History */}
+          <Row className="g-4 mt-4">
+            <Col>
+              <EnhancedVersionHistoryTree formId={form.id} versions={versions} liveVersionSha={liveVersionSha} showActions={true} />
             </Col>
           </Row>
         </Container>

@@ -8,6 +8,20 @@
       "when": 1755823060033,
       "tag": "0000_modern_hedge_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1755973647482,
+      "tag": "0001_lethal_forge",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756064970070,
+      "tag": "0002_normal_jimmy_woo",
+      "breakpoints": true
     }
   ]
 }

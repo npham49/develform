@@ -26,6 +26,7 @@ yarn-error.log
 # Client
 /client/node_modules
 /client/dist
+/client/.tanstack
 /client/.env
 /client/.env.local
 /client/.env.production.local

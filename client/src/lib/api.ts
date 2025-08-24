@@ -2,23 +2,31 @@ import type {
   CreateFormRequest,
   CreateFormResponse,
   CreateSubmissionResponse,
+  CreateVersionRequest,
+  CreateVersionResponse,
   DeleteAccountResponse,
   DeleteFormResponse,
+  DeleteVersionResponse,
+  FormVersion,
   GetFormResponse,
   GetFormSchemaResponse,
   GetFormsResponse,
   GetFormSubmissionsResponse,
+  GetFormVersionsResponse,
   GetProfileResponse,
   GetSubmissionResponse,
   GetSubmissionsByFormResponse,
   GetUserResponse,
   LogoutResponse,
+  PublishVersionResponse,
+  RevertVersionRequest,
+  RevertVersionResponse,
   UpdateFormRequest,
   UpdateFormResponse,
-  UpdateFormSchemaRequest,
-  UpdateFormSchemaResponse,
   UpdateProfileRequest,
   UpdateProfileResponse,
+  UpdateVersionRequest,
+  UpdateVersionResponse,
 } from '../types/api';
 
 class ApiClient {
@@ -69,11 +77,6 @@ class ApiClient {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
-    updateSchema: (id: number, data: UpdateFormSchemaRequest) =>
-      this.request<UpdateFormSchemaResponse>(`/forms/${id}/schema`, {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-      }),
     delete: (id: number) =>
       this.request<DeleteFormResponse>(`/forms/${id}`, {
         method: 'DELETE',
@@ -81,12 +84,49 @@ class ApiClient {
     getSubmissions: (id: number) => this.request<GetFormSubmissionsResponse>(`/forms/${id}/submissions`),
   };
 
+  // Versions methods
+  versions = {
+    list: (formId: number) => this.request<GetFormVersionsResponse>(`/forms/${formId}/versions`),
+    get: (formId: number, versionSha: string) => this.request<{ data: FormVersion & { schema: unknown } }>(`/forms/${formId}/versions/${versionSha}`),
+    create: (formId: number, data: CreateVersionRequest) =>
+      this.request<CreateVersionResponse>(`/forms/${formId}/versions`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (formId: number, sha: string, data: UpdateVersionRequest) =>
+      this.request<UpdateVersionResponse>(`/forms/${formId}/versions/${sha}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    delete: (formId: number, sha: string) =>
+      this.request<DeleteVersionResponse>(`/forms/${formId}/versions/${sha}`, {
+        method: 'DELETE',
+      }),
+    publish: (formId: number, sha: string) =>
+      this.request<PublishVersionResponse>(`/forms/${formId}/versions/${sha}/publish`, {
+        method: 'POST',
+      }),
+    forceReset: (formId: number, sha: string) =>
+      this.request<RevertVersionResponse>(`/forms/${formId}/versions/${sha}/force-reset`, {
+        method: 'POST',
+      }),
+    makeLive: (formId: number, sha: string) =>
+      this.request<RevertVersionResponse>(`/forms/${formId}/versions/${sha}/make-live`, {
+        method: 'POST',
+      }),
+    makeLatest: (formId: number, sha: string, data: RevertVersionRequest) =>
+      this.request<RevertVersionResponse>(`/forms/${formId}/versions/${sha}/make-latest`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+  };
+
   // Submissions methods
   submissions = {
-    submitToForm: (formId: number, data: unknown) =>
+    submitToForm: (formId: number, versionSha: string, data: unknown) =>
       this.request<CreateSubmissionResponse>(`/submissions/form/${formId}`, {
         method: 'POST',
-        body: JSON.stringify({ formId, data }),
+        body: JSON.stringify({ formId, versionSha, data }),
       }),
     get: (id: number, token?: string) => {
       const params = token ? `?token=${token}` : '';

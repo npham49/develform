@@ -1,20 +1,27 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { db } from '../db/index.js';
-import { authMiddleware } from '../middleware/auth.js';
-import * as authService from '../services/auth.js';
+import { db } from '../db/index';
+import { authMiddleware } from '../middleware/auth';
+import * as authService from '../services/auth';
 
 const settingsRoutes = new Hono();
 
 // Validation schema for profile updates
 const updateProfileSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email').optional(),
+  email: z.email('Invalid email').optional(),
 });
 
 /**
+ * GET /api/settings/profile
+ *
  * Retrieves current user's profile information
  * Returns safe user data for settings page display
+ *
+ * Access: Authenticated users only (own profile)
+ * Auth Required: Yes
+ *
+ * Response: { data: UserProfile }
  */
 settingsRoutes.get('/profile', authMiddleware, async (c) => {
   try {
@@ -34,8 +41,16 @@ settingsRoutes.get('/profile', authMiddleware, async (c) => {
 });
 
 /**
+ * PATCH /api/settings/profile
+ *
  * Updates user profile information (name and email)
  * Validates input and returns updated data for immediate UI refresh
+ *
+ * Access: Authenticated users only (own profile)
+ * Auth Required: Yes
+ *
+ * Body: { name, email? }
+ * Response: { data: UpdatedUserProfile }
  */
 settingsRoutes.patch('/profile', authMiddleware, async (c) => {
   try {
@@ -49,7 +64,7 @@ settingsRoutes.patch('/profile', authMiddleware, async (c) => {
     return c.json({ data: updatedUser[0] });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return c.json({ error: 'Validation failed', errors: error.errors }, 400);
+      return c.json({ error: 'Validation failed', errors: error.issues }, 400);
     }
     console.error('Error updating profile:', error);
     return c.json({ error: 'Failed to update profile' }, 500);
@@ -57,8 +72,15 @@ settingsRoutes.patch('/profile', authMiddleware, async (c) => {
 });
 
 /**
+ * DELETE /api/settings/profile
+ *
  * Permanently deletes the user account and all associated data
  * This action is irreversible and removes all forms and submissions
+ *
+ * Access: Authenticated users only (own account)
+ * Auth Required: Yes
+ *
+ * Response: { message: "Account deleted successfully" }
  */
 settingsRoutes.delete('/profile', authMiddleware, async (c) => {
   try {

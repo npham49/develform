@@ -1,8 +1,9 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { db } from '../db/index.js';
-import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js';
-import * as formsService from '../services/forms.js';
+import { db } from '../db/index';
+import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth';
+import { formWriteCheckMiddleware } from '../middleware/role';
+import * as formsService from '../services/forms';
 
 const formRoutes = new Hono();
 
@@ -22,8 +23,15 @@ const updateFormSchema = z.object({
 });
 
 /**
+ * GET /api/forms
+ *
  * Retrieves all forms created by the authenticated user
  * Returns form metadata without schemas for performance
+ *
+ * Access: Authenticated users only
+ * Auth Required: Yes
+ *
+ * Response: Array of FormSummary objects with basic form info
  */
 formRoutes.get('/', authMiddleware, async (c) => {
   try {
@@ -39,8 +47,15 @@ formRoutes.get('/', authMiddleware, async (c) => {
 });
 
 /**
+ * GET /api/forms/:id
+ *
  * Retrieves a single form by ID with creator information
  * Public forms accessible to all, private forms only to owners
+ *
+ * Access: Public forms - Anyone, Private forms - Owner only
+ * Auth Required: Optional (required for private forms)
+ *
+ * Response: FormWithCreator object including form data and owner info
  */
 formRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
   try {
@@ -111,7 +126,8 @@ formRoutes.get('/:id/submit', optionalAuthMiddleware, async (c) => {
       data: {
         id: formData.id,
         name: formData.name,
-        schema: formData.schema,
+        schema: formData.liveVersion?.schema || null,
+        versionSha: formData.liveVersion?.versionSha || null,
       },
     });
   } catch (error) {
@@ -121,8 +137,16 @@ formRoutes.get('/:id/submit', optionalAuthMiddleware, async (c) => {
 });
 
 /**
+ * POST /api/forms
+ *
  * Creates a new form with the authenticated user as owner
  * Validates form data and sets initial ownership
+ *
+ * Access: Authenticated users only
+ * Auth Required: Yes
+ *
+ * Body: { name, description?, isPublic?, schema? }
+ * Response: Created form object
  */
 formRoutes.post('/', authMiddleware, async (c) => {
   try {
@@ -136,7 +160,7 @@ formRoutes.post('/', authMiddleware, async (c) => {
     return c.json({ data: newForm[0] }, 201);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return c.json({ error: 'Validation failed', errors: error.errors }, 400);
+      return c.json({ error: 'Validation failed', errors: error.issues }, 400);
     }
     console.error('Error creating form:', error);
     return c.json({ error: 'Failed to create form' }, 500);
@@ -144,10 +168,18 @@ formRoutes.post('/', authMiddleware, async (c) => {
 });
 
 /**
+ * PATCH /api/forms/:id
+ *
  * Updates form metadata (name, description, visibility)
  * Verifies ownership before allowing updates
+ *
+ * Access: Form owner only
+ * Auth Required: Yes
+ *
+ * Body: { name?, description?, isPublic? }
+ * Response: Updated form object
  */
-formRoutes.patch('/:id', authMiddleware, async (c) => {
+formRoutes.patch('/:id', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('id'));
     const user = c.get('jwtPayload').user;
@@ -159,19 +191,12 @@ formRoutes.patch('/:id', authMiddleware, async (c) => {
 
     const validatedData = updateFormSchema.parse(body);
 
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
-    }
-
     const updatedForm = await formsService.updateForm(db, formId, user.id, validatedData);
 
     return c.json({ data: updatedForm[0] });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return c.json({ error: 'Validation failed', errors: error.errors }, 400);
+      return c.json({ error: 'Validation failed', errors: error.issues }, 400);
     }
     console.error('Error updating form:', error);
     return c.json({ error: 'Failed to update form' }, 500);
@@ -179,62 +204,15 @@ formRoutes.patch('/:id', authMiddleware, async (c) => {
 });
 
 /**
- * Updates form schema/structure separately from metadata
- * Handles large JSON schema payloads efficiently
- */
-formRoutes.patch('/:id/schema', authMiddleware, async (c) => {
-  try {
-    const formId = parseInt(c.req.param('id'));
-    const user = c.get('jwtPayload').user;
-    const body = await c.req.json();
-
-    if (isNaN(formId)) {
-      return c.json({ error: 'Invalid form ID' }, 400);
-    }
-
-    const schemaSchema = z.object({
-      schema: z.any(),
-    });
-
-    const validatedData = schemaSchema.parse(body);
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
-    }
-
-    const updatedForm = await formsService.updateFormSchema(db, formId, user.id, validatedData.schema);
-
-    return c.json({ data: updatedForm[0] });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return c.json({ error: 'Validation failed', errors: error.errors }, 400);
-    }
-    console.error('Error updating form schema:', error);
-    return c.json({ error: 'Failed to update form schema' }, 500);
-  }
-});
-
-/**
  * Permanently deletes a form and all associated data
  * Verifies ownership and handles cascading deletions
  */
-formRoutes.delete('/:id', authMiddleware, async (c) => {
+formRoutes.delete('/:id', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('id'));
-    const user = c.get('jwtPayload').user;
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
-    }
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
     await formsService.deleteForm(db, formId);
@@ -250,20 +228,12 @@ formRoutes.delete('/:id', authMiddleware, async (c) => {
  * Retrieves all submissions for a form (owner access only)
  * Returns submission data with submitter information when available
  */
-formRoutes.get('/:id/submissions', authMiddleware, async (c) => {
+formRoutes.get('/:id/submissions', authMiddleware, formWriteCheckMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('id'));
-    const user = c.get('jwtPayload').user;
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
-    }
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
     // Get submissions for this form

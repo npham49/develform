@@ -10,8 +10,15 @@ import type { AuthUser } from '../types/index';
 const auth = new Hono();
 
 /**
+ * GET /api/auth/github
+ *
  * Initiates GitHub OAuth flow by redirecting to GitHub authorization
  * Constructs OAuth URL with client ID and redirect URI from environment
+ *
+ * Access: Anyone (public OAuth initiation)
+ * Auth Required: No
+ *
+ * Response: Redirect to GitHub OAuth page
  */
 auth.get('/github', async (c) => {
   const clientId = process.env.GITHUB_CLIENT_ID;
@@ -27,9 +34,17 @@ auth.get('/github', async (c) => {
 });
 
 /**
+ * GET /api/auth/github/callback
+ *
  * Handles GitHub OAuth callback after user authorization
  * Exchanges code for access token, fetches user data, creates/updates user record
  * Sets JWT cookie and redirects to dashboard on success
+ *
+ * Access: GitHub OAuth callback only
+ * Auth Required: No (OAuth flow)
+ *
+ * Query: ?code=<string> (from GitHub)
+ * Response: Redirect to dashboard with auth cookie
  */
 auth.get('/github/callback', async (c) => {
   const code = c.req.query('code');
@@ -142,8 +157,15 @@ auth.get('/github/callback', async (c) => {
 });
 
 /**
+ * GET /api/auth/user
+ *
  * Retrieves current authenticated user information
  * Returns user data from JWT payload for client-side state management
+ *
+ * Access: Authenticated users only
+ * Auth Required: Yes
+ *
+ * Response: { user: AuthUser }
  */
 auth.get('/user', authMiddleware, async (c) => {
   const payload = c.get('jwtPayload');
@@ -157,8 +179,15 @@ auth.get('/user', authMiddleware, async (c) => {
 });
 
 /**
+ * POST /api/auth/logout
+ *
  * Logs out the current user by clearing the auth cookie
  * Client should redirect to login page after successful logout
+ *
+ * Access: Authenticated users only
+ * Auth Required: Yes
+ *
+ * Response: { message: "Logged out successfully" }
  */
 auth.post('/logout', authMiddleware, async (c) => {
   deleteCookie(c, 'auth_token');

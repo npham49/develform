@@ -1,7 +1,8 @@
 import { createFileRoute, useLoaderData, useNavigate, useParams } from '@tanstack/react-router';
 import { useRef, useState } from 'react';
 
-import { IconCard } from '@/components/icon-card';
+import { IconCard } from '@/components/common/icon-card';
+import { VersionShaDisplay } from '@/components/common/version-sha-display';
 import { useAuth } from '@/hooks/use-auth';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
@@ -61,7 +62,11 @@ function FormsSubmit() {
       });
 
       // Call the API endpoint to submit the form
-      const response = await api.submissions.submitToForm(actualFormId, submissionData);
+      const versionSha = form.versionSha;
+      if (!versionSha) {
+        throw new Error('No version available for submission');
+      }
+      const response = await api.submissions.submitToForm(actualFormId, versionSha, submissionData);
 
       const submissionResult = response.data;
       console.log('Submission successful:', submissionResult);
@@ -192,6 +197,13 @@ function FormsSubmit() {
                 </div>
               </Card.Body>
             </Card>
+
+            {/* Version SHA Display */}
+            {formData?.versionSha && (
+              <div className="mt-4">
+                <VersionShaDisplay versionSha={formData.versionSha} />
+              </div>
+            )}
           </div>
         </Container>
       </div>
