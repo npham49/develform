@@ -106,13 +106,12 @@ export const updateVersion = async (
   versionSha: string,
   updateData: {
     description?: string;
-    schema?: unknown;
   },
 ) => {
   return await db
     .update(formVersions)
     .set({
-      ...updateData,
+      description: updateData.description,
       updatedAt: new Date(),
     })
     .where(and(eq(formVersions.formId, formId), eq(formVersions.versionSha, versionSha), eq(formVersions.isPublished, false)))
