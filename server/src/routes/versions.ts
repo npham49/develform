@@ -143,17 +143,20 @@ versionRoutes.post('/forms/:formId/versions', authMiddleware, async (c) => {
       return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
-    let baseSchema = validatedData.schema;
+    let baseSchema;
 
-    if (validatedData.baseVersionSha) {
-      // No schema provided, determine base schema automatically
+    if (validatedData.schema) {
+      // Use provided schema
+      baseSchema = validatedData.schema;
+    } else if (validatedData.baseVersionSha) {
+      // No schema provided, use baseVersionSha to fetch base version schema
       try {
         const baseVersion = await versionsService.getVersionBySha(db, formId, validatedData.baseVersionSha);
         if (baseVersion.length > 0) {
-          // Use live version schema as base
+          // Use base version schema as base
           baseSchema = baseVersion[0].schema;
         } else {
-          // No live version exists, use blank schema
+          // No base version exists, use blank schema
           baseSchema = {
             title: '',
             name: '',
