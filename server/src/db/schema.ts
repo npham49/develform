@@ -45,6 +45,7 @@ export const formVersions = pgTable(
     schema: jsonb('schema').notNull(),
     isPublished: boolean('is_published').default(false),
     publishedAt: timestamp('published_at'),
+    metadata: jsonb('metadata'),
     createdBy: integer('created_by')
       .references(() => users.id)
       .notNull(),

@@ -23,8 +23,6 @@ import type {
   RevertVersionResponse,
   UpdateFormRequest,
   UpdateFormResponse,
-  UpdateFormSchemaRequest,
-  UpdateFormSchemaResponse,
   UpdateProfileRequest,
   UpdateProfileResponse,
   UpdateVersionRequest,
@@ -76,11 +74,6 @@ class ApiClient {
       }),
     update: (id: number, data: UpdateFormRequest) =>
       this.request<UpdateFormResponse>(`/forms/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-      }),
-    updateSchema: (id: number, data: UpdateFormSchemaRequest) =>
-      this.request<UpdateFormSchemaResponse>(`/forms/${id}/schema`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),

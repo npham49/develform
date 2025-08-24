@@ -1,0 +1,1 @@
+ALTER TABLE "form_versions" ADD COLUMN "metadata" jsonb;

@@ -40,6 +40,12 @@ export interface FormVersion {
   description: string | null;
   isPublished: boolean;
   publishedAt: string | null;
+  metadata: {
+    baseVersionSha: string | null;
+    auditDescription: string | null;
+    createdAt: string;
+    operation: 'initial' | 'derived';
+  } | null;
   createdAt: string;
   updatedAt: string;
   author: {

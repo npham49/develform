@@ -108,44 +108,54 @@ Each form version contains:
 
 ### Phase 3: Version Control Operations
 
-**Goal**: Implement the three revert strategies
+**Goal**: Implement version options and controlled editing workflow
 
 #### Backend Implementation:
 
-1. **Force Reset Operation**
+1. **Reset to Version Operation**
    - Delete all versions created after target version
    - Set target version as published
    - Update form's live version reference
 
-2. **Make Old Live Operation**
+2. **Make Version Live Operation**
    - Unpublish current live version
    - Set target version as published
    - Preserve complete version history
 
-3. **Make Old Latest Operation**
+3. **Create Version from Previous Operation**
    - Create new version using old schema as base
-   - Mark new version as published
+   - Mark new version as draft for editing
    - Preserve merge logic placeholder for future enhancement
 
 #### Frontend Implementation:
 
-4. **Revert Operations Interface**
-   - Modal presenting three revert strategy options
+4. **Version Options Interface**
+   - Modal presenting three version operation options
    - Clear warnings for destructive operations
    - Multi-step confirmation process for safety
 
-5. **Version Comparison Interface**
+5. **Controlled Editing Workflow**
+   - Only latest draft versions can be edited directly
+   - "Create New Version" only available on latest version
+   - To edit older versions: use "Create Version from Previous" option
+   - Clear version state management and user guidance
+
+6. **Version Comparison Interface**
+   - Button-triggered modal for version selection
    - Side-by-side schema difference visualization
    - Highlighted changes between selected versions
-   - Impact preview before executing revert operations
+   - Impact preview before executing operations
 
 #### Acceptance Criteria:
 
-- [ ] All three revert strategies implemented and tested
-- [ ] Frontend provides clear revert options with explanations
-- [ ] Version comparison shows schema differences visually
+- [ ] All three version operations implemented and tested
+- [ ] Frontend provides clear version options with explanations
+- [ ] Only latest draft versions are directly editable
+- [ ] "Create New Version" restricted to latest version only
+- [ ] Version comparison accessible via dedicated button/modal
 - [ ] Destructive operations require multi-step confirmation
-- [ ] History tree updates immediately after revert operations
+- [ ] History tree updates immediately after operations
+- [ ] Clear user guidance for version workflow
 
 ### Phase 4: Enhanced UI/UX
 

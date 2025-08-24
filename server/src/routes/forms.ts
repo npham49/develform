@@ -22,8 +22,15 @@ const updateFormSchema = z.object({
 });
 
 /**
+ * GET /api/forms
+ *
  * Retrieves all forms created by the authenticated user
  * Returns form metadata without schemas for performance
+ *
+ * Access: Authenticated users only
+ * Auth Required: Yes
+ *
+ * Response: Array of FormSummary objects with basic form info
  */
 formRoutes.get('/', authMiddleware, async (c) => {
   try {
@@ -39,8 +46,15 @@ formRoutes.get('/', authMiddleware, async (c) => {
 });
 
 /**
+ * GET /api/forms/:id
+ *
  * Retrieves a single form by ID with creator information
  * Public forms accessible to all, private forms only to owners
+ *
+ * Access: Public forms - Anyone, Private forms - Owner only
+ * Auth Required: Optional (required for private forms)
+ *
+ * Response: FormWithCreator object including form data and owner info
  */
 formRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
   try {
@@ -122,8 +136,16 @@ formRoutes.get('/:id/submit', optionalAuthMiddleware, async (c) => {
 });
 
 /**
+ * POST /api/forms
+ *
  * Creates a new form with the authenticated user as owner
  * Validates form data and sets initial ownership
+ *
+ * Access: Authenticated users only
+ * Auth Required: Yes
+ *
+ * Body: { name, description?, isPublic?, schema? }
+ * Response: Created form object
  */
 formRoutes.post('/', authMiddleware, async (c) => {
   try {
@@ -145,8 +167,16 @@ formRoutes.post('/', authMiddleware, async (c) => {
 });
 
 /**
+ * PATCH /api/forms/:id
+ *
  * Updates form metadata (name, description, visibility)
  * Verifies ownership before allowing updates
+ *
+ * Access: Form owner only
+ * Auth Required: Yes
+ *
+ * Body: { name?, description?, isPublic? }
+ * Response: Updated form object
  */
 formRoutes.patch('/:id', authMiddleware, async (c) => {
   try {
@@ -176,45 +206,6 @@ formRoutes.patch('/:id', authMiddleware, async (c) => {
     }
     console.error('Error updating form:', error);
     return c.json({ error: 'Failed to update form' }, 500);
-  }
-});
-
-/**
- * Updates form schema/structure separately from metadata
- * Handles large JSON schema payloads efficiently
- */
-formRoutes.patch('/:id/schema', authMiddleware, async (c) => {
-  try {
-    const formId = parseInt(c.req.param('id'));
-    const user = c.get('jwtPayload').user;
-    const body = await c.req.json();
-
-    if (isNaN(formId)) {
-      return c.json({ error: 'Invalid form ID' }, 400);
-    }
-
-    const schemaSchema = z.object({
-      schema: z.any(),
-    });
-
-    const validatedData = schemaSchema.parse(body);
-
-    // Check if form exists and user owns it
-    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
-
-    if (existingForm.length === 0) {
-      return c.json({ error: 'Form not found or access denied' }, 404);
-    }
-
-    const updatedForm = await formsService.updateFormSchema(db, formId, user.id, validatedData.schema);
-
-    return c.json({ data: updatedForm[0] });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return c.json({ error: 'Validation failed', errors: error.issues }, 400);
-    }
-    console.error('Error updating form schema:', error);
-    return c.json({ error: 'Failed to update form schema' }, 500);
   }
 });
 

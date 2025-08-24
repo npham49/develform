@@ -1,7 +1,7 @@
 import { createId } from '@paralleldrive/cuid2';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, gt, inArray, not } from 'drizzle-orm';
 import type { Database } from '../db/index';
-import { formVersions, forms, users } from '../db/schema';
+import { formVersions, forms, submissions, users } from '../db/schema';
 
 // Type for transaction or regular database
 type DatabaseOrTransaction = Database | Parameters<Parameters<Database['transaction']>[0]>[0];
@@ -18,6 +18,7 @@ export const getFormVersions = async (db: Database, formId: number) => {
       description: formVersions.description,
       isPublished: formVersions.isPublished,
       publishedAt: formVersions.publishedAt,
+      metadata: formVersions.metadata,
       createdAt: formVersions.createdAt,
       updatedAt: formVersions.updatedAt,
       author: {
@@ -68,16 +69,27 @@ export const createVersion = async (
     description?: string;
     schema: unknown;
     isPublished?: boolean;
+    baseVersionSha?: string;
+    auditDescription?: string;
   },
   userId: number,
 ) => {
   const versionSha = createId();
+
+  // Prepare metadata with version tracking and audit info
+  const metadata = {
+    baseVersionSha: versionData.baseVersionSha || null,
+    auditDescription: versionData.auditDescription || null,
+    createdAt: new Date().toISOString(),
+    operation: versionData.baseVersionSha ? 'derived' : 'initial',
+  };
 
   return await db
     .insert(formVersions)
     .values({
       ...versionData,
       versionSha,
+      metadata,
       createdBy: userId,
       publishedAt: versionData.isPublished ? new Date() : null,
     })
@@ -94,6 +106,7 @@ export const updateVersion = async (
   versionSha: string,
   updateData: {
     description?: string;
+    schema?: unknown;
   },
 ) => {
   return await db
@@ -158,7 +171,8 @@ export const deleteVersion = async (db: Database, formId: number, versionSha: st
 
 /**
  * Force reset to a specific version
- * Deletes all versions created after the target version
+ * Deletes all versions created after the target version and reassigns
+ * submissions from deleted versions to the target version to preserve data integrity
  */
 export const forceResetToVersion = async (db: Database, formId: number, targetSha: string) => {
   return await db.transaction(async (tx) => {
@@ -173,14 +187,51 @@ export const forceResetToVersion = async (db: Database, formId: number, targetSh
       throw new Error('Target version not found');
     }
 
-    // Delete all versions created after the target
+    const target = targetVersion[0];
+
+    if (!target.createdAt) {
+      throw new Error('Target version has no creation date');
+    }
+
+    // Get all versions that will be deleted (created after target, excluding target)
+    const versionsToDelete = await tx
+      .select({ versionSha: formVersions.versionSha })
+      .from(formVersions)
+      .where(and(eq(formVersions.formId, formId), gt(formVersions.createdAt, target.createdAt), not(eq(formVersions.versionSha, targetSha))));
+
+    // Reassign submissions from deleted versions to the target version
+    // This preserves submission data while maintaining referential integrity
+    if (versionsToDelete.length > 0) {
+      const deletedVersionShas = versionsToDelete.map((v) => v.versionSha);
+
+      await tx
+        .update(submissions)
+        .set({ versionSha: targetSha })
+        .where(and(eq(submissions.formId, formId), inArray(submissions.versionSha, deletedVersionShas)));
+    }
+
+    // Now safe to delete the versions since no submissions reference them
     await tx.delete(formVersions).where(
       and(
         eq(formVersions.formId, formId),
-        // Delete versions created after target version
-        // Using greater than comparison on creation timestamp
+        gt(formVersions.createdAt, target.createdAt),
+        not(eq(formVersions.versionSha, targetSha)), // Explicitly exclude target version
       ),
     );
+
+    // Update metadata for the target version before publishing
+    const existingMetadata = (target.metadata as Record<string, unknown>) || {};
+    const updatedMetadata = {
+      ...existingMetadata,
+      auditDescription: `Force reset operation: Made this version live and deleted all newer versions`,
+      lastOperation: 'force_reset',
+      lastOperationAt: new Date().toISOString(),
+    };
+
+    await tx
+      .update(formVersions)
+      .set({ metadata: updatedMetadata })
+      .where(and(eq(formVersions.formId, formId), eq(formVersions.versionSha, targetSha)));
 
     // Publish the target version
     return await publishVersion(tx, formId, targetSha);
@@ -192,7 +243,50 @@ export const forceResetToVersion = async (db: Database, formId: number, targetSh
  * Simply changes which version is published
  */
 export const makeVersionLive = async (db: Database, formId: number, targetSha: string) => {
-  return await publishVersion(db, formId, targetSha);
+  return await db.transaction(async (tx) => {
+    // Get the target version
+    const targetVersion = await tx
+      .select()
+      .from(formVersions)
+      .where(and(eq(formVersions.formId, formId), eq(formVersions.versionSha, targetSha)))
+      .limit(1);
+
+    if (targetVersion.length === 0) {
+      throw new Error('Target version not found');
+    }
+
+    const target = targetVersion[0];
+
+    // Unpublish all other versions
+    await tx
+      .update(formVersions)
+      .set({ isPublished: false, publishedAt: null })
+      .where(and(eq(formVersions.formId, formId), not(eq(formVersions.versionSha, targetSha))));
+
+    // Update metadata for the target version
+    const existingMetadata = (target.metadata as Record<string, unknown>) || {};
+    const updatedMetadata = {
+      ...existingMetadata,
+      auditDescription: `Make live operation: Set this version as the live version without affecting history`,
+      lastOperation: 'make_live',
+      lastOperationAt: new Date().toISOString(),
+    };
+
+    // Publish the target version with updated metadata
+    await tx
+      .update(formVersions)
+      .set({
+        isPublished: true,
+        publishedAt: new Date(),
+        metadata: updatedMetadata,
+      })
+      .where(and(eq(formVersions.formId, formId), eq(formVersions.versionSha, targetSha)));
+
+    // Update the form's live version reference
+    await tx.update(forms).set({ liveVersionId: target.id }).where(eq(forms.id, formId));
+
+    return targetVersion;
+  });
 };
 
 /**
@@ -212,14 +306,16 @@ export const makeVersionLatest = async (db: Database, formId: number, targetSha:
       throw new Error('Target version not found');
     }
 
-    // Create new version with old schema
+    // Create new version with old schema as draft (not published) and metadata tracking
     const newVersion = await createVersion(
       tx,
       {
         formId,
-        description: description || `Restored from version ${targetSha}`,
+        description: description || `New version based on ${targetSha.slice(0, 8)}`,
         schema: targetVersion[0].schema,
-        isPublished: true,
+        isPublished: false, // Create as draft for editing
+        baseVersionSha: targetSha,
+        auditDescription: `Created from version ${targetSha.slice(0, 8)} using "Create Version from Previous" operation`,
       },
       userId,
     );

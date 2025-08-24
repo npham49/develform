@@ -2,6 +2,7 @@ import { createFileRoute, useLoaderData, useParams } from '@tanstack/react-route
 import { useRef, useState } from 'react';
 
 import { PageHeader } from '@/components/common/page-header';
+import { VersionShaDisplay } from '@/components/common/version-sha-display';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
 import type { SubmissionDetail } from '@/types/api';
@@ -66,6 +67,7 @@ function FormsSuccess() {
         <Container className="d-flex align-items-center justify-content-center min-vh-100">
           <div className="w-100">
             <PageHeader badge={{ icon: CheckCircle, text: 'Submission Successful', variant: 'success' }} title="Thank You!" />
+
             {/* Status Alerts */}
             <div className="mt-4">
               <Alert variant="success" className="d-flex align-items-start">
@@ -158,6 +160,13 @@ function FormsSuccess() {
               <span className="text-muted">Created at: </span>
               <span className="text-dark">{new Date(submissionDetails.createdAt).toLocaleString()}</span>
             </div>
+
+            {/* Version SHA Display */}
+            {submission?.versionSha && (
+              <div className="mt-4">
+                <VersionShaDisplay versionSha={submission.versionSha} />
+              </div>
+            )}
 
             {/* Footer */}
             <div className="text-center mt-5">

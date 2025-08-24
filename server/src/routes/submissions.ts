@@ -16,8 +16,16 @@ const createSubmissionSchema = z.object({
 });
 
 /**
+ * GET /api/submissions/:id
+ *
  * Retrieves detailed submission data with access control
  * Allows access to form owners, submission creators, or via anonymous token
+ *
+ * Access: Form owner, submission creator, or anonymous with token
+ * Auth Required: Optional (depends on access method)
+ *
+ * Query: ?token=<string> (for anonymous access)
+ * Response: SubmissionDetail with form schema and submission data
  */
 submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
   try {
@@ -135,8 +143,16 @@ submissionRoutes.get('/form/:formId', authMiddleware, async (c) => {
 });
 
 /**
+ * POST /api/submissions/form/:formId
+ *
  * Creates a new submission for a form (public endpoint)
  * Supports both authenticated and anonymous submissions with token generation
+ *
+ * Access: Anyone for public forms, authenticated users for private forms
+ * Auth Required: Optional (required for private forms)
+ *
+ * Body: { formId, versionSha, data }
+ * Response: { id, token?, formId, submittedAt }
  */
 submissionRoutes.post('/form/:formId', optionalAuthMiddleware, async (c) => {
   try {

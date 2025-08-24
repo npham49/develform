@@ -1,4 +1,5 @@
 import { PageHeader } from '@/components/common/page-header';
+import { VersionShaDisplay } from '@/components/common/version-sha-display';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
 import { Webform } from '@formio/js';
@@ -152,6 +153,11 @@ function VersionPreviewPage() {
                 </Card.Body>
               </Card>
             </div>
+          </div>
+
+          {/* Version SHA Display */}
+          <div className="mt-4">
+            <VersionShaDisplay versionSha={version.versionSha} />
           </div>
         </Container>
       </div>

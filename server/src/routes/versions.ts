@@ -10,12 +10,14 @@ const versionRoutes = new Hono();
 // Validation schemas for version operations
 const createVersionSchema = z.object({
   description: z.string().optional(),
-  schema: z.any(),
+  schema: z.any().optional(), // Schema is now optional - server will determine base schema
   publish: z.boolean().default(false),
+  baseVersionSha: z.string().optional(), // Optional base version to copy schema from
 });
 
 const updateVersionSchema = z.object({
   description: z.string().optional(),
+  schema: z.any().optional(),
 });
 
 const revertVersionSchema = z.object({
@@ -23,8 +25,15 @@ const revertVersionSchema = z.object({
 });
 
 /**
+ * GET /api/forms/:formId/versions
+ *
  * Retrieves all versions for a specific form
  * Returns version history with author information
+ *
+ * Access: Form owner only
+ * Auth Required: Yes
+ *
+ * Response: { versions: FormVersion[], liveVersion: string | null }
  */
 versionRoutes.get('/forms/:formId/versions', authMiddleware, async (c) => {
   try {
@@ -58,8 +67,62 @@ versionRoutes.get('/forms/:formId/versions', authMiddleware, async (c) => {
 });
 
 /**
+ * GET /api/forms/:formId/versions/:sha
+ *
+ * Gets a specific version with schema
+ * Used for editing and previewing specific versions
+ *
+ * Access: Form owner only
+ * Auth Required: Yes
+ *
+ * Response: FormVersion with full schema data
+ */
+versionRoutes.get('/forms/:formId/versions/:sha', authMiddleware, async (c) => {
+  try {
+    const formId = parseInt(c.req.param('formId'));
+    const versionSha = c.req.param('sha');
+    const user = c.get('jwtPayload').user;
+
+    if (isNaN(formId)) {
+      return c.json({ error: 'Invalid form ID' }, 400);
+    }
+
+    if (!versionSha) {
+      return c.json({ error: 'Version SHA is required' }, 400);
+    }
+
+    // Check if form exists and user owns it
+    const existingForm = await formsService.getFormByIdAndOwner(db, formId, user.id);
+
+    if (existingForm.length === 0) {
+      return c.json({ error: 'Form not found or access denied' }, 404);
+    }
+
+    const version = await versionsService.getVersionBySha(db, formId, versionSha);
+
+    if (!version) {
+      return c.json({ error: 'Version not found' }, 404);
+    }
+
+    return c.json({ data: version[0] });
+  } catch (error) {
+    console.error('Error fetching form version:', error);
+    return c.json({ error: 'Failed to fetch form version' }, 500);
+  }
+});
+
+/**
+ * POST /api/forms/:formId/versions
+ *
  * Creates a new form version
  * Optionally publishes the version immediately
+ * Server determines base schema from live version or creates blank
+ *
+ * Access: Form owner only
+ * Auth Required: Yes
+ *
+ * Body: { description?, schema?, publish?, baseVersionSha? }
+ * Response: { data: { version: FormVersion, sha: string } }
  */
 versionRoutes.post('/forms/:formId/versions', authMiddleware, async (c) => {
   try {
@@ -80,13 +143,60 @@ versionRoutes.post('/forms/:formId/versions', authMiddleware, async (c) => {
       return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
+    let baseSchema = validatedData.schema;
+
+    if (validatedData.baseVersionSha) {
+      // No schema provided, determine base schema automatically
+      try {
+        const baseVersion = await versionsService.getVersionBySha(db, formId, validatedData.baseVersionSha);
+        if (baseVersion.length > 0) {
+          // Use live version schema as base
+          baseSchema = baseVersion[0].schema;
+        } else {
+          // No live version exists, use blank schema
+          baseSchema = {
+            title: '',
+            name: '',
+            path: '',
+            display: 'form',
+            type: 'form',
+            components: [],
+          };
+        }
+      } catch (error) {
+        console.warn('Could not fetch live version, using blank schema:', error);
+        // Fallback to blank schema
+        baseSchema = {
+          title: '',
+          name: '',
+          path: '',
+          display: 'form',
+          type: 'form',
+          components: [],
+        };
+      }
+    }
+
+    // Set appropriate description if none provided
+    const description =
+      validatedData.description ||
+      (validatedData.schema
+        ? 'New draft version'
+        : (await versionsService.getPublishedVersion(db, formId)).length > 0
+          ? 'New draft version'
+          : 'Initial draft version');
+
     const newVersion = await versionsService.createVersion(
       db,
       {
         formId,
-        description: validatedData.description,
-        schema: validatedData.schema,
+        description,
+        schema: baseSchema,
         isPublished: validatedData.publish,
+        baseVersionSha: validatedData.baseVersionSha,
+        auditDescription: validatedData.baseVersionSha
+          ? `Created new version from ${validatedData.baseVersionSha.slice(0, 8)}`
+          : 'New version created',
       },
       user.id,
     );
@@ -110,8 +220,16 @@ versionRoutes.post('/forms/:formId/versions', authMiddleware, async (c) => {
 });
 
 /**
- * Updates version metadata (description only)
+ * PUT /api/forms/:formId/versions/:sha
+ *
+ * Updates version metadata and schema
  * Only draft versions can be updated
+ *
+ * Access: Form owner only
+ * Auth Required: Yes
+ *
+ * Body: { description?, schema? }
+ * Response: { data: FormVersion }
  */
 versionRoutes.put('/forms/:formId/versions/:sha', authMiddleware, async (c) => {
   try {
@@ -150,8 +268,15 @@ versionRoutes.put('/forms/:formId/versions/:sha', authMiddleware, async (c) => {
 });
 
 /**
+ * DELETE /api/forms/:formId/versions/:sha
+ *
  * Deletes a version (only if not published)
  * Published versions cannot be deleted for data integrity
+ *
+ * Access: Form owner only
+ * Auth Required: Yes
+ *
+ * Response: { data: { deleted: true } }
  */
 versionRoutes.delete('/forms/:formId/versions/:sha', authMiddleware, async (c) => {
   try {
@@ -184,8 +309,15 @@ versionRoutes.delete('/forms/:formId/versions/:sha', authMiddleware, async (c) =
 });
 
 /**
+ * POST /api/forms/:formId/versions/:sha/publish
+ *
  * Publishes a specific version
  * Makes the version live and unpublishes others
+ *
+ * Access: Form owner only
+ * Auth Required: Yes
+ *
+ * Response: { data: FormVersion }
  */
 versionRoutes.post('/forms/:formId/versions/:sha/publish', authMiddleware, async (c) => {
   try {
@@ -218,8 +350,17 @@ versionRoutes.post('/forms/:formId/versions/:sha/publish', authMiddleware, async
 });
 
 /**
+ * POST /api/forms/:formId/versions/:sha/force-reset
+ *
  * Force reset to a specific version
- * Deletes all versions created after the target version
+ * Deletes all versions created after the target version and makes target live
+ * WARNING: This is destructive and cannot be undone
+ *
+ * Access: Form owner only
+ * Auth Required: Yes
+ *
+ * Body: { description? }
+ * Response: { data: { message: string, deletedCount: number } }
  */
 versionRoutes.post('/forms/:formId/versions/:sha/force-reset', authMiddleware, async (c) => {
   try {
@@ -251,8 +392,15 @@ versionRoutes.post('/forms/:formId/versions/:sha/force-reset', authMiddleware, a
 });
 
 /**
+ * POST /api/forms/:formId/versions/:sha/make-live
+ *
  * Make an old version live without deleting history
  * Simply changes which version is published
+ *
+ * Access: Form owner only
+ * Auth Required: Yes
+ *
+ * Response: { data: FormVersion, message: string }
  */
 versionRoutes.post('/forms/:formId/versions/:sha/make-live', authMiddleware, async (c) => {
   try {
@@ -284,8 +432,16 @@ versionRoutes.post('/forms/:formId/versions/:sha/make-live', authMiddleware, asy
 });
 
 /**
+ * POST /api/forms/:formId/versions/:sha/make-latest
+ *
  * Create a new latest version based on an old version
- * Duplicates the old schema as a new version
+ * Duplicates the old schema as a new draft version
+ *
+ * Access: Form owner only
+ * Auth Required: Yes
+ *
+ * Body: { description? }
+ * Response: { data: FormVersion[] }
  */
 versionRoutes.post('/forms/:formId/versions/:sha/make-latest', authMiddleware, async (c) => {
   try {
@@ -307,11 +463,11 @@ versionRoutes.post('/forms/:formId/versions/:sha/make-latest', authMiddleware, a
       return c.json({ error: 'Form not found or access denied' }, 404);
     }
 
-    const result = await versionsService.makeVersionLatest(db, formId, versionSha, user.id, validatedData.description);
+    const newVersion = await versionsService.makeVersionLatest(db, formId, versionSha, user.id, validatedData.description);
 
     return c.json({
-      data: result,
-      message: 'Successfully created new version from old schema',
+      data: newVersion,
+      message: 'Successfully created new draft version',
     });
   } catch (error) {
     console.error('Error making version latest:', error);

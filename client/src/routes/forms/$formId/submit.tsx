@@ -2,6 +2,7 @@ import { createFileRoute, useLoaderData, useNavigate, useParams } from '@tanstac
 import { useRef, useState } from 'react';
 
 import { IconCard } from '@/components/common/icon-card';
+import { VersionShaDisplay } from '@/components/common/version-sha-display';
 import { useAuth } from '@/hooks/use-auth';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
@@ -196,6 +197,13 @@ function FormsSubmit() {
                 </div>
               </Card.Body>
             </Card>
+
+            {/* Version SHA Display */}
+            {formData?.versionSha && (
+              <div className="mt-4">
+                <VersionShaDisplay versionSha={formData.versionSha} />
+              </div>
+            )}
           </div>
         </Container>
       </div>

@@ -13,8 +13,15 @@ const updateProfileSchema = z.object({
 });
 
 /**
+ * GET /api/settings/profile
+ *
  * Retrieves current user's profile information
  * Returns safe user data for settings page display
+ *
+ * Access: Authenticated users only (own profile)
+ * Auth Required: Yes
+ *
+ * Response: { data: UserProfile }
  */
 settingsRoutes.get('/profile', authMiddleware, async (c) => {
   try {
@@ -34,8 +41,16 @@ settingsRoutes.get('/profile', authMiddleware, async (c) => {
 });
 
 /**
+ * PATCH /api/settings/profile
+ *
  * Updates user profile information (name and email)
  * Validates input and returns updated data for immediate UI refresh
+ *
+ * Access: Authenticated users only (own profile)
+ * Auth Required: Yes
+ *
+ * Body: { name, email? }
+ * Response: { data: UpdatedUserProfile }
  */
 settingsRoutes.patch('/profile', authMiddleware, async (c) => {
   try {
@@ -57,8 +72,15 @@ settingsRoutes.patch('/profile', authMiddleware, async (c) => {
 });
 
 /**
+ * DELETE /api/settings/profile
+ *
  * Permanently deletes the user account and all associated data
  * This action is irreversible and removes all forms and submissions
+ *
+ * Access: Authenticated users only (own account)
+ * Auth Required: Yes
+ *
+ * Response: { message: "Account deleted successfully" }
  */
 settingsRoutes.delete('/profile', authMiddleware, async (c) => {
   try {

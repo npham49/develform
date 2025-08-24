@@ -3,9 +3,9 @@ import { createFileRoute, Link, redirect, useLoaderData } from '@tanstack/react-
 import { IconCard } from '@/components/common/icon-card';
 import { PageHeader } from '@/components/common/page-header';
 import { StatusBadge } from '@/components/common/status-badge';
-import { CreateNewVersionButton } from '@/components/versions/create-new-version-button';
-import { CreateVersionFromBaseButton } from '@/components/versions/create-version-from-base-button';
-import { VersionHistoryTree } from '@/components/versions/version-history-tree';
+import { CreateVersionButton } from '@/components/versions/create-version-button';
+import { EnhancedVersionHistoryTree } from '@/components/versions/enhanced-version-history-tree';
+import { VersionAnalyticsDashboard } from '@/components/versions/version-analytics-dashboard';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
 import { type BreadcrumbItem } from '@/types';
@@ -187,21 +187,21 @@ function FormsManage() {
                                   Edit Latest Draft
                                 </Button>
                               </Link>
-                              <CreateVersionFromBaseButton formId={form.id} baseVersion={latestVersion} variant="outline-secondary" size="lg">
+                              <CreateVersionButton formId={form.id} baseVersion={latestVersion} variant="outline-secondary" size="lg">
                                 Create New Version
-                              </CreateVersionFromBaseButton>
+                              </CreateVersionButton>
                             </>
                           );
                         } else if (latestVersion) {
                           // Latest version is published - only show create new version
                           return (
-                            <CreateVersionFromBaseButton formId={form.id} baseVersion={latestVersion} variant="primary" size="lg">
+                            <CreateVersionButton formId={form.id} baseVersion={latestVersion} variant="primary" size="lg">
                               Create New Version
-                            </CreateVersionFromBaseButton>
+                            </CreateVersionButton>
                           );
                         } else {
                           // No versions exist - show create initial version
-                          return <CreateNewVersionButton formId={form.id} />;
+                          return <CreateVersionButton formId={form.id} />;
                         }
                       })()}
                     </div>
@@ -295,10 +295,23 @@ function FormsManage() {
             </Col>
           </Row>
 
-          {/* Version History */}
+          {/* Version Analytics Dashboard */}
           <Row className="g-4 mt-4">
             <Col>
-              <VersionHistoryTree formId={form.id} versions={versions} liveVersionSha={liveVersionSha} showActions={true} />
+              <VersionAnalyticsDashboard
+                versions={versions}
+                submissionStats={{
+                  totalSubmissions: 0, // TODO: Fetch from API
+                  versionBreakdown: [], // TODO: Fetch from API
+                }}
+              />
+            </Col>
+          </Row>
+
+          {/* Enhanced Version History */}
+          <Row className="g-4 mt-4">
+            <Col>
+              <EnhancedVersionHistoryTree formId={form.id} versions={versions} liveVersionSha={liveVersionSha} showActions={true} />
             </Col>
           </Row>
         </Container>
