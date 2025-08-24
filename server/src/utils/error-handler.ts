@@ -26,14 +26,14 @@ export const handleValidationError = (error: z.ZodError): ErrorResponse => ({
  */
 export const handleGenericError = (error: unknown, operation: string): ErrorResponse => {
   console.error(`Error in ${operation}:`, error);
-  
+
   if (error instanceof Error) {
     return {
       error: error.message,
       status: 500,
     };
   }
-  
+
   return {
     error: `Failed to ${operation}`,
     status: 500,
@@ -43,10 +43,7 @@ export const handleGenericError = (error: unknown, operation: string): ErrorResp
 /**
  * Async route wrapper that handles errors consistently
  */
-export const asyncHandler = (
-  fn: (c: Context) => Promise<Response>,
-  operation: string,
-) => {
+export const asyncHandler = (fn: (c: Context) => Promise<Response>, operation: string) => {
   return async (c: Context): Promise<Response> => {
     try {
       return await fn(c);
@@ -55,7 +52,7 @@ export const asyncHandler = (
         const { error: message, errors } = handleValidationError(error);
         return c.json({ error: message, errors }, 400);
       }
-      
+
       const { error: message } = handleGenericError(error, operation);
       return c.json({ error: message }, 500);
     }

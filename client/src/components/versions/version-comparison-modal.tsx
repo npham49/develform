@@ -1,8 +1,8 @@
 import { Code, Eye, GitCompare } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Alert, Button, Modal, Tab, Tabs } from 'react-bootstrap';
-import { FormVersion } from '../../types/api';
 import { api } from '../../lib/api';
+import { FormVersion } from '../../types/api';
 
 interface VersionComparisonModalProps {
   show: boolean;
@@ -41,59 +41,59 @@ export const VersionComparisonModal = ({ show, onHide, versions, formId }: Versi
       // Fetch schemas from API since FormVersion doesn't include schema by default
       const [oldVersionResponse, newVersionResponse] = await Promise.all([
         api.versions.get(formId, olderVersion.versionSha),
-        api.versions.get(formId, newerVersion.versionSha)
+        api.versions.get(formId, newerVersion.versionSha),
       ]);
-      
+
       const oldSchema = oldVersionResponse.data.schema as any;
       const newSchema = newVersionResponse.data.schema as any;
 
-    const oldComponents = oldSchema?.components || [];
-    const newComponents = newSchema?.components || [];
+      const oldComponents = oldSchema?.components || [];
+      const newComponents = newSchema?.components || [];
 
-    const added: string[] = [];
-    const removed: string[] = [];
-    const modified: string[] = [];
-    const unchanged: string[] = [];
+      const added: string[] = [];
+      const removed: string[] = [];
+      const modified: string[] = [];
+      const unchanged: string[] = [];
 
-    // Track components by key/label for comparison
-    const oldComponentMap = new Map();
-    const newComponentMap = new Map();
+      // Track components by key/label for comparison
+      const oldComponentMap = new Map();
+      const newComponentMap = new Map();
 
-    oldComponents.forEach((comp: any) => {
-      const key = comp.key || comp.label || comp.type;
-      oldComponentMap.set(key, comp);
-    });
+      oldComponents.forEach((comp: any) => {
+        const key = comp.key || comp.label || comp.type;
+        oldComponentMap.set(key, comp);
+      });
 
-    newComponents.forEach((comp: any) => {
-      const key = comp.key || comp.label || comp.type;
-      newComponentMap.set(key, comp);
-    });
+      newComponents.forEach((comp: any) => {
+        const key = comp.key || comp.label || comp.type;
+        newComponentMap.set(key, comp);
+      });
 
-    // Find added components
-    newComponentMap.forEach((comp, key) => {
-      if (!oldComponentMap.has(key)) {
-        added.push(`${comp.type}: ${comp.label || comp.key || 'Untitled'}`);
-      }
-    });
-
-    // Find removed components
-    oldComponentMap.forEach((comp, key) => {
-      if (!newComponentMap.has(key)) {
-        removed.push(`${comp.type}: ${comp.label || comp.key || 'Untitled'}`);
-      }
-    });
-
-    // Find modified components
-    oldComponentMap.forEach((oldComp, key) => {
-      if (newComponentMap.has(key)) {
-        const newComp = newComponentMap.get(key);
-        if (JSON.stringify(oldComp) !== JSON.stringify(newComp)) {
-          modified.push(`${oldComp.type}: ${oldComp.label || oldComp.key || 'Untitled'}`);
-        } else {
-          unchanged.push(`${oldComp.type}: ${oldComp.label || oldComp.key || 'Untitled'}`);
+      // Find added components
+      newComponentMap.forEach((comp, key) => {
+        if (!oldComponentMap.has(key)) {
+          added.push(`${comp.type}: ${comp.label || comp.key || 'Untitled'}`);
         }
-      }
-    });
+      });
+
+      // Find removed components
+      oldComponentMap.forEach((comp, key) => {
+        if (!newComponentMap.has(key)) {
+          removed.push(`${comp.type}: ${comp.label || comp.key || 'Untitled'}`);
+        }
+      });
+
+      // Find modified components
+      oldComponentMap.forEach((oldComp, key) => {
+        if (newComponentMap.has(key)) {
+          const newComp = newComponentMap.get(key);
+          if (JSON.stringify(oldComp) !== JSON.stringify(newComp)) {
+            modified.push(`${oldComp.type}: ${oldComp.label || oldComp.key || 'Untitled'}`);
+          } else {
+            unchanged.push(`${oldComp.type}: ${oldComp.label || oldComp.key || 'Untitled'}`);
+          }
+        }
+      });
 
       setDiff({ added, removed, modified, unchanged });
     } catch (error) {
