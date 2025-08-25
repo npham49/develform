@@ -53,7 +53,7 @@ export interface JWTPayload {
 }
 
 // ==============================================================================
-// FORM TYPES 
+// FORM TYPES
 // ==============================================================================
 
 // Basic form schema interface - keeping generic to support FormType from @formio/react
