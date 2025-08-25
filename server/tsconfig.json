@@ -15,8 +15,12 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@develform/shared-types": ["../shared/types"]
+    }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../shared/types/**/*"],
   "exclude": ["node_modules", "dist"]
 }
