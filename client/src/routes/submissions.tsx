@@ -11,6 +11,11 @@ import { Badge, Button, Card, Col, Container, Row, Table } from 'react-bootstrap
 interface FormSubmissions {
   form: FormSummary;
   submissions: SubmissionSummary[];
+  formOwner?: {
+    id: number;
+    name: string;
+    email: string | null;
+  };
 }
 
 export const Route = createFileRoute('/submissions')({
@@ -42,33 +47,47 @@ export const Route = createFileRoute('/submissions')({
   },
   loader: async () => {
     try {
-      // Get all forms first
-      const formsResponse = await api.forms.list();
-      const forms = formsResponse.data;
+      // Get submissions made by the current user
+      const userSubmissionsResponse = await api.submissions.getByUser();
+      const userSubmissions = userSubmissionsResponse.data;
 
-      // Get submissions for each form
-      const formSubmissions: FormSubmissions[] = [];
-      
-      for (const form of forms) {
-        try {
-          const submissionsResponse = await api.submissions.getByForm(form.id);
-          formSubmissions.push({
-            form,
-            submissions: submissionsResponse.data,
-          });
-        } catch (error) {
-          // If we can't get submissions for a form, just skip it
-          console.warn(`Failed to get submissions for form ${form.id}:`, error);
-          formSubmissions.push({
-            form,
-            submissions: [],
-          });
+      // Group submissions by form
+      const submissionsByForm = new Map<number, typeof userSubmissions>();
+      userSubmissions.forEach(submission => {
+        const formId = submission.formId;
+        if (!submissionsByForm.has(formId)) {
+          submissionsByForm.set(formId, []);
         }
-      }
+        submissionsByForm.get(formId)!.push(submission);
+      });
+
+      // Create form submissions structure
+      const formSubmissions: FormSubmissions[] = [];
+      submissionsByForm.forEach((submissions, formId) => {
+        const firstSubmission = submissions[0];
+        formSubmissions.push({
+          form: {
+            id: formId,
+            name: firstSubmission.formName,
+            description: firstSubmission.formDescription,
+            isPublic: true, // We don't have this info from user submissions
+            createdAt: '', // We don't have this info 
+            updatedAt: '', // We don't have this info
+          },
+          submissions: submissions.map(sub => ({
+            id: sub.id,
+            data: sub.data,
+            createdAt: sub.createdAt,
+            submitterInformation: null, // This is the user's own submissions
+            isAnonymous: false,
+          })),
+          formOwner: firstSubmission.formOwner,
+        });
+      });
 
       return { formSubmissions };
     } catch (error) {
-      console.error('Error fetching submissions data:', error);
+      console.error('Error fetching user submissions:', error);
       throw error;
     }
   },
@@ -84,7 +103,7 @@ function Submissions() {
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
-      title: 'All Submissions',
+      title: 'My Submissions',
       href: '/submissions',
     },
   ];
@@ -108,9 +127,9 @@ function Submissions() {
       <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>
         <Container className="py-5">
           <PageHeader
-            badge={{ icon: FileText, text: 'Submissions Management' }}
-            title="All Submissions"
-            description="View and manage submissions across all your forms from one central location."
+            badge={{ icon: FileText, text: 'My Submissions' }}
+            title="My Submissions"
+            description="View all the forms you have submitted responses to."
           />
 
           {/* Summary Stats */}
@@ -127,7 +146,7 @@ function Submissions() {
                   <div className="fw-bold text-dark mb-1" style={{ fontSize: '2rem' }}>
                     {totalSubmissions}
                   </div>
-                  <div className="text-muted">Total Submissions</div>
+                  <div className="text-muted">My Submissions</div>
                 </Card.Body>
               </Card>
             </Col>
@@ -143,7 +162,7 @@ function Submissions() {
                   <div className="fw-bold text-dark mb-1" style={{ fontSize: '2rem' }}>
                     {totalForms}
                   </div>
-                  <div className="text-muted">Active Forms</div>
+                  <div className="text-muted">Forms Submitted To</div>
                 </Card.Body>
               </Card>
             </Col>
@@ -172,7 +191,7 @@ function Submissions() {
             <Col lg={8}>
               <Card className="shadow-sm border-0">
                 <Card.Header className="bg-white py-3">
-                  <h5 className="mb-0 fw-bold">Forms and Submissions</h5>
+                  <h5 className="mb-0 fw-bold">Forms You've Submitted To</h5>
                 </Card.Header>
                 <Card.Body className="p-0">
                   {formSubmissions.length > 0 ? (
@@ -180,8 +199,8 @@ function Submissions() {
                       <thead className="bg-light">
                         <tr>
                           <th className="border-0 py-3 px-4">Form</th>
-                          <th className="border-0 py-3 px-4">Submissions</th>
-                          <th className="border-0 py-3 px-4">Last Updated</th>
+                          <th className="border-0 py-3 px-4">My Submissions</th>
+                          <th className="border-0 py-3 px-4">Form Owner</th>
                           <th className="border-0 py-3 px-4">Actions</th>
                         </tr>
                       </thead>
@@ -201,29 +220,24 @@ function Submissions() {
                             </td>
                             <td className="py-3 px-4">
                               <small className="text-muted">
-                                {new Date(formSub.form.updatedAt).toLocaleDateString()}
+                                {formSub.formOwner?.name || 'Unknown'}
                               </small>
                             </td>
                             <td className="py-3 px-4">
                               <div className="d-flex gap-2">
-                                <Link 
-                                  to="/forms/$formId/submissions" 
-                                  params={{ formId: formSub.form.id.toString() }}
-                                  className="text-decoration-none"
-                                >
-                                  <Button variant="outline-primary" size="sm">
-                                    View Submissions
-                                  </Button>
-                                </Link>
-                                <Link 
-                                  to="/forms/$formId/manage" 
-                                  params={{ formId: formSub.form.id.toString() }}
-                                  className="text-decoration-none"
-                                >
-                                  <Button variant="outline-secondary" size="sm">
-                                    Manage
-                                  </Button>
-                                </Link>
+                                {/* For user submissions, we just want to view their own submissions */}
+                                {formSub.submissions.map((submission) => (
+                                  <Link 
+                                    key={submission.id}
+                                    to="/submissions/$submissionId" 
+                                    params={{ submissionId: submission.id.toString() }}
+                                    className="text-decoration-none"
+                                  >
+                                    <Button variant="outline-primary" size="sm">
+                                      View
+                                    </Button>
+                                  </Link>
+                                ))}
                               </div>
                             </td>
                           </tr>
@@ -233,11 +247,8 @@ function Submissions() {
                   ) : (
                     <div className="text-center py-5">
                       <FileText size={48} className="text-muted mb-3" />
-                      <h5 className="text-muted">No Forms Found</h5>
-                      <p className="text-muted mb-4">Create your first form to start collecting submissions.</p>
-                      <Link to="/forms/create" className="text-decoration-none">
-                        <Button variant="primary">Create Form</Button>
-                      </Link>
+                      <h5 className="text-muted">No Submissions Found</h5>
+                      <p className="text-muted mb-4">You haven't submitted any forms yet.</p>
                     </div>
                   )}
                 </Card.Body>
@@ -261,11 +272,6 @@ function Submissions() {
                               <Calendar size={12} className="me-1" />
                               {new Date(submission.createdAt).toLocaleDateString()}
                             </div>
-                            {submission.submitterInformation && (
-                              <div className="text-muted small">
-                                {submission.submitterInformation.name}
-                              </div>
-                            )}
                           </div>
                           <Link 
                             to="/submissions/$submissionId" 
