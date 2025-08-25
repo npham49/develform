@@ -138,10 +138,12 @@ function Dashboard() {
                       View All Forms
                     </Button>
                   </Link>
-                  <Button variant="outline-secondary" className="w-100 d-flex align-items-center">
-                    <Users size={18} className="me-2" />
-                    Manage Submissions
-                  </Button>
+                  <Link to="/submissions" className="text-decoration-none">
+                    <Button variant="outline-secondary" className="w-100 d-flex align-items-center">
+                      <Users size={18} className="me-2" />
+                      Manage Submissions
+                    </Button>
+                  </Link>
                 </Card.Body>
               </Card>
             </Col>

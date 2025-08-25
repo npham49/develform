@@ -9,21 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SubmissionsRouteImport } from './routes/submissions'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as FormsIndexRouteImport } from './routes/forms/index'
+import { Route as SubmissionsSubmissionIdRouteImport } from './routes/submissions/$submissionId'
 import { Route as SettingsProfileRouteImport } from './routes/settings/profile'
 import { Route as SettingsAppearanceRouteImport } from './routes/settings/appearance'
 import { Route as FormsCreateRouteImport } from './routes/forms/create'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as FormsFormIdSubmitRouteImport } from './routes/forms/$formId/submit'
+import { Route as FormsFormIdSubmissionsRouteImport } from './routes/forms/$formId/submissions'
 import { Route as FormsFormIdManageRouteImport } from './routes/forms/$formId/manage'
 import { Route as FormsFormIdSuccessSubmissionIdRouteImport } from './routes/forms/$formId/success.$submissionId'
 import { Route as FormsFormIdVersionsVersionIdPreviewRouteImport } from './routes/forms/$formId/versions/$versionId/preview'
 import { Route as FormsFormIdVersionsVersionIdEditRouteImport } from './routes/forms/$formId/versions/$versionId/edit'
 
+const SubmissionsRoute = SubmissionsRouteImport.update({
+  id: '/submissions',
+  path: '/submissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -49,6 +57,11 @@ const FormsIndexRoute = FormsIndexRouteImport.update({
   path: '/forms/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SubmissionsSubmissionIdRoute = SubmissionsSubmissionIdRouteImport.update({
+  id: '/$submissionId',
+  path: '/$submissionId',
+  getParentRoute: () => SubmissionsRoute,
+} as any)
 const SettingsProfileRoute = SettingsProfileRouteImport.update({
   id: '/settings/profile',
   path: '/settings/profile',
@@ -72,6 +85,11 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
 const FormsFormIdSubmitRoute = FormsFormIdSubmitRouteImport.update({
   id: '/forms/$formId/submit',
   path: '/forms/$formId/submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FormsFormIdSubmissionsRoute = FormsFormIdSubmissionsRouteImport.update({
+  id: '/forms/$formId/submissions',
+  path: '/forms/$formId/submissions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FormsFormIdManageRoute = FormsFormIdManageRouteImport.update({
@@ -102,13 +120,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/dashboard': typeof DashboardRoute
+  '/submissions': typeof SubmissionsRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/forms/create': typeof FormsCreateRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
   '/settings/profile': typeof SettingsProfileRoute
+  '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/forms': typeof FormsIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/forms/$formId/manage': typeof FormsFormIdManageRoute
+  '/forms/$formId/submissions': typeof FormsFormIdSubmissionsRoute
   '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
   '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute
   '/forms/$formId/versions/$versionId/edit': typeof FormsFormIdVersionsVersionIdEditRoute
@@ -118,13 +139,16 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/dashboard': typeof DashboardRoute
+  '/submissions': typeof SubmissionsRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/forms/create': typeof FormsCreateRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
   '/settings/profile': typeof SettingsProfileRoute
+  '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/forms': typeof FormsIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/forms/$formId/manage': typeof FormsFormIdManageRoute
+  '/forms/$formId/submissions': typeof FormsFormIdSubmissionsRoute
   '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
   '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute
   '/forms/$formId/versions/$versionId/edit': typeof FormsFormIdVersionsVersionIdEditRoute
@@ -135,13 +159,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/dashboard': typeof DashboardRoute
+  '/submissions': typeof SubmissionsRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/forms/create': typeof FormsCreateRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
   '/settings/profile': typeof SettingsProfileRoute
+  '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/forms/': typeof FormsIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/forms/$formId/manage': typeof FormsFormIdManageRoute
+  '/forms/$formId/submissions': typeof FormsFormIdSubmissionsRoute
   '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
   '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute
   '/forms/$formId/versions/$versionId/edit': typeof FormsFormIdVersionsVersionIdEditRoute
@@ -153,13 +180,16 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/submissions'
     | '/auth/login'
     | '/forms/create'
     | '/settings/appearance'
     | '/settings/profile'
+    | '/submissions/$submissionId'
     | '/forms'
     | '/settings'
     | '/forms/$formId/manage'
+    | '/forms/$formId/submissions'
     | '/forms/$formId/submit'
     | '/forms/$formId/success/$submissionId'
     | '/forms/$formId/versions/$versionId/edit'
@@ -169,13 +199,16 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/submissions'
     | '/auth/login'
     | '/forms/create'
     | '/settings/appearance'
     | '/settings/profile'
+    | '/submissions/$submissionId'
     | '/forms'
     | '/settings'
     | '/forms/$formId/manage'
+    | '/forms/$formId/submissions'
     | '/forms/$formId/submit'
     | '/forms/$formId/success/$submissionId'
     | '/forms/$formId/versions/$versionId/edit'
@@ -185,13 +218,16 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/submissions'
     | '/auth/login'
     | '/forms/create'
     | '/settings/appearance'
     | '/settings/profile'
+    | '/submissions/$submissionId'
     | '/forms/'
     | '/settings/'
     | '/forms/$formId/manage'
+    | '/forms/$formId/submissions'
     | '/forms/$formId/submit'
     | '/forms/$formId/success/$submissionId'
     | '/forms/$formId/versions/$versionId/edit'
@@ -202,12 +238,14 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   DashboardRoute: typeof DashboardRoute
+  SubmissionsRoute: typeof SubmissionsRouteWithChildren
   FormsCreateRoute: typeof FormsCreateRoute
   SettingsAppearanceRoute: typeof SettingsAppearanceRoute
   SettingsProfileRoute: typeof SettingsProfileRoute
   FormsIndexRoute: typeof FormsIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
   FormsFormIdManageRoute: typeof FormsFormIdManageRoute
+  FormsFormIdSubmissionsRoute: typeof FormsFormIdSubmissionsRoute
   FormsFormIdSubmitRoute: typeof FormsFormIdSubmitRoute
   FormsFormIdSuccessSubmissionIdRoute: typeof FormsFormIdSuccessSubmissionIdRoute
   FormsFormIdVersionsVersionIdEditRoute: typeof FormsFormIdVersionsVersionIdEditRoute
@@ -216,6 +254,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/submissions': {
+      id: '/submissions'
+      path: '/submissions'
+      fullPath: '/submissions'
+      preLoaderRoute: typeof SubmissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -251,6 +296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FormsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/submissions/$submissionId': {
+      id: '/submissions/$submissionId'
+      path: '/$submissionId'
+      fullPath: '/submissions/$submissionId'
+      preLoaderRoute: typeof SubmissionsSubmissionIdRouteImport
+      parentRoute: typeof SubmissionsRoute
+    }
     '/settings/profile': {
       id: '/settings/profile'
       path: '/settings/profile'
@@ -284,6 +336,13 @@ declare module '@tanstack/react-router' {
       path: '/forms/$formId/submit'
       fullPath: '/forms/$formId/submit'
       preLoaderRoute: typeof FormsFormIdSubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forms/$formId/submissions': {
+      id: '/forms/$formId/submissions'
+      path: '/forms/$formId/submissions'
+      fullPath: '/forms/$formId/submissions'
+      preLoaderRoute: typeof FormsFormIdSubmissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forms/$formId/manage': {
@@ -327,16 +386,30 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface SubmissionsRouteChildren {
+  SubmissionsSubmissionIdRoute: typeof SubmissionsSubmissionIdRoute
+}
+
+const SubmissionsRouteChildren: SubmissionsRouteChildren = {
+  SubmissionsSubmissionIdRoute: SubmissionsSubmissionIdRoute,
+}
+
+const SubmissionsRouteWithChildren = SubmissionsRoute._addFileChildren(
+  SubmissionsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   DashboardRoute: DashboardRoute,
+  SubmissionsRoute: SubmissionsRouteWithChildren,
   FormsCreateRoute: FormsCreateRoute,
   SettingsAppearanceRoute: SettingsAppearanceRoute,
   SettingsProfileRoute: SettingsProfileRoute,
   FormsIndexRoute: FormsIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
   FormsFormIdManageRoute: FormsFormIdManageRoute,
+  FormsFormIdSubmissionsRoute: FormsFormIdSubmissionsRoute,
   FormsFormIdSubmitRoute: FormsFormIdSubmitRoute,
   FormsFormIdSuccessSubmissionIdRoute: FormsFormIdSuccessSubmissionIdRoute,
   FormsFormIdVersionsVersionIdEditRoute: FormsFormIdVersionsVersionIdEditRoute,
