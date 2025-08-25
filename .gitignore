@@ -37,3 +37,10 @@ yarn-error.log
 /server/.env
 /server/.env.local
 /server/.env.production
+/server/tsconfig.tsbuildinfo
+
+# Shared
+/shared/types/node_modules
+
+# Temporary files
+/tmp

@@ -1,27 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export interface AuthUser {
-  id: number;
-  name: string;
-  email: string | null;
-  githubId: string | null;
-  avatarUrl: string | null;
-}
 
-export interface JWTPayload {
-  sub: string;
-  user: AuthUser;
-  iat: number;
-  exp: number;
-}
+// Re-export shared types for backwards compatibility
+export * from '@develform/shared-types';
 
-export interface FormSchema {
-  components: any[];
-  [key: string]: any;
-}
+// Server-specific types that are not shared with client
+// These types are only used internally by the server
 
-export interface ApiResponse<T = any> {
-  data?: T;
-  message?: string;
-  error?: string;
-  errors?: Record<string, string[]>;
-}
+// You can add server-only types here if needed in the future

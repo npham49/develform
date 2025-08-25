@@ -152,7 +152,7 @@ function FormsSuccess() {
               </Card.Header>
               <Card.Body className="p-4">
                 {submissionDetails && (
-                  <FormioForm src={formSchema.current} submission={{ data: submissionDetails.data }} options={{ readOnly: true }} />
+                  <FormioForm src={formSchema.current} submission={{ data: submissionDetails.data as any }} options={{ readOnly: true }} />
                 )}
               </Card.Body>
             </Card>

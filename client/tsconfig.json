@@ -16,6 +16,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
+      "@develform/shared-types": ["../shared/types"],
       "@/*": ["./src/*"]
     }
   },
