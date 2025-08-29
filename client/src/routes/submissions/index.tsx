@@ -18,7 +18,7 @@ interface FormSubmissions {
   };
 }
 
-export const Route = createFileRoute('/submissions')({
+export const Route = createFileRoute('/submissions/')({
   beforeLoad: async () => {
     // Check if user is authenticated by calling the auth API
     try {
@@ -53,7 +53,7 @@ export const Route = createFileRoute('/submissions')({
 
       // Group submissions by form
       const submissionsByForm = new Map<number, typeof userSubmissions>();
-      userSubmissions.forEach(submission => {
+      userSubmissions.forEach((submission) => {
         const formId = submission.formId;
         if (!submissionsByForm.has(formId)) {
           submissionsByForm.set(formId, []);
@@ -71,10 +71,10 @@ export const Route = createFileRoute('/submissions')({
             name: firstSubmission.formName,
             description: firstSubmission.formDescription,
             isPublic: true, // We don't have this info from user submissions
-            createdAt: '', // We don't have this info 
+            createdAt: '', // We don't have this info
             updatedAt: '', // We don't have this info
           },
-          submissions: submissions.map(sub => ({
+          submissions: submissions.map((sub) => ({
             id: sub.id,
             data: sub.data,
             createdAt: sub.createdAt,
@@ -112,12 +112,12 @@ function Submissions() {
   const totalSubmissions = formSubmissions.reduce((total, fs) => total + fs.submissions.length, 0);
   const totalForms = formSubmissions.length;
   const recentSubmissions = formSubmissions
-    .flatMap((fs) => 
+    .flatMap((fs) =>
       fs.submissions.map((submission) => ({
         ...submission,
         formName: fs.form.name,
         formId: fs.form.id,
-      }))
+      })),
     )
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 10);
@@ -176,9 +176,7 @@ function Submissions() {
                     <Calendar size={28} className="text-purple" />
                   </div>
                   <div className="fw-bold text-dark mb-1" style={{ fontSize: '2rem' }}>
-                    {recentSubmissions.filter(s => 
-                      new Date(s.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-                    ).length}
+                    {recentSubmissions.filter((s) => new Date(s.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
                   </div>
                   <div className="text-muted">This Week</div>
                 </Card.Body>
@@ -214,22 +212,18 @@ function Submissions() {
                               </div>
                             </td>
                             <td className="py-3 px-4">
-                              <Badge bg={formSub.submissions.length > 0 ? 'primary' : 'secondary'}>
-                                {formSub.submissions.length}
-                              </Badge>
+                              <Badge bg={formSub.submissions.length > 0 ? 'primary' : 'secondary'}>{formSub.submissions.length}</Badge>
                             </td>
                             <td className="py-3 px-4">
-                              <small className="text-muted">
-                                {formSub.formOwner?.name || 'Unknown'}
-                              </small>
+                              <small className="text-muted">{formSub.formOwner?.name || 'Unknown'}</small>
                             </td>
                             <td className="py-3 px-4">
                               <div className="d-flex gap-2">
                                 {/* For user submissions, we just want to view their own submissions */}
                                 {formSub.submissions.map((submission) => (
-                                  <Link 
+                                  <Link
                                     key={submission.id}
-                                    to="/submissions/$submissionId" 
+                                    to="/submissions/$submissionId"
                                     params={{ submissionId: submission.id.toString() }}
                                     className="text-decoration-none"
                                   >
@@ -273,11 +267,7 @@ function Submissions() {
                               {new Date(submission.createdAt).toLocaleDateString()}
                             </div>
                           </div>
-                          <Link 
-                            to="/submissions/$submissionId" 
-                            params={{ submissionId: submission.id.toString() }}
-                            className="text-decoration-none"
-                          >
+                          <Link to="/submissions/$submissionId" params={{ submissionId: submission.id.toString() }} className="text-decoration-none">
                             <Button variant="outline-primary" size="sm">
                               View
                             </Button>

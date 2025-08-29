@@ -135,7 +135,7 @@ submissionRoutes.get('/form/:formId', authMiddleware, formWriteCheckMiddleware, 
 });
 
 /**
- * GET /api/submissions/user
+ * GET /api/submissions
  *
  * Retrieves all submissions made by the authenticated user
  * Shows submissions TO any forms, not submissions FROM forms owned by the user
@@ -145,7 +145,7 @@ submissionRoutes.get('/form/:formId', authMiddleware, formWriteCheckMiddleware, 
  *
  * Response: Array of submissions with form information
  */
-submissionRoutes.get('/user', authMiddleware, async (c) => {
+submissionRoutes.get('/', authMiddleware, async (c) => {
   try {
     const user = c.get('jwtPayload')?.user;
 

@@ -9,10 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SubmissionsRouteImport } from './routes/submissions'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SubmissionsIndexRouteImport } from './routes/submissions/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as FormsIndexRouteImport } from './routes/forms/index'
 import { Route as SubmissionsSubmissionIdRouteImport } from './routes/submissions/$submissionId'
@@ -27,11 +27,6 @@ import { Route as FormsFormIdSuccessSubmissionIdRouteImport } from './routes/for
 import { Route as FormsFormIdVersionsVersionIdPreviewRouteImport } from './routes/forms/$formId/versions/$versionId/preview'
 import { Route as FormsFormIdVersionsVersionIdEditRouteImport } from './routes/forms/$formId/versions/$versionId/edit'
 
-const SubmissionsRoute = SubmissionsRouteImport.update({
-  id: '/submissions',
-  path: '/submissions',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -47,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SubmissionsIndexRoute = SubmissionsIndexRouteImport.update({
+  id: '/submissions/',
+  path: '/submissions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsIndexRoute = SettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
@@ -58,9 +58,9 @@ const FormsIndexRoute = FormsIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubmissionsSubmissionIdRoute = SubmissionsSubmissionIdRouteImport.update({
-  id: '/$submissionId',
-  path: '/$submissionId',
-  getParentRoute: () => SubmissionsRoute,
+  id: '/submissions/$submissionId',
+  path: '/submissions/$submissionId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsProfileRoute = SettingsProfileRouteImport.update({
   id: '/settings/profile',
@@ -120,7 +120,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/dashboard': typeof DashboardRoute
-  '/submissions': typeof SubmissionsRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/forms/create': typeof FormsCreateRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
@@ -128,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/forms': typeof FormsIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/submissions': typeof SubmissionsIndexRoute
   '/forms/$formId/manage': typeof FormsFormIdManageRoute
   '/forms/$formId/submissions': typeof FormsFormIdSubmissionsRoute
   '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
@@ -139,7 +139,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/dashboard': typeof DashboardRoute
-  '/submissions': typeof SubmissionsRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/forms/create': typeof FormsCreateRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
@@ -147,6 +146,7 @@ export interface FileRoutesByTo {
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/forms': typeof FormsIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/submissions': typeof SubmissionsIndexRoute
   '/forms/$formId/manage': typeof FormsFormIdManageRoute
   '/forms/$formId/submissions': typeof FormsFormIdSubmissionsRoute
   '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
@@ -159,7 +159,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/dashboard': typeof DashboardRoute
-  '/submissions': typeof SubmissionsRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/forms/create': typeof FormsCreateRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
@@ -167,6 +166,7 @@ export interface FileRoutesById {
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/forms/': typeof FormsIndexRoute
   '/settings/': typeof SettingsIndexRoute
+  '/submissions/': typeof SubmissionsIndexRoute
   '/forms/$formId/manage': typeof FormsFormIdManageRoute
   '/forms/$formId/submissions': typeof FormsFormIdSubmissionsRoute
   '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
@@ -180,7 +180,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
-    | '/submissions'
     | '/auth/login'
     | '/forms/create'
     | '/settings/appearance'
@@ -188,6 +187,7 @@ export interface FileRouteTypes {
     | '/submissions/$submissionId'
     | '/forms'
     | '/settings'
+    | '/submissions'
     | '/forms/$formId/manage'
     | '/forms/$formId/submissions'
     | '/forms/$formId/submit'
@@ -199,7 +199,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
-    | '/submissions'
     | '/auth/login'
     | '/forms/create'
     | '/settings/appearance'
@@ -207,6 +206,7 @@ export interface FileRouteTypes {
     | '/submissions/$submissionId'
     | '/forms'
     | '/settings'
+    | '/submissions'
     | '/forms/$formId/manage'
     | '/forms/$formId/submissions'
     | '/forms/$formId/submit'
@@ -218,7 +218,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
-    | '/submissions'
     | '/auth/login'
     | '/forms/create'
     | '/settings/appearance'
@@ -226,6 +225,7 @@ export interface FileRouteTypes {
     | '/submissions/$submissionId'
     | '/forms/'
     | '/settings/'
+    | '/submissions/'
     | '/forms/$formId/manage'
     | '/forms/$formId/submissions'
     | '/forms/$formId/submit'
@@ -238,12 +238,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   DashboardRoute: typeof DashboardRoute
-  SubmissionsRoute: typeof SubmissionsRouteWithChildren
   FormsCreateRoute: typeof FormsCreateRoute
   SettingsAppearanceRoute: typeof SettingsAppearanceRoute
   SettingsProfileRoute: typeof SettingsProfileRoute
+  SubmissionsSubmissionIdRoute: typeof SubmissionsSubmissionIdRoute
   FormsIndexRoute: typeof FormsIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
+  SubmissionsIndexRoute: typeof SubmissionsIndexRoute
   FormsFormIdManageRoute: typeof FormsFormIdManageRoute
   FormsFormIdSubmissionsRoute: typeof FormsFormIdSubmissionsRoute
   FormsFormIdSubmitRoute: typeof FormsFormIdSubmitRoute
@@ -254,13 +255,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/submissions': {
-      id: '/submissions'
-      path: '/submissions'
-      fullPath: '/submissions'
-      preLoaderRoute: typeof SubmissionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -282,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/submissions/': {
+      id: '/submissions/'
+      path: '/submissions'
+      fullPath: '/submissions'
+      preLoaderRoute: typeof SubmissionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings/': {
       id: '/settings/'
       path: '/settings'
@@ -298,10 +299,10 @@ declare module '@tanstack/react-router' {
     }
     '/submissions/$submissionId': {
       id: '/submissions/$submissionId'
-      path: '/$submissionId'
+      path: '/submissions/$submissionId'
       fullPath: '/submissions/$submissionId'
       preLoaderRoute: typeof SubmissionsSubmissionIdRouteImport
-      parentRoute: typeof SubmissionsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/settings/profile': {
       id: '/settings/profile'
@@ -386,28 +387,17 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
-interface SubmissionsRouteChildren {
-  SubmissionsSubmissionIdRoute: typeof SubmissionsSubmissionIdRoute
-}
-
-const SubmissionsRouteChildren: SubmissionsRouteChildren = {
-  SubmissionsSubmissionIdRoute: SubmissionsSubmissionIdRoute,
-}
-
-const SubmissionsRouteWithChildren = SubmissionsRoute._addFileChildren(
-  SubmissionsRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   DashboardRoute: DashboardRoute,
-  SubmissionsRoute: SubmissionsRouteWithChildren,
   FormsCreateRoute: FormsCreateRoute,
   SettingsAppearanceRoute: SettingsAppearanceRoute,
   SettingsProfileRoute: SettingsProfileRoute,
+  SubmissionsSubmissionIdRoute: SubmissionsSubmissionIdRoute,
   FormsIndexRoute: FormsIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
+  SubmissionsIndexRoute: SubmissionsIndexRoute,
   FormsFormIdManageRoute: FormsFormIdManageRoute,
   FormsFormIdSubmissionsRoute: FormsFormIdSubmissionsRoute,
   FormsFormIdSubmitRoute: FormsFormIdSubmitRoute,
