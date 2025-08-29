@@ -96,7 +96,7 @@ function Submissions() {
                   <thead className="bg-light">
                     <tr>
                       <th className="border-0 py-3 px-4">Form Name</th>
-                      <th className="border-0 py-3 px-4">Form Owner</th>
+                      <th className="border-0 py-3 px-4">Submission ID</th>
                       <th className="border-0 py-3 px-4">Submitted At</th>
                       <th className="border-0 py-3 px-4">Actions</th>
                     </tr>
@@ -111,7 +111,7 @@ function Submissions() {
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <small className="text-muted">{submission.formOwner?.name || 'Unknown'}</small>
+                          <small className="text-muted">#{submission.id}</small>
                         </td>
                         <td className="py-3 px-4">
                           <div className="d-flex align-items-center text-muted">
