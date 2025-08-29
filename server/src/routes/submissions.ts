@@ -135,6 +135,45 @@ submissionRoutes.get('/form/:formId', authMiddleware, formWriteCheckMiddleware, 
 });
 
 /**
+ * GET /api/submissions
+ *
+ * Retrieves all submissions made by the authenticated user
+ * Shows submissions TO any forms, not submissions FROM forms owned by the user
+ *
+ * Access: Authenticated user (their own submissions only)
+ * Auth Required: Yes
+ *
+ * Response: Array of submissions with form information
+ */
+submissionRoutes.get('/', authMiddleware, async (c) => {
+  try {
+    const user = c.get('jwtPayload')?.user;
+
+    if (!user) {
+      return c.json({ error: 'Authentication required' }, 401);
+    }
+
+    const userSubmissions = await submissionsService.getSubmissionsByUser(db, user.id);
+
+    const submissionsData = userSubmissions.map((sub) => ({
+      id: sub.id,
+      formId: sub.formId,
+      formName: sub.formName,
+      formDescription: sub.formDescription,
+      data: sub.data,
+      createdAt: sub.createdAt,
+      versionSha: sub.versionSha,
+      formOwner: sub.formOwner,
+    }));
+
+    return c.json({ data: submissionsData });
+  } catch (error) {
+    console.error('Error fetching user submissions:', error);
+    return c.json({ error: 'Failed to fetch submissions' }, 500);
+  }
+});
+
+/**
  * POST /api/submissions/form/:formId
  *
  * Creates a new submission for a form (public endpoint)

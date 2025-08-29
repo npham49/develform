@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import type { Database } from '../db/index';
 import { forms, formVersions, submissions, submissionTokens, users } from '../db/schema';
 
@@ -93,4 +93,31 @@ export const createSubmissionToken = async (
   },
 ) => {
   return await db.insert(submissionTokens).values(tokenData);
+};
+
+/**
+ * Retrieves all submissions made by a specific user
+ * Includes form information and submission data for user's own submissions
+ */
+export const getSubmissionsByUser = async (db: Database, userId: number) => {
+  return await db
+    .select({
+      id: submissions.id,
+      formId: submissions.formId,
+      formName: forms.name,
+      formDescription: forms.description,
+      data: submissions.data,
+      createdAt: submissions.createdAt,
+      versionSha: submissions.versionSha,
+      formOwner: {
+        id: forms.createdBy,
+        name: users.name,
+        email: users.email,
+      },
+    })
+    .from(submissions)
+    .innerJoin(forms, eq(submissions.formId, forms.id))
+    .leftJoin(users, eq(forms.createdBy, users.id))
+    .where(eq(submissions.createdBy, userId))
+    .orderBy(desc(submissions.createdAt));
 };

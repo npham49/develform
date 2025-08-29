@@ -97,8 +97,7 @@ export const createVersion = async (
 };
 
 /**
- * Updates version metadata (description only)
- * Schema updates require creating a new version for immutability
+ * Updates description or schema
  */
 export const updateVersion = async (
   db: Database,
@@ -106,12 +105,14 @@ export const updateVersion = async (
   versionSha: string,
   updateData: {
     description?: string;
+    schema?: unknown;
   },
 ) => {
   return await db
     .update(formVersions)
     .set({
       description: updateData.description,
+      schema: updateData.schema,
       updatedAt: new Date(),
     })
     .where(and(eq(formVersions.formId, formId), eq(formVersions.versionSha, versionSha), eq(formVersions.isPublished, false)))

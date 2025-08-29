@@ -143,6 +143,21 @@ export interface SubmissionCreateResult {
   submittedAt: string;
 }
 
+export interface UserSubmission {
+  id: number;
+  formId: number;
+  formName: string;
+  formDescription: string | null;
+  data: unknown;
+  createdAt: string;
+  versionSha: string | null;
+  formOwner: {
+    id: number;
+    name: string;
+    email: string | null;
+  };
+}
+
 // API Response Types
 
 // Auth endpoints
@@ -232,6 +247,10 @@ export interface CreateSubmissionResponse {
   data: SubmissionCreateResult;
 }
 
+export interface GetUserSubmissionsResponse {
+  data: UserSubmission[];
+}
+
 // Settings endpoints
 export interface GetProfileResponse {
   data: UserProfile;
@@ -276,6 +295,7 @@ export interface ApiResponses {
   // Submissions
   'GET /submissions/:id': SubmissionApiResponse<GetSubmissionResponse>;
   'GET /submissions/form/:formId': SubmissionApiResponse<GetSubmissionsByFormResponse>;
+  'GET /submissions/user': SubmissionApiResponse<GetUserSubmissionsResponse>;
   'POST /submissions/form/:formId': SubmissionApiResponse<CreateSubmissionResponse>;
 
   // Settings

@@ -17,6 +17,7 @@ import type {
   GetSubmissionResponse,
   GetSubmissionsByFormResponse,
   GetUserResponse,
+  GetUserSubmissionsResponse,
   LogoutResponse,
   PublishVersionResponse,
   RevertVersionRequest,
@@ -133,6 +134,7 @@ class ApiClient {
       return this.request<GetSubmissionResponse>(`/submissions/${id}${params}`);
     },
     getByForm: (formId: number) => this.request<GetSubmissionsByFormResponse>(`/submissions/form/${formId}`),
+    getByUser: () => this.request<GetUserSubmissionsResponse>('/submissions'),
   };
 
   // Settings methods

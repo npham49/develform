@@ -11,7 +11,7 @@ import { api } from '@/lib/api';
 import { requireAuth } from '@/lib/auth-utils';
 import { type BreadcrumbItem } from '@/types';
 import type { FormVersion, FormWithCreator } from '@/types/api';
-import { ArrowLeft, BarChart3, Calendar, Edit3, Eye, FileText, Send, Settings } from 'lucide-react';
+import { ArrowLeft, BarChart3, Calendar, Edit3, Eye, FileText, Send, Settings, Users } from 'lucide-react';
 import { Button, Card, Col, Container, Row } from 'react-bootstrap';
 
 export const Route = createFileRoute('/forms/$formId/manage')({
@@ -188,6 +188,13 @@ function FormsManage() {
                       <Button variant="outline-success" className="w-100 d-flex align-items-center">
                         <Send size={18} className="me-2" />
                         Submit Form
+                      </Button>
+                    </Link>
+                    
+                    <Link to="/forms/$formId/submissions" params={{ formId: form.id.toString() }} className="text-decoration-none">
+                      <Button variant="outline-info" className="w-100 d-flex align-items-center">
+                        <Users size={18} className="me-2" />
+                        View Submissions
                       </Button>
                     </Link>
                   </div>
