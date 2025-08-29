@@ -1,0 +1,154 @@
+import { useState } from 'react';
+import { Button, Card, Col, Row } from 'react-bootstrap';
+import { Code, Copy } from 'lucide-react';
+
+interface EmbedCodeSectionProps {
+  formId: number;
+  formName: string;
+}
+
+export function EmbedCodeSection({ formId, formName }: EmbedCodeSectionProps) {
+  const [copied, setCopied] = useState<string | null>(null);
+  const baseUrl = window.location.origin;
+
+  const embedCodes = {
+    html: `<!-- Embed ${formName} Form -->
+<iframe 
+  src="${baseUrl}/forms/${formId}/submit?embed=true"
+  width="100%" 
+  height="600"
+  frameborder="0"
+  scrolling="auto"
+  style="border: 1px solid #ddd; border-radius: 8px;">
+</iframe>`,
+    
+    react: `// React Component for ${formName}
+function EmbeddedForm() {
+  return (
+    <iframe
+      src="${baseUrl}/forms/${formId}/submit?embed=true"
+      width="100%"
+      height="600"
+      frameBorder="0"
+      scrolling="auto"
+      style={{
+        border: '1px solid #ddd',
+        borderRadius: '8px'
+      }}
+      title="${formName} Form"
+    />
+  );
+}`,
+
+    wordpress: `<!-- WordPress Shortcode for ${formName} -->
+[iframe src="${baseUrl}/forms/${formId}/submit?embed=true" width="100%" height="600" scrolling="auto"]
+
+<!-- Or use HTML block in Gutenberg editor -->
+<iframe 
+  src="${baseUrl}/forms/${formId}/submit?embed=true"
+  width="100%" 
+  height="600"
+  frameborder="0"
+  scrolling="auto"
+  style="border: 1px solid #ddd; border-radius: 8px;">
+</iframe>`
+  };
+
+  const copyToClipboard = (code: string, type: string) => {
+    navigator.clipboard.writeText(code);
+    setCopied(type);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  return (
+    <Card className="shadow-sm border-0">
+      <Card.Header className="bg-white py-3">
+        <div className="d-flex align-items-center">
+          <Code size={20} className="text-primary me-2" />
+          <div>
+            <h5 className="mb-0 fw-bold">Embed Form</h5>
+            <small className="text-muted">Copy and paste these code snippets to embed your public form</small>
+          </div>
+        </div>
+      </Card.Header>
+      <Card.Body className="p-4">
+        <Row className="g-4">
+          {/* HTML */}
+          <Col lg={4}>
+            <div className="border rounded p-3">
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <h6 className="fw-bold mb-0">HTML</h6>
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  onClick={() => copyToClipboard(embedCodes.html, 'html')}
+                  className="d-flex align-items-center"
+                >
+                  <Copy size={14} className="me-1" />
+                  {copied === 'html' ? 'Copied!' : 'Copy'}
+                </Button>
+              </div>
+              <pre className="bg-light p-2 rounded small" style={{ fontSize: '0.75rem', maxHeight: '200px', overflow: 'auto' }}>
+                <code>{embedCodes.html}</code>
+              </pre>
+            </div>
+          </Col>
+
+          {/* React */}
+          <Col lg={4}>
+            <div className="border rounded p-3">
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <h6 className="fw-bold mb-0">React</h6>
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  onClick={() => copyToClipboard(embedCodes.react, 'react')}
+                  className="d-flex align-items-center"
+                >
+                  <Copy size={14} className="me-1" />
+                  {copied === 'react' ? 'Copied!' : 'Copy'}
+                </Button>
+              </div>
+              <pre className="bg-light p-2 rounded small" style={{ fontSize: '0.75rem', maxHeight: '200px', overflow: 'auto' }}>
+                <code>{embedCodes.react}</code>
+              </pre>
+            </div>
+          </Col>
+
+          {/* WordPress */}
+          <Col lg={4}>
+            <div className="border rounded p-3">
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <h6 className="fw-bold mb-0">WordPress</h6>
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  onClick={() => copyToClipboard(embedCodes.wordpress, 'wordpress')}
+                  className="d-flex align-items-center"
+                >
+                  <Copy size={14} className="me-1" />
+                  {copied === 'wordpress' ? 'Copied!' : 'Copy'}
+                </Button>
+              </div>
+              <pre className="bg-light p-2 rounded small" style={{ fontSize: '0.75rem', maxHeight: '200px', overflow: 'auto' }}>
+                <code>{embedCodes.wordpress}</code>
+              </pre>
+            </div>
+          </Col>
+        </Row>
+
+        {/* Usage Notes */}
+        <div className="mt-4 p-3 bg-light rounded">
+          <h6 className="fw-bold mb-2">📝 Usage Notes</h6>
+          <ul className="mb-0 small text-muted">
+            <li>Forms are embedded with <code>?embed=true</code> parameter for minimal styling</li>
+            <li>Recommended iframe height is 600px, but adjust based on your form length</li>
+            <li>Forms are responsive and will adapt to iframe width</li>
+            <li>Only public forms can be embedded - private forms will show an error message</li>
+            <li>Success pages will also be embedded when users submit the form</li>
+          </ul>
+        </div>
+      </Card.Body>
+    </Card>
+  );
+}
