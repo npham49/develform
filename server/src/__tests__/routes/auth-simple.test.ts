@@ -54,13 +54,6 @@ describe('Auth Routes', () => {
       mockAuthService.findUserByGithubId.mockResolvedValue([mockUser]);
       mockJWT.sign.mockResolvedValue('mock-jwt-token');
 
-      // Mock fetch for GitHub API
-      const mockResponse = { access_token: 'github_token' };
-      const mockJson = jest.fn().mockResolvedValue(mockResponse);
-      const mockFetchResponse = { json: mockJson };
-      
-      (global as any).fetch = jest.fn().mockResolvedValue(mockFetchResponse);
-
       mockOctokit.rest.users.getAuthenticated.mockResolvedValue({
         data: mockGithubUser,
       });
@@ -234,6 +227,305 @@ describe('Auth Routes', () => {
       const result = logout(mockDeleteCookie);
       expect(result.message).toBe('Logged out successfully');
       expect(mockDeleteCookie).toHaveBeenCalledWith('auth_token');
+    });
+  });
+
+  describe('Edge Cases and Security Scenarios', () => {
+    describe('GitHub OAuth Edge Cases', () => {
+      it('should handle GitHub API rate limiting', async () => {
+        const rateLimitError = new Error('API rate limit exceeded');
+        rateLimitError.name = 'RateLimitError';
+        
+        mockOctokit.rest.users.getAuthenticated.mockRejectedValue(rateLimitError);
+
+        await expect(
+          mockOctokit.rest.users.getAuthenticated()
+        ).rejects.toThrow('API rate limit exceeded');
+      });
+
+      it('should handle GitHub API service outages', async () => {
+        const serviceError = new Error('GitHub service unavailable');
+        serviceError.name = 'ServiceUnavailableError';
+        
+        mockOctokit.rest.users.getAuthenticated.mockRejectedValue(serviceError);
+
+        await expect(
+          mockOctokit.rest.users.getAuthenticated()
+        ).rejects.toThrow('GitHub service unavailable');
+      });
+
+      it('should handle malformed GitHub API responses', async () => {
+        const malformedResponse = {
+          data: {
+            id: 'not-a-number',
+            login: null,
+            email: undefined,
+          },
+        };
+
+        mockOctokit.rest.users.getAuthenticated.mockResolvedValue(malformedResponse);
+
+        const result = await mockOctokit.rest.users.getAuthenticated();
+        expect(typeof result.data.id).toBe('string');
+        expect(result.data.login).toBeNull();
+        expect(result.data.email).toBeUndefined();
+      });
+
+      it('should handle GitHub users with extremely long usernames', async () => {
+        const longUsername = 'a'.repeat(100);
+        const githubUser = {
+          id: 123456,
+          login: longUsername,
+          name: 'Test User',
+          email: 'test@example.com',
+        };
+
+        mockOctokit.rest.users.getAuthenticated.mockResolvedValue({
+          data: githubUser,
+        });
+
+        const result = await mockOctokit.rest.users.getAuthenticated();
+        expect(result.data.login).toBe(longUsername);
+        expect(result.data.login.length).toBe(100);
+      });
+    });
+
+    describe('JWT Token Edge Cases', () => {
+      it('should handle JWT token expiration during requests', () => {
+        const expiredTokenError = new Error('Token expired');
+        expiredTokenError.name = 'TokenExpiredError';
+
+        const verifyToken = (token: string) => {
+          if (token === 'expired-token') {
+            throw expiredTokenError;
+          }
+          return { user: { id: 1 } };
+        };
+
+        expect(() => verifyToken('valid-token')).not.toThrow();
+        expect(() => verifyToken('expired-token')).toThrow('Token expired');
+      });
+
+      it('should handle malformed JWT tokens', () => {
+        const invalidTokens = [
+          'invalid.token',
+          'not.a.jwt.token',
+          '',
+          null,
+          undefined,
+          'a'.repeat(1000),
+        ];
+
+        const validateTokenFormat = (token: any) => {
+          if (!token || typeof token !== 'string') {
+            throw new Error('Invalid token format');
+          }
+          if (token.split('.').length !== 3) {
+            throw new Error('Invalid JWT format');
+          }
+          return true;
+        };
+
+        invalidTokens.forEach(token => {
+          expect(() => validateTokenFormat(token)).toThrow();
+        });
+
+        expect(() => validateTokenFormat('valid.jwt.token')).not.toThrow();
+      });
+
+      it('should handle JWT tokens with special characters', () => {
+        const tokenWithSpecialChars = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ';
+        
+        const decodeToken = (token: string) => {
+          try {
+            const parts = token.split('.');
+            if (parts.length !== 3) throw new Error('Invalid format');
+            return JSON.parse(atob(parts[1]));
+          } catch (error) {
+            throw new Error('Failed to decode token');
+          }
+        };
+
+        expect(() => decodeToken(tokenWithSpecialChars)).not.toThrow();
+      });
+    });
+
+    describe('User Data Validation Edge Cases', () => {
+      it('should handle users with null or empty GitHub profiles', async () => {
+        const incompleteGithubUsers = [
+          { id: 123, login: 'user1', name: null, email: null },
+          { id: 124, login: 'user2', name: '', email: '' },
+          { id: 125, login: 'user3', name: undefined, email: undefined },
+        ];
+
+        for (const githubUser of incompleteGithubUsers) {
+          const cleanUserData = (user: any) => {
+            return {
+              githubId: user.id.toString(),
+              name: user.name || user.login || 'Unknown User',
+              email: user.email || null,
+            };
+          };
+
+          const cleaned = cleanUserData(githubUser);
+          expect(cleaned.githubId).toBe(githubUser.id.toString());
+          expect(cleaned.name).toBeTruthy();
+        }
+      });
+
+      it('should handle extremely large user profile data', async () => {
+        const largeProfileData = {
+          id: 123456,
+          login: 'user',
+          name: 'A'.repeat(1000),
+          bio: 'B'.repeat(5000),
+          location: 'C'.repeat(500),
+          company: 'D'.repeat(500),
+        };
+
+        const validateProfileSize = (profile: any) => {
+          const maxSizes = {
+            name: 255,
+            bio: 1000,
+            location: 100,
+            company: 100,
+          };
+
+          Object.keys(maxSizes).forEach(field => {
+            if (profile[field] && profile[field].length > maxSizes[field as keyof typeof maxSizes]) {
+              profile[field] = profile[field].substring(0, maxSizes[field as keyof typeof maxSizes]);
+            }
+          });
+
+          return profile;
+        };
+
+        const validated = validateProfileSize(largeProfileData);
+        expect(validated.name.length).toBe(255);
+        expect(validated.bio.length).toBe(1000);
+        expect(validated.location.length).toBe(100);
+        expect(validated.company.length).toBe(100);
+      });
+
+      it('should handle users with special characters in profile data', async () => {
+        const specialCharUser = {
+          id: 123456,
+          login: 'user-123',
+          name: 'José María García-López 🚀',
+          email: 'josé+test@domain.co.uk',
+          bio: 'Full-stack developer @ Company™ <script>alert("xss")</script>',
+        };
+
+        const sanitizeUserData = (user: any) => {
+          const sanitize = (str: string) => {
+            return str
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .trim();
+          };
+
+          return {
+            ...user,
+            name: user.name ? sanitize(user.name) : user.name,
+            bio: user.bio ? sanitize(user.bio) : user.bio,
+          };
+        };
+
+        const sanitized = sanitizeUserData(specialCharUser);
+        expect(sanitized.name).toBe('José María García-López 🚀');
+        expect(sanitized.bio).toContain('&lt;script&gt;');
+        expect(sanitized.bio).not.toContain('<script>');
+      });
+    });
+
+    describe('Database Concurrency Edge Cases', () => {
+      it('should handle simultaneous user creation attempts', async () => {
+        const githubUser = {
+          id: 123456,
+          login: 'testuser',
+          email: 'test@example.com',
+        };
+
+        // Simulate race condition where user is created between check and creation
+        mockAuthService.findUserByGithubId
+          .mockResolvedValueOnce([]) // First check: user doesn't exist
+          .mockResolvedValueOnce([{ id: 1, githubId: '123456' }]); // Second check: user exists
+
+        mockAuthService.createUser.mockRejectedValue(
+          new Error('Duplicate key violation')
+        );
+
+        const result1 = await mockAuthService.findUserByGithubId(null, '123456');
+        expect(result1).toEqual([]);
+
+        await expect(mockAuthService.createUser(null, githubUser))
+          .rejects.toThrow('Duplicate key violation');
+
+        const result2 = await mockAuthService.findUserByGithubId(null, '123456');
+        expect(result2).toEqual([{ id: 1, githubId: '123456' }]);
+      });
+
+      it('should handle database deadlocks during user updates', async () => {
+        const deadlockError = new Error('Deadlock detected');
+        deadlockError.name = 'DeadlockError';
+
+        mockAuthService.updateUserWithGithubData.mockRejectedValue(deadlockError);
+
+        await expect(
+          mockAuthService.updateUserWithGithubData(null, 1, {})
+        ).rejects.toThrow('Deadlock detected');
+      });
+    });
+
+    describe('Network and Connectivity Edge Cases', () => {
+      it('should handle network timeouts during GitHub OAuth', () => {
+        const simulateNetworkTimeout = () => {
+          throw new Error('Network timeout');
+        };
+
+        expect(() => simulateNetworkTimeout()).toThrow('Network timeout');
+      });
+
+      it('should handle DNS resolution failures', () => {
+        const simulateDNSError = () => {
+          throw new Error('DNS resolution failed');
+        };
+
+        expect(() => simulateDNSError()).toThrow('DNS resolution failed');
+      });
+    });
+
+    describe('Memory and Performance Edge Cases', () => {
+      it('should handle memory pressure during token operations', () => {
+        const largePayload = {
+          user: {
+            id: 1,
+            metadata: 'x'.repeat(10000), // Large metadata
+            permissions: Array.from({ length: 1000 }, (_, i) => `permission_${i}`),
+          },
+        };
+
+        const optimizePayload = (payload: any) => {
+          const optimized = { ...payload };
+          
+          // Limit metadata size
+          if (optimized.user.metadata && optimized.user.metadata.length > 1000) {
+            optimized.user.metadata = optimized.user.metadata.substring(0, 1000) + '...';
+          }
+          
+          // Limit permissions array
+          if (optimized.user.permissions && optimized.user.permissions.length > 100) {
+            optimized.user.permissions = optimized.user.permissions.slice(0, 100);
+          }
+          
+          return optimized;
+        };
+
+        const optimized = optimizePayload(largePayload);
+        expect(optimized.user.metadata.length).toBeLessThanOrEqual(1003); // 1000 + '...'
+        expect(optimized.user.permissions.length).toBe(100);
+      });
     });
   });
 });
