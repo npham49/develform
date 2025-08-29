@@ -97,7 +97,7 @@ export const Route = createFileRoute('/submissions/')({
 });
 
 function Submissions() {
-  const { formSubmissions } = useLoaderData({ from: '/submissions' }) as {
+  const { formSubmissions } = useLoaderData({ from: '/submissions/' }) as {
     formSubmissions: FormSubmissions[];
   };
 
