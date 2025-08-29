@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect, useLoaderData } from '@tanstack/react-router';
+import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router';
 
 import { IconCard } from '@/components/common/icon-card';
 import { PageHeader } from '@/components/common/page-header';
@@ -8,37 +8,15 @@ import { EnhancedVersionHistoryTree } from '@/components/versions/enhanced-versi
 import { VersionAnalyticsDashboard } from '@/components/versions/version-analytics-dashboard';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
+import { requireAuth } from '@/lib/auth-utils';
 import { type BreadcrumbItem } from '@/types';
 import type { FormVersion, FormWithCreator } from '@/types/api';
 import { ArrowLeft, BarChart3, Calendar, Edit3, Eye, FileText, Send, Settings, Users } from 'lucide-react';
 import { Button, Card, Col, Container, Row } from 'react-bootstrap';
 
 export const Route = createFileRoute('/forms/$formId/manage')({
-  beforeLoad: async () => {
-    // Check if user is authenticated by calling the auth API
-    try {
-      const response = await fetch('/api/auth/user', {
-        credentials: 'include',
-      });
-      if (!response.ok) {
-        throw redirect({
-          to: '/auth/login',
-          search: {
-            redirect: window.location.pathname,
-          },
-        });
-      }
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('redirect')) {
-        throw error; // Re-throw redirect
-      }
-      throw redirect({
-        to: '/auth/login',
-        search: {
-          redirect: window.location.pathname,
-        },
-      });
-    }
+  beforeLoad: ({ context }) => {
+    requireAuth(context, window.location.pathname);
   },
   loader: async ({ params }) => {
     try {

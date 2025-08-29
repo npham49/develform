@@ -2,6 +2,7 @@ import { PageHeader } from '@/components/common/page-header';
 import { VersionShaDisplay } from '@/components/common/version-sha-display';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
+import { requireAuth } from '@/lib/auth-utils';
 import { Webform } from '@formio/js';
 import { Form, Submission } from '@formio/react';
 import { createFileRoute, Link } from '@tanstack/react-router';
@@ -11,6 +12,9 @@ import { Alert, Card, Container } from 'react-bootstrap';
 import { toast } from 'sonner';
 
 export const Route = createFileRoute('/forms/$formId/versions/$versionId/preview')({
+  beforeLoad: ({ context }) => {
+    requireAuth(context, window.location.pathname);
+  },
   loader: async ({ params }) => {
     const formId = parseInt(params.formId);
     const versionId = params.versionId;

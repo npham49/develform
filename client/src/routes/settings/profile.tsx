@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/common/page-header';
 import { useAuth } from '@/hooks/use-auth';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { requireAuth } from '@/lib/auth-utils';
 import { type BreadcrumbItem } from '@/types';
 import { AlertTriangle, CheckCircle, Mail, Shield, Trash2, User } from 'lucide-react';
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
@@ -268,6 +269,9 @@ function SettingsProfile() {
 }
 
 export const Route = createFileRoute('/settings/profile')({
+  beforeLoad: ({ context }) => {
+    requireAuth(context, '/settings/profile');
+  },
   loader: async () => {
     try {
       const response = await fetch('/api/user/profile', {
