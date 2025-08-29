@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { api } from '../../lib/api';
 import { FormVersion } from '../../types/api';
 import { RevertOperation, VersionRevertModal } from './version-revert-modal';
+import { useRouter } from '@tanstack/react-router';
 
 interface VersionActionsToolbarProps {
   version: FormVersion;
@@ -17,6 +18,7 @@ interface VersionActionsToolbarProps {
  */
 export const VersionActionsToolbar = ({ version, formId }: VersionActionsToolbarProps) => {
   const [showRevertModal, setShowRevertModal] = useState(false);
+  const router = useRouter();
 
   const handleRevert = () => {
     setShowRevertModal(true);
@@ -39,17 +41,17 @@ export const VersionActionsToolbar = ({ version, formId }: VersionActionsToolbar
 
           // Navigate to edit the new draft version
           if (newVersionResponse.data && Array.isArray(newVersionResponse.data) && newVersionResponse.data.length > 0) {
-            window.location.href = `/forms/${formId}/versions/${newVersionResponse.data[0].versionSha}/edit`;
+            router.navigate({ to: `/forms/${formId}/versions/${newVersionResponse.data[0].versionSha}/edit` });
           } else {
             // Fallback to refreshing the page
-            window.location.reload();
+            router.invalidate();
           }
           return;
         } // Don't reload page since we're navigating
       }
 
       // Refresh the page to show updated versions
-      window.location.reload();
+      router.invalidate();
     } catch (error) {
       console.error('Revert operation failed:', error);
       toast.error('Revert operation failed');
