@@ -7,6 +7,61 @@ import { type BreadcrumbItem } from '@/types';
 import { BarChart3, Clock, FileText, GitBranch, TrendingUp, Users } from 'lucide-react';
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
 
+export const Route = createFileRoute('/dashboard')({
+  beforeLoad: ({ context }) => {
+    requireAuth(context, '/dashboard');
+  },
+  loader: async () => {
+    try {
+      // Fetch dashboard data from API
+      const response = await fetch('/api/dashboard', {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return { dashboardData: data.data || data };
+      } else {
+        // Return default data if API not available
+        return {
+          dashboardData: {
+            totalForms: 12,
+            totalSubmissions: 847,
+            activeBranches: 5,
+            recentActivity: [
+              {
+                icon: 'FileText',
+                title: 'New form "Contact Us" created',
+                time: '2 hours ago',
+              },
+              {
+                icon: 'Users',
+                title: '15 new submissions received',
+                time: '4 hours ago',
+              },
+              {
+                icon: 'GitBranch',
+                title: 'Branch "feature/validation" merged',
+                time: '1 day ago',
+              },
+            ],
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      return {
+        dashboardData: {
+          totalForms: 0,
+          totalSubmissions: 0,
+          activeBranches: 0,
+          recentActivity: [],
+        },
+      };
+    }
+  },
+  component: Dashboard,
+});
+
 const breadcrumbs: BreadcrumbItem[] = [
   {
     title: 'Dashboard',
@@ -168,58 +223,3 @@ function Dashboard() {
     </AppLayout>
   );
 }
-
-export const Route = createFileRoute('/dashboard')({
-  beforeLoad: ({ context }) => {
-    requireAuth(context, '/dashboard');
-  },
-  loader: async () => {
-    try {
-      // Fetch dashboard data from API
-      const response = await fetch('/api/dashboard', {
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return { dashboardData: data.data || data };
-      } else {
-        // Return default data if API not available
-        return {
-          dashboardData: {
-            totalForms: 12,
-            totalSubmissions: 847,
-            activeBranches: 5,
-            recentActivity: [
-              {
-                icon: 'FileText',
-                title: 'New form "Contact Us" created',
-                time: '2 hours ago',
-              },
-              {
-                icon: 'Users',
-                title: '15 new submissions received',
-                time: '4 hours ago',
-              },
-              {
-                icon: 'GitBranch',
-                title: 'Branch "feature/validation" merged',
-                time: '1 day ago',
-              },
-            ],
-          },
-        };
-      }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      return {
-        dashboardData: {
-          totalForms: 0,
-          totalSubmissions: 0,
-          activeBranches: 0,
-          recentActivity: [],
-        },
-      };
-    }
-  },
-  component: Dashboard,
-});
