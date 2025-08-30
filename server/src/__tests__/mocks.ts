@@ -1,7 +1,8 @@
 import { jest } from '@jest/globals';
+import { MockUser, MockForm, MockFormVersion, MockSubmission, MockSubmissionToken, MockDb, JwtPayload } from './types';
 
 // Mock data for testing
-export const mockUser = {
+export const mockUser: MockUser = {
   id: 1,
   name: 'Test User',
   email: 'test@example.com',
@@ -13,7 +14,7 @@ export const mockUser = {
   updatedAt: new Date('2024-01-01T00:00:00Z'),
 };
 
-export const mockForm = {
+export const mockForm: MockForm = {
   id: 1,
   name: 'Test Form',
   description: 'A test form',
@@ -25,7 +26,7 @@ export const mockForm = {
   updatedAt: new Date('2024-01-01T00:00:00Z'),
 };
 
-export const mockFormVersion = {
+export const mockFormVersion: MockFormVersion = {
   id: 1,
   formId: 1,
   versionSha: 'abc123',
@@ -37,7 +38,7 @@ export const mockFormVersion = {
   updatedAt: new Date('2024-01-01T00:00:00Z'),
 };
 
-export const mockSubmission = {
+export const mockSubmission: MockSubmission = {
   id: 1,
   formId: 1,
   versionSha: 'abc123',
@@ -48,7 +49,7 @@ export const mockSubmission = {
   updatedAt: new Date('2024-01-01T00:00:00Z'),
 };
 
-export const mockSubmissionToken = {
+export const mockSubmissionToken: MockSubmissionToken = {
   id: 1,
   submissionId: 1,
   token: 'test-token-123',
@@ -57,7 +58,7 @@ export const mockSubmissionToken = {
 };
 
 // Mock database operations
-export const createMockDb = () => {
+export const createMockDb = (): MockDb => {
   const mockQuery = jest.fn();
   const mockSelect = jest.fn().mockReturnThis();
   const mockWhere = jest.fn().mockReturnThis();
@@ -117,7 +118,7 @@ export const createMockDb = () => {
 };
 
 // Helper to create JWT payload
-export const createMockJwtPayload = (user = mockUser) => ({
+export const createMockJwtPayload = (user: MockUser = mockUser): JwtPayload => ({
   sub: user.id.toString(),
   user: {
     id: user.id,
@@ -131,7 +132,7 @@ export const createMockJwtPayload = (user = mockUser) => ({
 });
 
 // Helper to mock successful database response
-export const mockDbResponse = (data: any) => Promise.resolve(data);
+export const mockDbResponse = <T>(data: T): Promise<T> => Promise.resolve(data);
 
 // Helper to mock failed database response
-export const mockDbError = (error: string) => Promise.reject(new Error(error));
+export const mockDbError = (error: string): Promise<never> => Promise.reject(new Error(error));

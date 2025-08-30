@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { jest } from '@jest/globals';
-import { createMockJwtPayload } from './mocks.js';
+import { createMockJwtPayload } from './mocks';
+import { MockUser, MockContext } from './types';
 
 // Create test app factory
 export const createTestApp = () => {
@@ -16,7 +17,7 @@ export const createTestApp = () => {
 };
 
 // Mock authentication middleware
-export const mockAuthMiddleware = (user?: any) => {
+export const mockAuthMiddleware = (user?: MockUser) => {
   return jest.fn(async (c, next) => {
     if (user) {
       c.set('jwtPayload', createMockJwtPayload(user));
@@ -28,7 +29,7 @@ export const mockAuthMiddleware = (user?: any) => {
 };
 
 // Mock optional authentication middleware
-export const mockOptionalAuthMiddleware = (user?: any) => {
+export const mockOptionalAuthMiddleware = (user?: MockUser) => {
   return jest.fn(async (c, next) => {
     if (user) {
       c.set('jwtPayload', createMockJwtPayload(user));
@@ -52,18 +53,18 @@ export const mockFormWriteCheckMiddleware = (shouldPass = true) => {
 // Helper to mock request context
 export const createMockContext = (options: {
   params?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   headers?: Record<string, string>;
   cookies?: Record<string, string>;
-  jwtPayload?: any;
-} = {}) => {
+  jwtPayload?: unknown;
+} = {}): MockContext => {
   const context = {
     req: {
       param: jest.fn((key: string) => options.params?.[key]),
       json: jest.fn(() => Promise.resolve(options.body)),
       header: jest.fn((key: string) => options.headers?.[key]),
     },
-    json: jest.fn((data: any, status?: number) => ({
+    json: jest.fn((data: unknown, status?: number) => ({
       status: status || 200,
       data,
     })),
@@ -82,9 +83,9 @@ export const testRouteHandler = async (
   handler: Function,
   options: {
     params?: Record<string, string>;
-    body?: any;
+    body?: unknown;
     headers?: Record<string, string>;
-    user?: any;
+    user?: MockUser;
   } = {}
 ) => {
   const context = createMockContext({
