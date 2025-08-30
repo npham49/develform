@@ -67,6 +67,7 @@ export const getFormByIdForSubmission = async (db: Database, formId: number) => 
 /**
  * Creates a new form submission with version tracking
  * Links to user if authenticated, requires version SHA for audit trail
+ * Sets default status to SUBMITTED
  */
 export const createSubmission = async (
   db: Database,
@@ -78,7 +79,10 @@ export const createSubmission = async (
     updatedBy?: number | null;
   },
 ) => {
-  return await db.insert(submissions).values(submissionData).returning();
+  return await db.insert(submissions).values({
+    ...submissionData,
+    status: 'SUBMITTED' as const,
+  }).returning();
 };
 
 /**
@@ -93,6 +97,27 @@ export const createSubmissionToken = async (
   },
 ) => {
   return await db.insert(submissionTokens).values(tokenData);
+};
+
+/**
+ * Updates the status of a submission
+ * Only accessible by form owners
+ */
+export const updateSubmissionStatus = async (
+  db: Database,
+  submissionId: number,
+  status: 'SUBMITTED' | 'REVIEWING' | 'PENDING_UPDATES' | 'COMPLETED',
+  updatedBy: number,
+) => {
+  return await db
+    .update(submissions)
+    .set({ 
+      status,
+      updatedBy,
+      updatedAt: new Date(),
+    })
+    .where(eq(submissions.id, submissionId))
+    .returning();
 };
 
 /**
