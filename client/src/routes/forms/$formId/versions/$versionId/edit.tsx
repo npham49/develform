@@ -86,6 +86,7 @@ function EditFormVersion() {
 
   // Simple change tracking - no schema comparison needed
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isManualSaving, setIsManualSaving] = useState(false);
 
   /**
    * Saves current FormBuilder schema to server.
@@ -131,6 +132,28 @@ function EditFormVersion() {
   const autoSaveDebounce = useMemo(() => {
     return createDebounce(triggerAutoSave, 5000);
   }, [triggerAutoSave]);
+
+  /**
+   * Manually triggers save immediately, bypassing the debounce delay.
+   * Called when user clicks the "Save Now" button.
+   */
+  const handleManualSave = useCallback(async () => {
+    if (!hasUnsavedChanges || isManualSaving) {
+      return;
+    }
+
+    setIsManualSaving(true);
+    
+    try {
+      // Cancel any pending auto-save
+      autoSaveDebounce.cleanup();
+      
+      // Trigger save immediately
+      await triggerAutoSave();
+    } finally {
+      setIsManualSaving(false);
+    }
+  }, [hasUnsavedChanges, isManualSaving, autoSaveDebounce, triggerAutoSave]);
 
   /**
    * Handles FormBuilder schema changes by marking as unsaved and triggering auto-save.
@@ -324,9 +347,30 @@ function EditFormVersion() {
                   <p className="text-muted small mb-0">Drag and drop components to build your form</p>
                 </div>
                 <div className="d-flex align-items-center gap-2">
-                  {hasUnsavedChanges && autoSaveDebounce.isPending() && <span className="d-flex align-items-center badge bg-warning text-dark"><Spinner className='me-1' animation="border" role="status" size="sm" />Saving...</span>}
-                  {hasUnsavedChanges && !autoSaveDebounce.isPending() && <span className="badge bg-danger text-white">Unsaved changes</span>}
-                  {!hasUnsavedChanges && <span className="badge bg-success text-white">All changes saved</span>}
+                  {hasUnsavedChanges && (autoSaveDebounce.isPending() || isManualSaving) && (
+                    <span className="d-flex align-items-center badge bg-warning text-dark">
+                      <Spinner className='me-1' animation="border" role="status" size="sm" />
+                      {isManualSaving ? 'Saving...' : 'Auto-saving...'}
+                    </span>
+                  )}
+                  {hasUnsavedChanges && autoSaveDebounce.isPending() && !isManualSaving && (
+                    <Button 
+                      variant="outline-primary" 
+                      size="sm" 
+                      onClick={handleManualSave}
+                      className="d-flex align-items-center"
+                      disabled={isManualSaving}
+                    >
+                      <Save size={14} className="me-1" />
+                      Save Now
+                    </Button>
+                  )}
+                  {hasUnsavedChanges && !autoSaveDebounce.isPending() && !isManualSaving && (
+                    <span className="badge bg-danger text-white">Unsaved changes</span>
+                  )}
+                  {!hasUnsavedChanges && (
+                    <span className="badge bg-success text-white">All changes saved</span>
+                  )}
                 </div>
               </div>
             </Card.Header>
