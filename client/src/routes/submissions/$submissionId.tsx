@@ -1,12 +1,14 @@
-import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router';
+import { createFileRoute, Link, useLoaderData, useRouter } from '@tanstack/react-router';
 
 import { PageHeader } from '@/components/common/page-header';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
 import { type BreadcrumbItem } from '@/types';
-import type { SubmissionDetail } from '@/types/api';
+import type { SubmissionDetail, UpdateSubmissionStatusRequest } from '@/types/api';
 import { ArrowLeft, Calendar, FileText, User, Users } from 'lucide-react';
-import { Alert, Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
+import { useState } from 'react';
+import { Alert, Badge, Button, Card, Col, Container, Dropdown, Row } from 'react-bootstrap';
+import { toast } from 'react-toastify';
 import { requireAuth } from '@/lib/auth-utils';
 
 export const Route = createFileRoute('/submissions/$submissionId')({
@@ -33,6 +35,36 @@ export const Route = createFileRoute('/submissions/$submissionId')({
 function SubmissionDetail() {
   const { submission } = useLoaderData({ from: '/submissions/$submissionId' }) as {
     submission: SubmissionDetail;
+  };
+  const router = useRouter();
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  const statusOptions = [
+    { value: 'SUBMITTED', label: 'Submitted', color: 'info' },
+    { value: 'REVIEWING', label: 'Reviewing', color: 'warning' },
+    { value: 'PENDING_UPDATES', label: 'Pending Updates', color: 'danger' },
+    { value: 'COMPLETED', label: 'Completed', color: 'success' },
+  ] as const;
+
+  const getCurrentStatusOption = () => 
+    statusOptions.find(option => option.value === submission.status) || statusOptions[0];
+
+  const handleStatusUpdate = async (newStatus: UpdateSubmissionStatusRequest['status']) => {
+    if (newStatus === submission.status) return;
+
+    setIsUpdatingStatus(true);
+    try {
+      await api.submissions.updateStatus(submission.id, { status: newStatus });
+      toast.success('Submission status updated successfully');
+      
+      // Refresh the page to show updated status
+      router.invalidate();
+    } catch (error) {
+      console.error('Error updating submission status:', error);
+      toast.error('Failed to update submission status');
+    } finally {
+      setIsUpdatingStatus(false);
+    }
   };
 
   if (!submission) {
@@ -122,6 +154,39 @@ function SubmissionDetail() {
                       <div className="d-flex align-items-center text-muted">
                         <Calendar size={14} className="me-1" />
                         {new Date(submission.createdAt).toLocaleString()}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="fw-semibold text-dark small">Status</div>
+                      <div className="d-flex align-items-center">
+                        <Badge bg={getCurrentStatusOption().color} className="me-2">
+                          {getCurrentStatusOption().label}
+                        </Badge>
+                        {submission.isFormOwner && (
+                          <Dropdown>
+                            <Dropdown.Toggle
+                              variant="outline-secondary"
+                              size="sm"
+                              disabled={isUpdatingStatus}
+                            >
+                              {isUpdatingStatus ? 'Updating...' : 'Change Status'}
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              {statusOptions.map((option) => (
+                                <Dropdown.Item
+                                  key={option.value}
+                                  active={option.value === submission.status}
+                                  onClick={() => handleStatusUpdate(option.value)}
+                                >
+                                  <Badge bg={option.color} className="me-2">
+                                    {option.label}
+                                  </Badge>
+                                </Dropdown.Item>
+                              ))}
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        )}
                       </div>
                     </div>
 

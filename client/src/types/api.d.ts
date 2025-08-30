@@ -131,6 +131,7 @@ export interface SubmissionDetail {
     description: string | null;
   } | null;
   createdAt: string;
+  status: 'SUBMITTED' | 'REVIEWING' | 'PENDING_UPDATES' | 'COMPLETED';
   isFormOwner: boolean;
   submitterInformation: SubmitterInformation | null;
   token?: string;
@@ -247,6 +248,14 @@ export interface CreateSubmissionResponse {
   data: SubmissionCreateResult;
 }
 
+export interface UpdateSubmissionStatusResponse {
+  data: {
+    id: number;
+    status: 'SUBMITTED' | 'REVIEWING' | 'PENDING_UPDATES' | 'COMPLETED';
+    updatedAt: string;
+  };
+}
+
 export interface GetUserSubmissionsResponse {
   data: UserSubmission[];
 }
@@ -330,6 +339,10 @@ export interface CreateSubmissionRequest {
   formId: number;
   versionSha: string;
   data: unknown;
+}
+
+export interface UpdateSubmissionStatusRequest {
+  status: 'SUBMITTED' | 'REVIEWING' | 'PENDING_UPDATES' | 'COMPLETED';
 }
 
 export interface UpdateProfileRequest {

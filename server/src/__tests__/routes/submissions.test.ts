@@ -1,7 +1,7 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { Hono } from 'hono';
 import { createMockDb, mockUser, mockSubmission, mockSubmissionToken, mockForm } from '../mocks';
-import { TestResponse, MockUser, MockSubmission } from '../types';
+import { TestResponse, MockUser, MockSubmission, StatusUpdateResponse } from '../types';
 
 // Create test app with mocked submission routes
 const createTestSubmissionsApp = () => {
@@ -143,6 +143,42 @@ const createTestSubmissionsApp = () => {
     }
 
     return c.json({ message: 'Submission deleted successfully' });
+  });
+
+  // Mock update submission status endpoint
+  app.put('/:id/status', async (c) => {
+    const id = c.req.param('id');
+    const authHeader = c.req.header('Authorization');
+    
+    if (!id || isNaN(Number(id))) {
+      return c.json({ error: 'Invalid submission ID' }, 400);
+    }
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
+
+    const body = await c.req.json();
+    
+    // Validate status
+    const validStatuses = ['SUBMITTED', 'REVIEWING', 'PENDING_UPDATES', 'COMPLETED'];
+    if (!body.status || !validStatuses.includes(body.status)) {
+      return c.json({ error: 'Invalid status' }, 400);
+    }
+
+    // Check if user is form owner (simplified check)
+    const token = authHeader.replace('Bearer ', '');
+    if (token === 'non-owner-token') {
+      return c.json({ error: 'Only form owners can update submission status' }, 403);
+    }
+
+    return c.json({
+      data: {
+        id: Number(id),
+        status: body.status,
+        updatedAt: new Date().toISOString(),
+      },
+    });
   });
 
   // Mock anonymous submission access endpoint
@@ -387,6 +423,137 @@ describe('Submissions Routes', () => {
       
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
+    });
+  });
+
+  describe('PUT /:id/status', () => {
+    it('should update submission status successfully', async () => {
+      const statusData = {
+        status: 'REVIEWING',
+      };
+
+      const res = await app.request('/1/status', {
+        method: 'PUT',
+        headers: { 
+          Authorization: 'Bearer mock-token',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(statusData),
+      });
+      const data = await res.json() as TestResponse<StatusUpdateResponse>;
+      
+      expect(res.status).toBe(200);
+      expect(data.data).toBeDefined();
+      expect(data.data!.status).toBe('REVIEWING');
+      expect(data.data!.id).toBe(1);
+      expect(data.data!.updatedAt).toBeDefined();
+    });
+
+    it('should accept all valid status values', async () => {
+      const validStatuses = ['SUBMITTED', 'REVIEWING', 'PENDING_UPDATES', 'COMPLETED'];
+      
+      for (const status of validStatuses) {
+        const res = await app.request('/1/status', {
+          method: 'PUT',
+          headers: { 
+            Authorization: 'Bearer mock-token',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status }),
+        });
+        const data = await res.json() as TestResponse<StatusUpdateResponse>;
+        
+        expect(res.status).toBe(200);
+        expect(data.data!.status).toBe(status);
+      }
+    });
+
+    it('should return error for invalid status', async () => {
+      const statusData = {
+        status: 'INVALID_STATUS',
+      };
+
+      const res = await app.request('/1/status', {
+        method: 'PUT',
+        headers: { 
+          Authorization: 'Bearer mock-token',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(statusData),
+      });
+      const data = await res.json() as TestResponse;
+      
+      expect(res.status).toBe(400);
+      expect(data.error).toBe('Invalid status');
+    });
+
+    it('should return error when status is missing', async () => {
+      const res = await app.request('/1/status', {
+        method: 'PUT',
+        headers: { 
+          Authorization: 'Bearer mock-token',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json() as TestResponse;
+      
+      expect(res.status).toBe(400);
+      expect(data.error).toBe('Invalid status');
+    });
+
+    it('should return error for invalid submission ID', async () => {
+      const statusData = {
+        status: 'REVIEWING',
+      };
+
+      const res = await app.request('/invalid/status', {
+        method: 'PUT',
+        headers: { 
+          Authorization: 'Bearer mock-token',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(statusData),
+      });
+      const data = await res.json() as TestResponse;
+      
+      expect(res.status).toBe(400);
+      expect(data.error).toBe('Invalid submission ID');
+    });
+
+    it('should return unauthorized without authentication', async () => {
+      const statusData = {
+        status: 'REVIEWING',
+      };
+
+      const res = await app.request('/1/status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(statusData),
+      });
+      const data = await res.json() as TestResponse;
+      
+      expect(res.status).toBe(401);
+      expect(data.error).toBe('Unauthorized');
+    });
+
+    it('should return forbidden when user is not form owner', async () => {
+      const statusData = {
+        status: 'REVIEWING',
+      };
+
+      const res = await app.request('/1/status', {
+        method: 'PUT',
+        headers: { 
+          Authorization: 'Bearer non-owner-token',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(statusData),
+      });
+      const data = await res.json() as TestResponse;
+      
+      expect(res.status).toBe(403);
+      expect(data.error).toBe('Only form owners can update submission status');
     });
   });
 

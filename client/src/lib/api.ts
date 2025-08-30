@@ -26,6 +26,8 @@ import type {
   UpdateFormResponse,
   UpdateProfileRequest,
   UpdateProfileResponse,
+  UpdateSubmissionStatusRequest,
+  UpdateSubmissionStatusResponse,
   UpdateVersionRequest,
   UpdateVersionResponse,
 } from '../types/api';
@@ -133,6 +135,11 @@ class ApiClient {
       const params = token ? `?token=${token}` : '';
       return this.request<GetSubmissionResponse>(`/submissions/${id}${params}`);
     },
+    updateStatus: (id: number, data: UpdateSubmissionStatusRequest) =>
+      this.request<UpdateSubmissionStatusResponse>(`/submissions/${id}/status`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
     getByForm: (formId: number) => this.request<GetSubmissionsByFormResponse>(`/submissions/form/${formId}`),
     getByUser: () => this.request<GetUserSubmissionsResponse>('/submissions'),
   };
