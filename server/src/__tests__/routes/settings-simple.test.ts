@@ -1,5 +1,7 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 describe('Settings Routes', () => {
   let mockAuthService: any;
 

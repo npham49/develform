@@ -1,5 +1,7 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Simple test implementation for auth routes
 describe('Auth Routes', () => {
   let mockAuthService: any;

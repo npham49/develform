@@ -1,5 +1,7 @@
 import { jest } from '@jest/globals';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Set up environment variables for testing
 process.env.JWT_SECRET = 'test-secret-key';
 process.env.CLIENT_URL = 'http://localhost:3000';

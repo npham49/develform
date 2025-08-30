@@ -3,6 +3,8 @@ import { Hono } from 'hono';
 import { createMockDb, mockUser, mockForm } from '../mocks';
 import { TestResponse, MockUser, MockForm } from '../types';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Create test app with mocked form routes
 const createTestFormsApp = () => {
   const app = new Hono();

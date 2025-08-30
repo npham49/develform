@@ -3,6 +3,8 @@ import { Hono } from 'hono';
 import { createMockDb, mockUser } from '../mocks';
 import { TestResponse, MockUser } from '../types';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Create test app with mocked settings routes
 const createTestSettingsApp = () => {
   const app = new Hono();
