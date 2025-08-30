@@ -31,6 +31,7 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
   try {
     const submissionId = parseInt(c.req.param('id'));
     const token = c.req.query('token');
+    const isEmbedded = c.req.query('embed') === 'true';
     const user = c.get('jwtPayload')?.user;
 
     if (isNaN(submissionId)) {
@@ -44,6 +45,11 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
     }
 
     const data = submission[0];
+
+    // Embedded access is only allowed for public forms
+    if (isEmbedded && !data.form?.isPublic) {
+      return c.json({ error: 'Embedding is only available for public forms' }, 403);
+    }
 
     // Check access permissions
     let hasAccess = false;

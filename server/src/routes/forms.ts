@@ -104,6 +104,7 @@ formRoutes.get('/:id/submit', optionalAuthMiddleware, async (c) => {
   try {
     const formId = parseInt(c.req.param('id'));
     const user = c.get('jwtPayload')?.user;
+    const isEmbedded = c.req.query('embed') === 'true';
 
     if (isNaN(formId)) {
       return c.json({ error: 'Invalid form ID' }, 400);
@@ -120,6 +121,11 @@ formRoutes.get('/:id/submit', optionalAuthMiddleware, async (c) => {
     // Check access permissions
     if (!formData.isPublic && !user) {
       return c.json({ error: 'Authentication required' }, 401);
+    }
+
+    // Embedded forms are only allowed for public forms
+    if (isEmbedded && !formData.isPublic) {
+      return c.json({ error: 'Embedding is only available for public forms' }, 403);
     }
 
     return c.json({
