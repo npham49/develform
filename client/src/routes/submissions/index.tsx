@@ -3,11 +3,11 @@ import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router';
 import { PageHeader } from '@/components/common/page-header';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
+import { requireAuth } from '@/lib/auth-utils';
 import { type BreadcrumbItem } from '@/types';
 import type { UserSubmission } from '@/types/api';
 import { Calendar, FileText } from 'lucide-react';
 import { Button, Card, Container, Table } from 'react-bootstrap';
-import { requireAuth } from '@/lib/auth-utils';
 
 export const Route = createFileRoute('/submissions/')({
   beforeLoad: ({ context }) => {
