@@ -95,6 +95,14 @@ function FormsSubmit() {
         <div className="text-center">
           <h3>Form not found</h3>
           <p className="text-muted">The requested form could not be loaded.</p>
+          {isEmbedded && (
+            <div className="mt-3">
+              <Alert variant="info" className="d-inline-block">
+                <Info size={20} className="me-2" />
+                Only public forms can be embedded on external websites.
+              </Alert>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -118,17 +126,29 @@ function FormsSubmit() {
   if (!actualFormId || error) {
     // Check if this is an access denied error for private forms
     const isAccessDenied = error && (error.includes('Access denied') || error.includes('Authentication required'));
+    const isEmbedBlocked = error && error.includes('Embedding is only available for public forms');
     
     const errorContent = (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
         <div className="text-center">
-          <h3>{isAccessDenied ? 'Form Not Available' : (error ? 'Error' : 'Form not found')}</h3>
+          <h3>{isAccessDenied ? 'Form Not Available' : (isEmbedBlocked ? 'Embedding Not Available' : (error ? 'Error' : 'Form not found'))}</h3>
           <p className="text-muted">
-            {isAccessDenied && isEmbedded 
-              ? 'This form cannot be embedded because it is not public.' 
-              : (error || 'The requested form could not be loaded.')
+            {isEmbedBlocked
+              ? 'This form cannot be embedded because it is not public.'
+              : (isAccessDenied && isEmbedded 
+                  ? 'This form cannot be embedded because it is not public.' 
+                  : (error || 'The requested form could not be loaded.')
+                )
             }
           </p>
+          {(isEmbedBlocked || (isAccessDenied && isEmbedded)) && (
+            <div className="mt-3">
+              <Alert variant="info" className="d-inline-block">
+                <Info size={20} className="me-2" />
+                Only public forms can be embedded on external websites.
+              </Alert>
+            </div>
+          )}
         </div>
       </div>
     );

@@ -7,7 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
 import type { SubmissionDetail } from '@/types/api';
 import { Form as FormioForm } from '@formio/react';
-import { CheckCircle, Copy, Download, Shield, User } from 'lucide-react';
+import { CheckCircle, Copy, Download, Info, Shield, User } from 'lucide-react';
 import { Alert, Badge, Button, Card, Container } from 'react-bootstrap';
 
 export const Route = createFileRoute('/forms/$formId/success/$submissionId')({
@@ -59,6 +59,14 @@ function FormsSuccess() {
         <div className="text-center">
           <h3>Submission not found</h3>
           <p className="text-muted">The requested submission could not be loaded.</p>
+          {isEmbedded && (
+            <div className="mt-3">
+              <Alert variant="info" className="d-inline-block">
+                <Info size={20} className="me-2" />
+                Only public forms can be embedded on external websites.
+              </Alert>
+            </div>
+          )}
         </div>
       </div>
     );
