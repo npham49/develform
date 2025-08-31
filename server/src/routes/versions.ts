@@ -155,6 +155,16 @@ versionRoutes.post('/forms/:formId/versions', authMiddleware, formWriteCheckMidd
           components: [],
         };
       }
+    } else {
+      // No schema and no baseVersionSha provided, use blank schema
+      baseSchema = {
+        title: '',
+        name: '',
+        path: '',
+        display: 'form',
+        type: 'form',
+        components: [],
+      };
     }
 
     // Set appropriate description if none provided
