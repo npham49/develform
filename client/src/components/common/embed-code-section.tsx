@@ -21,7 +21,12 @@ export function EmbedCodeSection({ formId, formName }: EmbedCodeSectionProps) {
   frameborder="0"
   scrolling="auto"
   style="border: 1px solid #ddd; border-radius: 8px;">
-</iframe>`,
+</iframe>
+
+<!-- With specific theme (optional) -->
+<!-- Light theme: add &theme=light to URL -->
+<!-- Dark theme: add &theme=dark to URL -->
+<!-- System theme: add &theme=system to URL (default) -->`,
 
     react: `// React Component for ${formName}
 function EmbeddedForm() {
@@ -39,7 +44,12 @@ function EmbeddedForm() {
       title="${formName} Form"
     />
   );
-}`,
+}
+
+// With theme parameter (optional):
+// &theme=light - Force light theme
+// &theme=dark - Force dark theme  
+// &theme=system - Use system preference (default)`,
 
     wordpress: `<!-- WordPress Shortcode for ${formName} -->
 [iframe src="${baseUrl}/forms/${formId}/submit?embed=true" width="100%" height="600" scrolling="auto"]
@@ -52,7 +62,12 @@ function EmbeddedForm() {
   frameborder="0"
   scrolling="auto"
   style="border: 1px solid #ddd; border-radius: 8px;">
-</iframe>`,
+</iframe>
+
+<!-- Theme options (add to URL):
+&theme=light - Force light theme
+&theme=dark - Force dark theme
+&theme=system - Use system preference (default) -->`,
   };
 
   const returnEmbed = (type: 'html' | 'react' | 'wordpress') => {
@@ -122,6 +137,9 @@ function EmbeddedForm() {
           <ul className="mb-0 small text-muted">
             <li>
               Forms are embedded with <code>?embed=true</code> parameter for minimal styling
+            </li>
+            <li>
+              Optional theme parameter: <code>&theme=light</code>, <code>&theme=dark</code>, or <code>&theme=system</code> (default)
             </li>
             <li>Recommended iframe height is 600px, but adjust based on your form length</li>
             <li>Forms are responsive and will adapt to iframe width</li>

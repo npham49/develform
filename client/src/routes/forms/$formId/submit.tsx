@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useLoaderData, useNavigate, useParams } from '@tanstack/react-router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { IconCard } from '@/components/common/icon-card';
 import { VersionShaDisplay } from '@/components/common/version-sha-display';
 import { useAuth } from '@/hooks/use-auth';
+import { type Appearance } from '@/hooks/use-appearance';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
 import type { FormSchema } from '@/types/api';
@@ -17,7 +18,8 @@ export const Route = createFileRoute('/forms/$formId/submit')({
       const response = await api.forms.getSubmitSchema(parseInt(params.formId));
       const searchParams = new URLSearchParams(location.search);
       const isEmbedded = searchParams.get('embed') === 'true';
-      return { form: response.data, isEmbedded };
+      const embedTheme = searchParams.get('theme');
+      return { form: response.data, isEmbedded, embedTheme };
     } catch (error) {
       console.error('Error fetching form for submission:', error);
       throw error;
@@ -29,7 +31,11 @@ export const Route = createFileRoute('/forms/$formId/submit')({
 });
 
 function FormsSubmit() {
-  const { form, isEmbedded } = useLoaderData({ from: '/forms/$formId/submit' }) as { form: FormSchema; isEmbedded: boolean };
+  const { form, isEmbedded, embedTheme } = useLoaderData({ from: '/forms/$formId/submit' }) as { 
+    form: FormSchema; 
+    isEmbedded: boolean;
+    embedTheme: string | null;
+  };
   const { formId } = useParams({ from: '/forms/$formId/submit' });
   const navigate = useNavigate({ from: '/forms/$formId/submit' });
   const { user } = useAuth();
@@ -41,6 +47,18 @@ function FormsSubmit() {
   const actualFormId = form?.id || (formId ? parseInt(formId) : null);
   const isLoggedIn = !!user;
   const formData = form;
+
+  // Apply embed theme if specified
+  useEffect(() => {
+    if (isEmbedded && embedTheme) {
+      const validThemes: Appearance[] = ['light', 'dark', 'system'];
+      const theme = validThemes.includes(embedTheme as Appearance) ? (embedTheme as Appearance) : 'system';
+      
+      // Apply theme directly for embedded forms
+      const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.classList.toggle('dark', isDark);
+    }
+  }, [isEmbedded, embedTheme]);
 
   const handleChange = (value: unknown, _flags: unknown, modified: boolean) => {
     if (modified && value && typeof value === 'object' && 'data' in value) {

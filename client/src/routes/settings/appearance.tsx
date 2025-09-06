@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
 
 import { PageHeader } from '@/components/common/page-header';
+import { useAppearance, type Appearance } from '@/hooks/use-appearance';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { requireAuth } from '@/lib/auth-utils';
@@ -16,20 +16,16 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-type Theme = 'light' | 'dark' | 'auto';
-
 function SettingsAppearance() {
-  const [currentTheme, setCurrentTheme] = useState<Theme>('light');
+  const { appearance, updateAppearance } = useAppearance();
 
-  const handleThemeChange = (theme: Theme) => {
-    setCurrentTheme(theme);
-    // TODO: Implement theme change logic
-    console.log('Changing theme to:', theme);
+  const handleThemeChange = (theme: Appearance) => {
+    updateAppearance(theme);
   };
 
   const themes = [
     {
-      id: 'light' as Theme,
+      id: 'light' as Appearance,
       name: 'Light Theme',
       description: 'Bright and clean interface',
       icon: Sun,
@@ -37,7 +33,7 @@ function SettingsAppearance() {
       iconColor: 'text-primary',
     },
     {
-      id: 'dark' as Theme,
+      id: 'dark' as Appearance,
       name: 'Dark Theme',
       description: 'Easy on the eyes',
       icon: Moon,
@@ -45,7 +41,7 @@ function SettingsAppearance() {
       iconColor: 'text-muted',
     },
     {
-      id: 'auto' as Theme,
+      id: 'system' as Appearance,
       name: 'Auto',
       description: 'Matches system settings',
       icon: Monitor,
@@ -85,7 +81,7 @@ function SettingsAppearance() {
                   <div className="d-flex gap-3">
                     {themes.map((theme) => {
                       const Icon = theme.icon;
-                      const isActive = currentTheme === theme.id;
+                      const isActive = appearance === theme.id;
 
                       return (
                         <Card key={theme.id} className={`border-2 ${isActive ? 'border-primary' : 'border'}`} style={{ width: '200px' }}>
