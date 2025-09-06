@@ -1,25 +1,25 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it } from '@jest/globals';
 import { Hono } from 'hono';
-import { createMockDb, mockUser, mockSubmission, mockSubmissionToken, mockForm } from '../mocks';
-import { TestResponse, MockUser, MockSubmission } from '../types';
+import { mockSubmission, mockSubmissionToken, mockUser } from '../mocks';
+import { TestResponse } from '../types';
 
 // Create test app with mocked submission routes
 const createTestSubmissionsApp = () => {
   const app = new Hono();
-  
+
   // Mock list submissions endpoint
   app.get('/', async (c) => {
     const authHeader = c.req.header('Authorization');
     const formId = c.req.query('formId');
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
     let submissions = [mockSubmission];
-    
+
     if (formId) {
-      submissions = submissions.filter(s => s.formId === Number(formId));
+      submissions = submissions.filter((s) => s.formId === Number(formId));
     }
 
     return c.json({
@@ -32,11 +32,11 @@ const createTestSubmissionsApp = () => {
   app.get('/:id', async (c) => {
     const id = c.req.param('id');
     const authHeader = c.req.header('Authorization');
-    
+
     if (!id || isNaN(Number(id))) {
       return c.json({ error: 'Invalid submission ID' }, 400);
     }
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -49,7 +49,7 @@ const createTestSubmissionsApp = () => {
   app.post('/', async (c) => {
     const body = await c.req.json();
     const authHeader = c.req.header('Authorization');
-    
+
     if (!body.formId) {
       return c.json({ error: 'Form ID is required' }, 400);
     }
@@ -70,10 +70,13 @@ const createTestSubmissionsApp = () => {
         updatedBy: mockUser.id,
       };
 
-      return c.json({ 
-        data: newSubmission,
-        message: 'Submission created successfully' 
-      }, 201);
+      return c.json(
+        {
+          data: newSubmission,
+          message: 'Submission created successfully',
+        },
+        201,
+      );
     }
 
     // For anonymous submissions
@@ -93,28 +96,31 @@ const createTestSubmissionsApp = () => {
       token: 'anon-token-' + Date.now(),
     };
 
-    return c.json({ 
-      data: newSubmission,
-      token: token.token,
-      message: 'Anonymous submission created successfully' 
-    }, 201);
+    return c.json(
+      {
+        data: newSubmission,
+        token: token.token,
+        message: 'Anonymous submission created successfully',
+      },
+      201,
+    );
   });
 
   // Mock update submission endpoint
   app.put('/:id', async (c) => {
     const id = c.req.param('id');
     const authHeader = c.req.header('Authorization');
-    
+
     if (!id || isNaN(Number(id))) {
       return c.json({ error: 'Invalid submission ID' }, 400);
     }
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
     const body = await c.req.json();
-    
+
     const updatedSubmission = {
       ...mockSubmission,
       id: Number(id),
@@ -123,9 +129,9 @@ const createTestSubmissionsApp = () => {
       updatedAt: new Date(),
     };
 
-    return c.json({ 
+    return c.json({
       data: updatedSubmission,
-      message: 'Submission updated successfully' 
+      message: 'Submission updated successfully',
     });
   });
 
@@ -133,11 +139,11 @@ const createTestSubmissionsApp = () => {
   app.delete('/:id', async (c) => {
     const id = c.req.param('id');
     const authHeader = c.req.header('Authorization');
-    
+
     if (!id || isNaN(Number(id))) {
       return c.json({ error: 'Invalid submission ID' }, 400);
     }
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -148,7 +154,7 @@ const createTestSubmissionsApp = () => {
   // Mock anonymous submission access endpoint
   app.get('/anonymous/:token', async (c) => {
     const token = c.req.param('token');
-    
+
     if (!token || token === 'empty') {
       return c.json({ error: 'Token is required' }, 400);
     }
@@ -176,8 +182,8 @@ describe('Submissions Routes', () => {
       const res = await app.request('/', {
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
       expect(Array.isArray(data.data)).toBe(true);
@@ -187,8 +193,8 @@ describe('Submissions Routes', () => {
       const res = await app.request('/?formId=1', {
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
       expect(Array.isArray(data.data)).toBe(true);
@@ -196,8 +202,8 @@ describe('Submissions Routes', () => {
 
     it('should return unauthorized without authentication', async () => {
       const res = await app.request('/');
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -208,8 +214,8 @@ describe('Submissions Routes', () => {
       const res = await app.request('/1', {
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
     });
@@ -218,16 +224,16 @@ describe('Submissions Routes', () => {
       const res = await app.request('/invalid', {
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Invalid submission ID');
     });
 
     it('should return unauthorized without authentication', async () => {
       const res = await app.request('/1');
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -243,14 +249,14 @@ describe('Submissions Routes', () => {
 
       const res = await app.request('/', {
         method: 'POST',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(submissionData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(201);
       expect(data.data).toBeDefined();
       expect(data.message).toBe('Submission created successfully');
@@ -268,8 +274,8 @@ describe('Submissions Routes', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(submissionData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(201);
       expect(data.data).toBeDefined();
       expect(data.token).toBeDefined();
@@ -286,8 +292,8 @@ describe('Submissions Routes', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(submissionData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Form ID is required');
     });
@@ -302,8 +308,8 @@ describe('Submissions Routes', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(submissionData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Submission data is required');
     });
@@ -317,14 +323,14 @@ describe('Submissions Routes', () => {
 
       const res = await app.request('/1', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
       expect(data.message).toBe('Submission updated successfully');
@@ -333,14 +339,14 @@ describe('Submissions Routes', () => {
     it('should return error for invalid submission ID', async () => {
       const res = await app.request('/invalid', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ data: { field1: 'value' } }),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Invalid submission ID');
     });
@@ -351,8 +357,8 @@ describe('Submissions Routes', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: { field1: 'value' } }),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -364,8 +370,8 @@ describe('Submissions Routes', () => {
         method: 'DELETE',
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.message).toBe('Submission deleted successfully');
     });
@@ -375,16 +381,16 @@ describe('Submissions Routes', () => {
         method: 'DELETE',
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Invalid submission ID');
     });
 
     it('should return unauthorized without authentication', async () => {
       const res = await app.request('/1', { method: 'DELETE' });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -393,24 +399,24 @@ describe('Submissions Routes', () => {
   describe('GET /anonymous/:token', () => {
     it('should return submission with valid token', async () => {
       const res = await app.request('/anonymous/valid-token');
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
     });
 
     it('should return error for invalid token', async () => {
       const res = await app.request('/anonymous/invalid-token');
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Invalid token');
     });
 
     it('should return error when token is missing', async () => {
       const res = await app.request('/anonymous/empty');
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Token is required');
     });
@@ -437,14 +443,14 @@ describe('Submissions Routes', () => {
 
       const res = await app.request('/', {
         method: 'POST',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(submissionData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(201);
       expect(data.data).toBeDefined();
     });
@@ -461,14 +467,14 @@ describe('Submissions Routes', () => {
 
       const res = await app.request('/', {
         method: 'POST',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(submissionData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(201);
       expect(data.data).toBeDefined();
     });
@@ -478,7 +484,7 @@ describe('Submissions Routes', () => {
         formId: 1,
         data: {
           'field-with-dashes': 'value1',
-          'field_with_underscores': 'value2',
+          field_with_underscores: 'value2',
           'field.with.dots': 'value3',
           'field with spaces': 'value4',
         },
@@ -486,14 +492,14 @@ describe('Submissions Routes', () => {
 
       const res = await app.request('/', {
         method: 'POST',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(submissionData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(201);
       expect(data.data).toBeDefined();
     });
@@ -501,13 +507,13 @@ describe('Submissions Routes', () => {
     it('should handle malformed JSON in submission data', async () => {
       const res = await app.request('/', {
         method: 'POST',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: 'invalid json{',
       });
-      
+
       // Should handle JSON parse error gracefully
       expect(res.status).toBeGreaterThanOrEqual(400);
     });
@@ -518,31 +524,31 @@ describe('Submissions Routes', () => {
         data: { field1: 'value1' },
       };
 
-      const promises = Array.from({ length: 5 }, (_, i) => 
+      const promises = Array.from({ length: 5 }, (_, i) =>
         app.request('/', {
           method: 'POST',
-          headers: { 
+          headers: {
             Authorization: 'Bearer mock-token',
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ ...submissionData, data: { ...submissionData.data, index: i } }),
-        })
+        }),
       );
 
       const results = await Promise.all(promises);
-      
+
       // All should succeed
-      results.forEach(res => {
+      results.forEach((res) => {
         expect(res.status).toBe(201);
       });
     });
 
     it('should handle very long anonymous tokens', async () => {
       const longToken = 'a'.repeat(500);
-      
+
       const res = await app.request(`/anonymous/${longToken}`);
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
     });
@@ -563,14 +569,14 @@ describe('Submissions Routes', () => {
 
       const res = await app.request('/', {
         method: 'POST',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(submissionData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(201);
       expect(data.data).toBeDefined();
     });

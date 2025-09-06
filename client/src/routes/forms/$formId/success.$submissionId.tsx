@@ -31,9 +31,9 @@ export const Route = createFileRoute('/forms/$formId/success/$submissionId')({
 });
 
 function FormsSuccess() {
-  const { submission, isEmbedded } = useLoaderData({ from: '/forms/$formId/success/$submissionId' }) as { 
-    submission: SubmissionDetail; 
-    isEmbedded: boolean; 
+  const { submission, isEmbedded } = useLoaderData({ from: '/forms/$formId/success/$submissionId' }) as {
+    submission: SubmissionDetail;
+    isEmbedded: boolean;
   };
   const { formId, submissionId } = useParams({ from: '/forms/$formId/success/$submissionId' });
   const formSchema = useRef(submission?.schema || { components: [] });
@@ -79,11 +79,7 @@ function FormsSuccess() {
       );
     }
 
-    return (
-      <AppLayout hideHeader>
-        {errorContent}
-      </AppLayout>
-    );
+    return <AppLayout hideHeader>{errorContent}</AppLayout>;
   }
 
   // Embedded layout - minimal success message
@@ -120,18 +116,8 @@ function FormsSuccess() {
                 <div>
                   <label className="form-label fw-semibold small">Access Link</label>
                   <div className="d-flex gap-2">
-                    <input 
-                      type="text" 
-                      className="form-control form-control-sm" 
-                      value={submissionUrl} 
-                      readOnly 
-                    />
-                    <Button 
-                      variant="outline-secondary" 
-                      size="sm" 
-                      onClick={copyToClipboard} 
-                      className="d-flex align-items-center"
-                    >
+                    <input type="text" className="form-control form-control-sm" value={submissionUrl} readOnly />
+                    <Button variant="outline-secondary" size="sm" onClick={copyToClipboard} className="d-flex align-items-center">
                       <Copy size={14} className="me-1" />
                       {copied ? 'Copied!' : 'Copy'}
                     </Button>
@@ -142,9 +128,7 @@ function FormsSuccess() {
 
               {/* Timestamp */}
               <div className="text-center">
-                <div className="small text-muted">
-                  Submitted: {new Date(submissionDetails.createdAt).toLocaleString()}
-                </div>
+                <div className="small text-muted">Submitted: {new Date(submissionDetails.createdAt).toLocaleString()}</div>
               </div>
             </div>
           </Card.Body>
@@ -156,7 +140,7 @@ function FormsSuccess() {
             <Shield size={16} className="text-success me-2 mt-1 flex-shrink-0" />
             <div className="small text-muted">
               Your submission is stored securely.
-              {submissionDetails.token && ' Keep your access link safe as it\'s the only way to view this submission.'}
+              {submissionDetails.token && " Keep your access link safe as it's the only way to view this submission."}
             </div>
           </div>
         </div>

@@ -115,11 +115,7 @@ function FormsSubmit() {
       );
     }
 
-    return (
-      <AppLayout hideHeader>
-        {errorContent}
-      </AppLayout>
-    );
+    return <AppLayout hideHeader>{errorContent}</AppLayout>;
   }
 
   // Handle errors and access denied cases
@@ -131,15 +127,13 @@ function FormsSubmit() {
     const errorContent = (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
         <div className="text-center">
-          <h3>{isAccessDenied ? 'Form Not Available' : (isEmbedBlocked ? 'Embedding Not Available' : (error ? 'Error' : 'Form not found'))}</h3>
+          <h3>{isAccessDenied ? 'Form Not Available' : isEmbedBlocked ? 'Embedding Not Available' : error ? 'Error' : 'Form not found'}</h3>
           <p className="text-muted">
             {isEmbedBlocked
               ? 'This form cannot be embedded because it is not public.'
-              : (isAccessDenied && isEmbedded
+              : isAccessDenied && isEmbedded
                 ? 'This form cannot be embedded because it is not public.'
-                : (error || 'The requested form could not be loaded.')
-              )
-            }
+                : error || 'The requested form could not be loaded.'}
           </p>
           {(isEmbedBlocked || (isAccessDenied && isEmbedded)) && (
             <div className="mt-3">
@@ -161,11 +155,7 @@ function FormsSubmit() {
       );
     }
 
-    return (
-      <AppLayout hideHeader>
-        {errorContent}
-      </AppLayout>
-    );
+    return <AppLayout hideHeader>{errorContent}</AppLayout>;
   }
 
   // Embedded layout - minimal styling, just the form
@@ -225,7 +215,12 @@ function FormsSubmit() {
         </div>
         {/* Powered by Flowy Forms */}
         <div className="text-center mt-3">
-          <small className="text-muted small">Powered by <Link to="/" target="_blank" rel="noopener noreferrer">Flowy Forms</Link></small>
+          <small className="text-muted small">
+            Powered by{' '}
+            <Link to="/" target="_blank" rel="noopener noreferrer">
+              Flowy Forms
+            </Link>
+          </small>
         </div>
       </div>
     );
@@ -307,7 +302,9 @@ function FormsSubmit() {
                       <ul className="mb-0 ps-3">
                         <li>We only collect the information you provide in this form</li>
                         <li>
-                          {isLoggedIn ? 'Your submission is linked to your account' : 'Anonymous submission - please do not enter sensitive information'}
+                          {isLoggedIn
+                            ? 'Your submission is linked to your account'
+                            : 'Anonymous submission - please do not enter sensitive information'}
                         </li>
                         <li>You can contact us anytime if you have questions about your data</li>
                       </ul>

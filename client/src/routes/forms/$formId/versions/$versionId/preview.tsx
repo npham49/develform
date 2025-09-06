@@ -6,7 +6,7 @@ import { requireAuth } from '@/lib/auth-utils';
 import { Webform } from '@formio/js';
 import { Form, Submission } from '@formio/react';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { ArrowLeft, Eye, Info, FileText, Shield, Monitor, Laptop } from 'lucide-react';
+import { ArrowLeft, Eye, FileText, Info, Laptop, Monitor, Shield } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Alert, Card, Container, Tab, Tabs } from 'react-bootstrap';
 import { toast } from 'sonner';
@@ -63,14 +63,14 @@ function VersionPreviewPage() {
         <Monitor size={16} className="me-1" />
         This is how your form appears when embedded on external websites
       </div>
-      
+
       {/* Simulated iframe container with embedded styling */}
-      <div 
+      <div
         className="mx-auto bg-white border rounded shadow-sm"
-        style={{ 
+        style={{
           maxWidth: '600px',
           fontFamily: 'system-ui, -apple-system, sans-serif',
-          minHeight: '400px'
+          minHeight: '400px',
         }}
       >
         <div className="p-3">
@@ -115,9 +115,7 @@ function VersionPreviewPage() {
           <div className="mt-3 p-2 bg-light rounded">
             <div className="d-flex align-items-start">
               <Shield size={16} className="text-success me-2 mt-1 flex-shrink-0" />
-              <div className="small text-muted">
-                Embedded form with secure submission handling
-              </div>
+              <div className="small text-muted">Embedded form with secure submission handling</div>
             </div>
           </div>
         </div>
@@ -265,8 +263,7 @@ function VersionPreviewPage() {
                 <div className="d-flex align-items-center">
                   <Info size={20} className="me-2" />
                   <div>
-                    <strong>Private Form:</strong> This form is private and cannot be embedded on external websites.
-                    Only normal preview is available.
+                    <strong>Private Form:</strong> This form is private and cannot be embedded on external websites. Only normal preview is available.
                   </div>
                 </div>
               </Alert>

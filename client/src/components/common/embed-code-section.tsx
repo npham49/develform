@@ -1,6 +1,6 @@
+import { Code, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { Button, Card, Form, Row } from 'react-bootstrap';
-import { Code, Copy } from 'lucide-react';
 
 interface EmbedCodeSectionProps {
   formId: number;
@@ -52,7 +52,7 @@ function EmbeddedForm() {
   frameborder="0"
   scrolling="auto"
   style="border: 1px solid #ddd; border-radius: 8px;">
-</iframe>`
+</iframe>`,
   };
 
   const returnEmbed = (type: 'html' | 'react' | 'wordpress') => {
@@ -66,7 +66,7 @@ function EmbeddedForm() {
       default:
         return '';
     }
-  }
+  };
 
   const copyToClipboard = (code: string, type: string) => {
     navigator.clipboard.writeText(code);
@@ -90,7 +90,12 @@ function EmbeddedForm() {
           {/* HTML */}
           <div className="border rounded p-3">
             <div className="d-flex align-items-center justify-content-between mb-2">
-              <Form.Select className='me-2' aria-label="Default select example" value={selectedTab} onChange={(e) => setSelectedTab(e.target.value as 'html' | 'react' | 'wordpress')}>
+              <Form.Select
+                className="me-2"
+                aria-label="Default select example"
+                value={selectedTab}
+                onChange={(e) => setSelectedTab(e.target.value as 'html' | 'react' | 'wordpress')}
+              >
                 <option value="html">HTML</option>
                 <option value="react">React</option>
                 <option value="wordpress">WordPress</option>
@@ -115,7 +120,9 @@ function EmbeddedForm() {
         <div className="mt-4 p-3 bg-light rounded">
           <h6 className="fw-bold mb-2">📝 Usage Notes</h6>
           <ul className="mb-0 small text-muted">
-            <li>Forms are embedded with <code>?embed=true</code> parameter for minimal styling</li>
+            <li>
+              Forms are embedded with <code>?embed=true</code> parameter for minimal styling
+            </li>
             <li>Recommended iframe height is 600px, but adjust based on your form length</li>
             <li>Forms are responsive and will adapt to iframe width</li>
             <li>Only public forms can be embedded - private forms will show an error message</li>

@@ -5,6 +5,7 @@ This document describes the test suite for authentication-related API endpoints.
 ## Test File: `auth-simple.test.ts`
 
 ### Purpose
+
 Tests the authentication flow including GitHub OAuth integration, user management, and session handling.
 
 ### Test Suites
@@ -28,7 +29,7 @@ Tests the authentication flow including GitHub OAuth integration, user managemen
    - **Setup**: Mock empty user lookup and successful user creation
    - **Steps**:
      1. Mock `findUserByGithubId` to return empty array
-     2. Mock `findUserByEmail` to return empty array  
+     2. Mock `findUserByEmail` to return empty array
      3. Mock `createUser` to return new user data
    - **Expected**: New user is created with GitHub profile data
    - **Edge Cases**: GitHub user not in database
@@ -92,12 +93,14 @@ Tests the authentication flow including GitHub OAuth integration, user managemen
    - **Edge Cases**: Valid session logout
 
 ### Mock Services Used
+
 - `mockAuthService`: Database operations for user management
 - `mockOctokit`: GitHub API client simulation
 - `mockJWT`: JWT token generation and validation
 - `global.fetch`: HTTP requests to GitHub OAuth endpoints
 
 ### Key Testing Patterns
+
 - Service layer mocking for database operations
 - External API mocking for GitHub integration
 - Validation function testing for input sanitization
