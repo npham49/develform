@@ -3,11 +3,11 @@ import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router';
 import { PageHeader } from '@/components/common/page-header';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
+import { requireAuth } from '@/lib/auth-utils';
 import { type BreadcrumbItem } from '@/types';
 import type { SubmissionDetail } from '@/types/api';
 import { ArrowLeft, Calendar, FileText, User, Users } from 'lucide-react';
 import { Alert, Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
-import { requireAuth } from '@/lib/auth-utils';
 
 export const Route = createFileRoute('/submissions/$submissionId')({
   beforeLoad: ({ context }) => {
@@ -84,11 +84,7 @@ function SubmissionDetail() {
                   All Submissions
                 </Button>
               </Link>
-              <Link
-                to="/forms/$formId/submissions"
-                params={{ formId: submission.formId.toString() }}
-                className="text-decoration-none"
-              >
+              <Link to="/forms/$formId/submissions" params={{ formId: submission.formId.toString() }} className="text-decoration-none">
                 <Button variant="outline-primary" className="d-flex align-items-center">
                   Form Submissions
                 </Button>
@@ -132,9 +128,7 @@ function SubmissionDetail() {
                           <Badge bg="secondary" className="me-2">
                             {submission.version.sha.substring(0, 8)}
                           </Badge>
-                          {submission.version.description && (
-                            <small className="text-muted">{submission.version.description}</small>
-                          )}
+                          {submission.version.description && <small className="text-muted">{submission.version.description}</small>}
                         </div>
                       </div>
                     )}
@@ -152,9 +146,7 @@ function SubmissionDetail() {
                         <div className="fw-semibold text-dark small">Submitter</div>
                         <div className="text-dark">
                           <div>{submission.submitterInformation.name}</div>
-                          {submission.submitterInformation.email && (
-                            <div className="text-muted small">{submission.submitterInformation.email}</div>
-                          )}
+                          {submission.submitterInformation.email && <div className="text-muted small">{submission.submitterInformation.email}</div>}
                         </div>
                       </div>
                     )}
@@ -187,7 +179,8 @@ function SubmissionDetail() {
                         <div>
                           <Alert variant="info" className="mb-3">
                             <small>
-                              The form data is displayed below in a structured format. The form was rendered using the schema version at the time of submission.
+                              The form data is displayed below in a structured format. The form was rendered using the schema version at the time of
+                              submission.
                             </small>
                           </Alert>
                           {/* This would be rendered with FormioForm component if available */}
@@ -200,9 +193,7 @@ function SubmissionDetail() {
                       ) : (
                         <div>
                           <Alert variant="warning" className="mb-3">
-                            <small>
-                              Form schema not available. Displaying raw submission data.
-                            </small>
+                            <small>Form schema not available. Displaying raw submission data.</small>
                           </Alert>
                           <div className="bg-light p-3 rounded">
                             <pre className="mb-0" style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
@@ -234,11 +225,7 @@ function SubmissionDetail() {
                       Export Data
                     </Button>
 
-                    <Link
-                      to="/forms/$formId/manage"
-                      params={{ formId: submission.formId.toString() }}
-                      className="text-decoration-none"
-                    >
+                    <Link to="/forms/$formId/manage" params={{ formId: submission.formId.toString() }} className="text-decoration-none">
                       <Button variant="outline-secondary" className="d-flex align-items-center">
                         Manage Form
                       </Button>

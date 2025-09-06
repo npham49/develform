@@ -22,7 +22,7 @@ const queryClient = new QueryClient();
 // Router component that has access to auth context
 function RouterWithAuth() {
   const auth = useAuth();
-  
+
   // Create a new router instance with auth context
   const router = createRouter({
     routeTree,

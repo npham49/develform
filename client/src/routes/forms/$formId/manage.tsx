@@ -143,9 +143,12 @@ function FormsManage() {
                     <div className="d-flex flex-column gap-2">
                       {(() => {
                         // Find the latest version by creation date
-                        const latestVersion = versions.reduce((latest, current) =>
-                          new Date(current.createdAt).getTime() > new Date(latest.createdAt).getTime() ? current : latest,
-                        );
+                        const latestVersion =
+                          versions.length > 0
+                            ? versions.reduce((latest, current) =>
+                                new Date(current.createdAt).getTime() > new Date(latest.createdAt).getTime() ? current : latest,
+                              )
+                            : null;
                         const isLatestDraft = latestVersion && !latestVersion.isPublished;
 
                         if (isLatestDraft) {
@@ -190,7 +193,7 @@ function FormsManage() {
                         Submit Form
                       </Button>
                     </Link>
-                    
+
                     <Link to="/forms/$formId/submissions" params={{ formId: form.id.toString() }} className="text-decoration-none">
                       <Button variant="outline-info" className="w-100 d-flex align-items-center">
                         <Users size={18} className="me-2" />
