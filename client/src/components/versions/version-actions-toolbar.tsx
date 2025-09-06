@@ -1,3 +1,4 @@
+import { useRouter } from '@tanstack/react-router';
 import { RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from 'react-bootstrap';
@@ -5,7 +6,6 @@ import { toast } from 'sonner';
 import { api } from '../../lib/api';
 import { FormVersion } from '../../types/api';
 import { RevertOperation, VersionRevertModal } from './version-revert-modal';
-import { useRouter } from '@tanstack/react-router';
 
 interface VersionActionsToolbarProps {
   version: FormVersion;
