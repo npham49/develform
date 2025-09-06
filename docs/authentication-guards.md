@@ -5,6 +5,7 @@ This document explains how the authentication guard functions work in the TanSta
 ## Overview
 
 The authentication system uses two main guard functions to protect routes:
+
 - `requireAuth()` - Protects routes that require user authentication
 - `requireGuest()` - Protects routes that should only be accessible to non-authenticated users
 
@@ -41,14 +42,17 @@ This prevents premature redirects while the authentication status is being fetch
 ## requireAuth() Guard
 
 ### Purpose
+
 Protects routes that require user authentication. If a user is not authenticated, they are redirected to the login page.
 
 ### Function Signature
+
 ```typescript
-function requireAuth(context: RouterContext, redirectTo?: string): void
+function requireAuth(context: RouterContext, redirectTo?: string): void;
 ```
 
 ### Parameters
+
 - `context: RouterContext` - The router context containing auth state
 - `redirectTo?: string` - Optional redirect path to return to after login (defaults to current pathname)
 
@@ -61,9 +65,9 @@ function requireAuth(context: RouterContext, redirectTo?: string): void
 ```typescript
 export function requireAuth(context: RouterContext, redirectTo?: string) {
   const { auth } = context;
-  
+
   if (auth.loading) return;
-  
+
   if (!auth.user) {
     throw redirect({
       to: '/auth/login',
@@ -90,20 +94,24 @@ export const Route = createFileRoute('/dashboard')({
 ### Redirect Behavior
 
 When an unauthenticated user tries to access a protected route:
+
 - User navigating to `/dashboard` → Redirected to `/auth/login?redirect=/dashboard`
 - After successful login, user is redirected back to `/dashboard`
 
 ## requireGuest() Guard
 
 ### Purpose
+
 Protects authentication-related routes (login, register, etc.) from authenticated users. If a user is already authenticated, they are redirected away from these pages.
 
 ### Function Signature
+
 ```typescript
-function requireGuest(context: RouterContext, redirectTo: string = '/dashboard'): void
+function requireGuest(context: RouterContext, redirectTo: string = '/dashboard'): void;
 ```
 
 ### Parameters
+
 - `context: RouterContext` - The router context containing auth state
 - `redirectTo: string` - Redirect destination for authenticated users (defaults to `/dashboard`)
 
@@ -116,9 +124,9 @@ function requireGuest(context: RouterContext, redirectTo: string = '/dashboard')
 ```typescript
 export function requireGuest(context: RouterContext, redirectTo: string = '/dashboard') {
   const { auth } = context;
-  
+
   if (auth.loading) return;
-  
+
   if (auth.user) {
     throw redirect({
       to: redirectTo,
@@ -142,32 +150,38 @@ export const Route = createFileRoute('/auth')({
 ### Redirect Behavior
 
 When an authenticated user tries to access guest-only routes:
+
 - Authenticated user navigating to `/auth/login` → Redirected to `/dashboard`
 - Prevents logged-in users from seeing login/register forms
 
 ## Benefits of This Approach
 
 ### 1. Centralized Logic
+
 - Single source of truth for authentication checks
 - Consistent behavior across all routes
 - Easy to maintain and update
 
 ### 2. Performance
+
 - No redundant API calls on route navigation
 - Uses existing auth context from `useAuth` hook
 - Leverages TanStack Router's efficient context system
 
 ### 3. Type Safety
+
 - Full TypeScript support with router context
 - Compile-time validation of auth properties
 - IntelliSense support in route definitions
 
 ### 4. Developer Experience
+
 - Simple, declarative API
 - Clear separation of concerns
 - Reduced boilerplate code
 
 ### 5. Flexibility
+
 - Customizable redirect destinations
 - Works with any authentication provider
 - Easily extensible for additional auth logic
@@ -187,14 +201,14 @@ beforeLoad: async () => {
   } catch (error) {
     throw redirect({ to: '/auth/login', search: { redirect: '/dashboard' } });
   }
-}
+};
 ```
 
 ```typescript
 // New approach (clean and centralized)
 beforeLoad: ({ context }) => {
   requireAuth(context, '/dashboard');
-}
+};
 ```
 
 This reduces code duplication and improves maintainability significantly.
@@ -202,6 +216,7 @@ This reduces code duplication and improves maintainability significantly.
 ## Error Handling
 
 The guards use TanStack Router's `redirect` function to perform navigation. This:
+
 - Throws a redirect exception that TanStack Router catches
 - Prevents the route from loading
 - Maintains proper browser history
@@ -210,6 +225,7 @@ The guards use TanStack Router's `redirect` function to perform navigation. This
 ## Security Considerations
 
 These guards work at the route level and should be combined with:
+
 - Server-side authentication validation
 - API endpoint protection
 - Proper session management

@@ -7,7 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
 import type { SubmissionDetail } from '@/types/api';
 import { Form as FormioForm } from '@formio/react';
-import { CheckCircle, Copy, Download, Shield, User } from 'lucide-react';
+import { CheckCircle, Copy, Download, Info, Shield, User } from 'lucide-react';
 import { Alert, Badge, Button, Card, Container } from 'react-bootstrap';
 
 export const Route = createFileRoute('/forms/$formId/success/$submissionId')({
@@ -15,10 +15,11 @@ export const Route = createFileRoute('/forms/$formId/success/$submissionId')({
     try {
       const searchParams = new URLSearchParams(location.search);
       const token = searchParams.get('token') || undefined;
+      const isEmbedded = searchParams.get('embed') === 'true';
 
       const response = await api.submissions.get(parseInt(params.submissionId), token);
 
-      return { submission: response.data };
+      return { submission: response.data, isEmbedded };
     } catch (error) {
       console.error('Error fetching submission:', error);
       throw error;
@@ -30,7 +31,10 @@ export const Route = createFileRoute('/forms/$formId/success/$submissionId')({
 });
 
 function FormsSuccess() {
-  const { submission } = useLoaderData({ from: '/forms/$formId/success/$submissionId' }) as { submission: SubmissionDetail };
+  const { submission, isEmbedded } = useLoaderData({ from: '/forms/$formId/success/$submissionId' }) as {
+    submission: SubmissionDetail;
+    isEmbedded: boolean;
+  };
   const { formId, submissionId } = useParams({ from: '/forms/$formId/success/$submissionId' });
   const formSchema = useRef(submission?.schema || { components: [] });
   const [copied, setCopied] = useState(false);
@@ -39,8 +43,8 @@ function FormsSuccess() {
   const submissionDetails = submission;
 
   const submissionUrl = submission?.token
-    ? `${window.location.origin}/forms/${formId}/success/${actualSubmissionId}?token=${submission.token}`
-    : window.location.href;
+    ? `${window.location.origin}/forms/${formId}/success/${actualSubmissionId}?token=${submission.token}${isEmbedded ? '&embed=true' : ''}`
+    : `${window.location.origin}/forms/${formId}/success/${actualSubmissionId}${isEmbedded ? '?embed=true' : ''}`;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(submissionUrl);
@@ -48,19 +52,103 @@ function FormsSuccess() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Handle submission not found
   if (!actualSubmissionId || !submissionDetails) {
+    const errorContent = (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+        <div className="text-center">
+          <h3>Submission not found</h3>
+          <p className="text-muted">The requested submission could not be loaded.</p>
+          {isEmbedded && (
+            <div className="mt-3">
+              <Alert variant="info" className="d-inline-block">
+                <Info size={20} className="me-2" />
+                Only public forms can be embedded on external websites.
+              </Alert>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+
+    if (isEmbedded) {
+      return (
+        <div className="container-fluid p-3" style={{ maxWidth: '600px' }}>
+          {errorContent}
+        </div>
+      );
+    }
+
+    return <AppLayout hideHeader>{errorContent}</AppLayout>;
+  }
+
+  // Embedded layout - minimal success message
+  if (isEmbedded) {
     return (
-      <AppLayout hideHeader>
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
-          <div className="text-center">
-            <h3>Submission not found</h3>
-            <p className="text-muted">The requested submission could not be loaded.</p>
+      <div className="container-fluid p-3" style={{ maxWidth: '600px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+        {/* Success message */}
+        <div className="text-center mb-4">
+          <div
+            className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+            style={{ width: 64, height: 64, backgroundColor: '#dcfce7' }}
+          >
+            <CheckCircle size={32} className="text-success" />
+          </div>
+          <h4 className="fw-bold text-success mb-2">Submission Successful!</h4>
+          <p className="text-muted">Your response has been recorded.</p>
+        </div>
+
+        {/* Submission details card */}
+        <Card className="border-0 shadow-sm">
+          <Card.Body className="p-3">
+            <div className="d-flex flex-column gap-3">
+              {/* Submission info */}
+              <div className="text-center">
+                <div className="small text-muted mb-1">Submission ID</div>
+                <Badge bg="light" text="dark" className="fw-bold">
+                  #{submissionDetails.id}
+                </Badge>
+                <div className="small text-muted mt-1">for {submissionDetails.formName}</div>
+              </div>
+
+              {/* Submission link for anonymous submissions */}
+              {submissionDetails.token && (
+                <div>
+                  <label className="form-label fw-semibold small">Access Link</label>
+                  <div className="d-flex gap-2">
+                    <input type="text" className="form-control form-control-sm" value={submissionUrl} readOnly />
+                    <Button variant="outline-secondary" size="sm" onClick={copyToClipboard} className="d-flex align-items-center">
+                      <Copy size={14} className="me-1" />
+                      {copied ? 'Copied!' : 'Copy'}
+                    </Button>
+                  </div>
+                  <div className="text-muted small mt-1">Save this link to access your submission later</div>
+                </div>
+              )}
+
+              {/* Timestamp */}
+              <div className="text-center">
+                <div className="small text-muted">Submitted: {new Date(submissionDetails.createdAt).toLocaleString()}</div>
+              </div>
+            </div>
+          </Card.Body>
+        </Card>
+
+        {/* Security notice */}
+        <div className="mt-3 p-2 bg-light rounded">
+          <div className="d-flex align-items-start">
+            <Shield size={16} className="text-success me-2 mt-1 flex-shrink-0" />
+            <div className="small text-muted">
+              Your submission is stored securely.
+              {submissionDetails.token && " Keep your access link safe as it's the only way to view this submission."}
+            </div>
           </div>
         </div>
-      </AppLayout>
+      </div>
     );
   }
 
+  // Full layout for non-embedded forms
   return (
     <AppLayout hideHeader>
       <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>

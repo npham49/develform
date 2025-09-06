@@ -19,5 +19,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "src/routeTree.gen.ts"]
+  "include": ["src", "src/routeTree.gen.ts", "dashboard.tsx"]
 }

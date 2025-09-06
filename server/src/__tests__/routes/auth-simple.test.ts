@@ -1,4 +1,4 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -11,7 +11,7 @@ describe('Auth Routes', () => {
   beforeEach(() => {
     // Reset all mocks before each test
     jest.clearAllMocks();
-    
+
     // Create fresh mocks
     mockAuthService = {
       findUserByGithubId: jest.fn(),
@@ -63,7 +63,7 @@ describe('Auth Routes', () => {
       // Test that the service method would be called correctly
       expect(mockAuthService.findUserByGithubId).toBeDefined();
       expect(mockJWT.sign).toBeDefined();
-      
+
       // Simulate the auth flow
       const result = await mockAuthService.findUserByGithubId(null, '123456');
       expect(result).toEqual([mockUser]);
@@ -105,15 +105,12 @@ describe('Auth Routes', () => {
       });
 
       expect(createResult).toEqual([newUser]);
-      expect(mockAuthService.createUser).toHaveBeenCalledWith(
-        null,
-        {
-          name: mockGithubUser.name,
-          email: mockGithubUser.email,
-          githubId: mockGithubUser.id.toString(),
-          avatarUrl: mockGithubUser.avatar_url,
-        }
-      );
+      expect(mockAuthService.createUser).toHaveBeenCalledWith(null, {
+        name: mockGithubUser.name,
+        email: mockGithubUser.email,
+        githubId: mockGithubUser.id.toString(),
+        avatarUrl: mockGithubUser.avatar_url,
+      });
     });
 
     it('should handle GitHub user without email', async () => {
@@ -141,14 +138,11 @@ describe('Auth Routes', () => {
       });
 
       expect(createResult).toEqual([newUser]);
-      expect(mockAuthService.createUser).toHaveBeenCalledWith(
-        null,
-        {
-          name: githubUserNoEmail.name,
-          githubId: githubUserNoEmail.id.toString(),
-          avatarUrl: githubUserNoEmail.avatar_url,
-        }
-      );
+      expect(mockAuthService.createUser).toHaveBeenCalledWith(null, {
+        name: githubUserNoEmail.name,
+        githubId: githubUserNoEmail.id.toString(),
+        avatarUrl: githubUserNoEmail.avatar_url,
+      });
     });
 
     it('should validate required code parameter', () => {
@@ -173,10 +167,8 @@ describe('Auth Routes', () => {
         return tokenData.access_token;
       };
 
-      expect(() => handleGitHubResponse({ error: 'invalid_request' }))
-        .toThrow('Failed to get access token');
-      expect(() => handleGitHubResponse({ access_token: 'valid-token' }))
-        .not.toThrow();
+      expect(() => handleGitHubResponse({ error: 'invalid_request' })).toThrow('Failed to get access token');
+      expect(() => handleGitHubResponse({ access_token: 'valid-token' })).not.toThrow();
     });
   });
 
@@ -219,7 +211,7 @@ describe('Auth Routes', () => {
   describe('POST /api/auth/logout', () => {
     it('should successfully logout user', () => {
       const mockDeleteCookie = jest.fn();
-      
+
       // Test logout logic
       const logout = (deleteCookieFn: any) => {
         deleteCookieFn('auth_token');
@@ -237,23 +229,19 @@ describe('Auth Routes', () => {
       it('should handle GitHub API rate limiting', async () => {
         const rateLimitError = new Error('API rate limit exceeded');
         rateLimitError.name = 'RateLimitError';
-        
+
         mockOctokit.rest.users.getAuthenticated.mockRejectedValue(rateLimitError);
 
-        await expect(
-          mockOctokit.rest.users.getAuthenticated()
-        ).rejects.toThrow('API rate limit exceeded');
+        await expect(mockOctokit.rest.users.getAuthenticated()).rejects.toThrow('API rate limit exceeded');
       });
 
       it('should handle GitHub API service outages', async () => {
         const serviceError = new Error('GitHub service unavailable');
         serviceError.name = 'ServiceUnavailableError';
-        
+
         mockOctokit.rest.users.getAuthenticated.mockRejectedValue(serviceError);
 
-        await expect(
-          mockOctokit.rest.users.getAuthenticated()
-        ).rejects.toThrow('GitHub service unavailable');
+        await expect(mockOctokit.rest.users.getAuthenticated()).rejects.toThrow('GitHub service unavailable');
       });
 
       it('should handle malformed GitHub API responses', async () => {
@@ -309,14 +297,7 @@ describe('Auth Routes', () => {
       });
 
       it('should handle malformed JWT tokens', () => {
-        const invalidTokens = [
-          'invalid.token',
-          'not.a.jwt.token',
-          '',
-          null,
-          undefined,
-          'a'.repeat(1000),
-        ];
+        const invalidTokens = ['invalid.token', 'not.a.jwt.token', '', null, undefined, 'a'.repeat(1000)];
 
         const validateTokenFormat = (token: any) => {
           if (!token || typeof token !== 'string') {
@@ -328,7 +309,7 @@ describe('Auth Routes', () => {
           return true;
         };
 
-        invalidTokens.forEach(token => {
+        invalidTokens.forEach((token) => {
           expect(() => validateTokenFormat(token)).toThrow();
         });
 
@@ -336,8 +317,9 @@ describe('Auth Routes', () => {
       });
 
       it('should handle JWT tokens with special characters', () => {
-        const tokenWithSpecialChars = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ';
-        
+        const tokenWithSpecialChars =
+          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ';
+
         const decodeToken = (token: string) => {
           try {
             const parts = token.split('.');
@@ -393,7 +375,7 @@ describe('Auth Routes', () => {
             company: 100,
           };
 
-          Object.keys(maxSizes).forEach(field => {
+          Object.keys(maxSizes).forEach((field) => {
             if (profile[field] && profile[field].length > maxSizes[field as keyof typeof maxSizes]) {
               profile[field] = profile[field].substring(0, maxSizes[field as keyof typeof maxSizes]);
             }
@@ -420,11 +402,7 @@ describe('Auth Routes', () => {
 
         const sanitizeUserData = (user: any) => {
           const sanitize = (str: string) => {
-            return str
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/"/g, '&quot;')
-              .trim();
+            return str.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').trim();
           };
 
           return {
@@ -454,15 +432,12 @@ describe('Auth Routes', () => {
           .mockResolvedValueOnce([]) // First check: user doesn't exist
           .mockResolvedValueOnce([{ id: 1, githubId: '123456' }]); // Second check: user exists
 
-        mockAuthService.createUser.mockRejectedValue(
-          new Error('Duplicate key violation')
-        );
+        mockAuthService.createUser.mockRejectedValue(new Error('Duplicate key violation'));
 
         const result1 = await mockAuthService.findUserByGithubId(null, '123456');
         expect(result1).toEqual([]);
 
-        await expect(mockAuthService.createUser(null, githubUser))
-          .rejects.toThrow('Duplicate key violation');
+        await expect(mockAuthService.createUser(null, githubUser)).rejects.toThrow('Duplicate key violation');
 
         const result2 = await mockAuthService.findUserByGithubId(null, '123456');
         expect(result2).toEqual([{ id: 1, githubId: '123456' }]);
@@ -474,9 +449,7 @@ describe('Auth Routes', () => {
 
         mockAuthService.updateUserWithGithubData.mockRejectedValue(deadlockError);
 
-        await expect(
-          mockAuthService.updateUserWithGithubData(null, 1, {})
-        ).rejects.toThrow('Deadlock detected');
+        await expect(mockAuthService.updateUserWithGithubData(null, 1, {})).rejects.toThrow('Deadlock detected');
       });
     });
 
@@ -510,17 +483,17 @@ describe('Auth Routes', () => {
 
         const optimizePayload = (payload: any) => {
           const optimized = { ...payload };
-          
+
           // Limit metadata size
           if (optimized.user.metadata && optimized.user.metadata.length > 1000) {
             optimized.user.metadata = optimized.user.metadata.substring(0, 1000) + '...';
           }
-          
+
           // Limit permissions array
           if (optimized.user.permissions && optimized.user.permissions.length > 100) {
             optimized.user.permissions = optimized.user.permissions.slice(0, 100);
           }
-          
+
           return optimized;
         };
 

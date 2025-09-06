@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router';
 
+import { EmbedCodeSection } from '@/components/common/embed-code-section';
 import { IconCard } from '@/components/common/icon-card';
 import { PageHeader } from '@/components/common/page-header';
 import { StatusBadge } from '@/components/common/status-badge';
@@ -295,6 +296,15 @@ function FormsManage() {
               />
             </Col>
           </Row>
+
+          {/* Embed Code Section - Only for Public Forms */}
+          {form.isPublic && (
+            <Row className="g-4 mt-4">
+              <Col>
+                <EmbedCodeSection formId={form.id} formName={form.name} />
+              </Col>
+            </Row>
+          )}
 
           {/* Enhanced Version History */}
           <Row className="g-4 mt-4">

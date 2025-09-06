@@ -5,6 +5,7 @@ This document describes the basic test suite for verifying test infrastructure.
 ## Test File: `basic.test.ts`
 
 ### Purpose
+
 Verifies that the Jest test framework is properly configured and functioning.
 
 ### Test Cases
@@ -24,6 +25,7 @@ Verifies that the Jest test framework is properly configured and functioning.
    - **Edge Cases**: Fundamental JavaScript operation verification
 
 ### Key Testing Patterns
+
 - Infrastructure verification
 - Test runner validation
 - Basic assertion testing

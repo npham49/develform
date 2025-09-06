@@ -1,4 +1,4 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -7,7 +7,7 @@ describe('Forms Routes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockFormsService = {
       getUserForms: jest.fn(),
       getFormByIdForPublic: jest.fn(),
@@ -24,9 +24,9 @@ describe('Forms Routes', () => {
         { id: 1, name: 'Form 1', isPublic: true },
         { id: 2, name: 'Form 2', isPublic: false },
       ];
-      
+
       const mockUser = { id: 1, name: 'Test User' };
-      
+
       mockFormsService.getUserForms.mockResolvedValue(mockForms);
 
       const result = await mockFormsService.getUserForms(null, mockUser.id);
@@ -44,8 +44,7 @@ describe('Forms Routes', () => {
     it('should handle database errors', async () => {
       mockFormsService.getUserForms.mockRejectedValue(new Error('Database error'));
 
-      await expect(mockFormsService.getUserForms(null, 1))
-        .rejects.toThrow('Database error');
+      await expect(mockFormsService.getUserForms(null, 1)).rejects.toThrow('Database error');
     });
   });
 
@@ -157,7 +156,7 @@ describe('Forms Routes', () => {
     it('should handle creation with optional fields', async () => {
       const minimalData = { name: 'Minimal Form' };
       const createdForm = { id: 1, ...minimalData, isPublic: true };
-      
+
       mockFormsService.createForm.mockResolvedValue([createdForm]);
 
       const result = await mockFormsService.createForm(null, minimalData, 1);
@@ -167,8 +166,7 @@ describe('Forms Routes', () => {
     it('should handle database errors during creation', async () => {
       mockFormsService.createForm.mockRejectedValue(new Error('Database error'));
 
-      await expect(mockFormsService.createForm(null, validFormData, 1))
-        .rejects.toThrow('Database error');
+      await expect(mockFormsService.createForm(null, validFormData, 1)).rejects.toThrow('Database error');
     });
   });
 
@@ -204,7 +202,7 @@ describe('Forms Routes', () => {
     it('should handle partial updates', async () => {
       const partialUpdate = { name: 'New Name Only' };
       const updatedForm = { id: 1, name: 'New Name Only', description: 'Old description' };
-      
+
       mockFormsService.updateForm.mockResolvedValue([updatedForm]);
 
       const result = await mockFormsService.updateForm(null, 1, 1, partialUpdate);
@@ -214,8 +212,7 @@ describe('Forms Routes', () => {
     it('should handle update errors', async () => {
       mockFormsService.updateForm.mockRejectedValue(new Error('Update failed'));
 
-      await expect(mockFormsService.updateForm(null, 1, 1, updateData))
-        .rejects.toThrow('Update failed');
+      await expect(mockFormsService.updateForm(null, 1, 1, updateData)).rejects.toThrow('Update failed');
     });
   });
 
@@ -246,7 +243,7 @@ describe('Forms Routes', () => {
             required: i % 2 === 0,
           })),
         };
-        
+
         const formWithLargeSchema = {
           name: 'Large Form',
           schema: largeSchema,
@@ -269,9 +266,7 @@ describe('Forms Routes', () => {
                   components: [
                     {
                       type: 'fieldset',
-                      components: [
-                        { type: 'text', label: 'Deep Field' },
-                      ],
+                      components: [{ type: 'text', label: 'Deep Field' }],
                     },
                   ],
                 },
@@ -345,16 +340,12 @@ describe('Forms Routes', () => {
 
       it('should handle forms with special HTML characters', () => {
         const sanitizeInput = (input: string) => {
-          return input
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#x27;');
+          return input.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
         };
 
         const maliciousInput = '<script>alert("xss")</script>';
         const sanitized = sanitizeInput(maliciousInput);
-        
+
         expect(sanitized).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
         expect(sanitized).not.toContain('<script>');
       });
@@ -373,14 +364,11 @@ describe('Forms Routes', () => {
         const result1 = await mockFormsService.updateForm(null, 1, 1, updateData1);
         expect(result1[0].name).toBe('Updated by User 1');
 
-        await expect(mockFormsService.updateForm(null, 1, 1, updateData2))
-          .rejects.toThrow('Version conflict');
+        await expect(mockFormsService.updateForm(null, 1, 1, updateData2)).rejects.toThrow('Version conflict');
       });
 
       it('should handle rapid successive API calls', async () => {
-        const calls = Array.from({ length: 10 }, (_, i) => 
-          mockFormsService.getUserForms(null, 1)
-        );
+        const calls = Array.from({ length: 10 }, (_, i) => mockFormsService.getUserForms(null, 1));
 
         mockFormsService.getUserForms.mockResolvedValue([]);
 
@@ -401,7 +389,7 @@ describe('Forms Routes', () => {
 
         const cleanFormData = (data: any) => {
           const cleaned: any = {};
-          Object.keys(data).forEach(key => {
+          Object.keys(data).forEach((key) => {
             if (data[key] !== null && data[key] !== undefined) {
               cleaned[key] = data[key];
             }
@@ -436,21 +424,19 @@ describe('Forms Routes', () => {
       it('should handle database connection timeouts', async () => {
         const timeoutError = new Error('Connection timeout');
         timeoutError.name = 'TimeoutError';
-        
+
         mockFormsService.getUserForms.mockRejectedValue(timeoutError);
 
-        await expect(mockFormsService.getUserForms(null, 1))
-          .rejects.toThrow('Connection timeout');
+        await expect(mockFormsService.getUserForms(null, 1)).rejects.toThrow('Connection timeout');
       });
 
       it('should handle database connection pool exhaustion', async () => {
         const poolError = new Error('Connection pool exhausted');
         poolError.name = 'PoolExhaustedError';
-        
+
         mockFormsService.createForm.mockRejectedValue(poolError);
 
-        await expect(mockFormsService.createForm(null, { name: 'Test' }, 1))
-          .rejects.toThrow('Connection pool exhausted');
+        await expect(mockFormsService.createForm(null, { name: 'Test' }, 1)).rejects.toThrow('Connection pool exhausted');
       });
     });
 

@@ -5,6 +5,7 @@ This document describes the test suite for form submission API endpoints.
 ## Test File: `submissions-simple.test.ts`
 
 ### Purpose
+
 Tests form submission management including creation, retrieval, access control, and anonymous submission handling.
 
 ### Test Suites
@@ -169,6 +170,7 @@ Tests form submission management including creation, retrieval, access control, 
    - **Edge Cases**: Constraint violations, data too large, connection failures
 
 ### Mock Services Used
+
 - `mockSubmissionsService`: Database operations for submission management
   - `getSubmissionById`: Retrieve specific submission with access control
   - `getFormSubmissions`: Get all submissions for a form
@@ -178,6 +180,7 @@ Tests form submission management including creation, retrieval, access control, 
   - `randomBytes`: Generate cryptographically secure random data
 
 ### Key Testing Patterns
+
 - Access control testing for form owners vs anonymous users
 - Anonymous token generation and validation
 - Public vs private form submission handling
