@@ -1,4 +1,4 @@
-import { createFileRoute, useLoaderData, useNavigate, useParams } from '@tanstack/react-router';
+import { createFileRoute, Link, useLoaderData, useNavigate, useParams } from '@tanstack/react-router';
 import { useRef, useState } from 'react';
 
 import { IconCard } from '@/components/common/icon-card';
@@ -12,10 +12,12 @@ import { FileText, Info, Shield, User } from 'lucide-react';
 import { Alert, Card, Container } from 'react-bootstrap';
 
 export const Route = createFileRoute('/forms/$formId/submit')({
-  loader: async ({ params }) => {
+  loader: async ({ params, location }) => {
     try {
       const response = await api.forms.getSubmitSchema(parseInt(params.formId));
-      return { form: response.data };
+      const searchParams = new URLSearchParams(location.search);
+      const isEmbedded = searchParams.get('embed') === 'true';
+      return { form: response.data, isEmbedded };
     } catch (error) {
       console.error('Error fetching form for submission:', error);
       throw error;
@@ -27,7 +29,7 @@ export const Route = createFileRoute('/forms/$formId/submit')({
 });
 
 function FormsSubmit() {
-  const { form } = useLoaderData({ from: '/forms/$formId/submit' }) as { form: FormSchema };
+  const { form, isEmbedded } = useLoaderData({ from: '/forms/$formId/submit' }) as { form: FormSchema; isEmbedded: boolean };
   const { formId } = useParams({ from: '/forms/$formId/submit' });
   const navigate = useNavigate({ from: '/forms/$formId/submit' });
   const { user } = useAuth();
@@ -73,7 +75,9 @@ function FormsSubmit() {
 
       // Redirect to success page with submission ID and token (if anonymous)
       const successUrl = `/forms/${actualFormId}/success/${submissionResult.id}`;
-      const urlWithToken = submissionResult.token ? `${successUrl}?token=${submissionResult.token}` : successUrl;
+      const urlWithToken = submissionResult.token
+        ? `${successUrl}?token=${submissionResult.token}${isEmbedded ? '&embed=true' : ''}`
+        : `${successUrl}${isEmbedded ? '?embed=true' : ''}`;
 
       navigate({ to: urlWithToken });
     } catch (error) {
@@ -84,27 +88,145 @@ function FormsSubmit() {
     }
   };
 
+  // Handle form not found - check if it's an access denied case for embedded forms
   if (!formData) {
-    return (
-      <AppLayout hideHeader>
-        <div>Form not found</div>
-      </AppLayout>
+    const errorContent = (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+        <div className="text-center">
+          <h3>Form not found</h3>
+          <p className="text-muted">The requested form could not be loaded.</p>
+          {isEmbedded && (
+            <div className="mt-3">
+              <Alert variant="info" className="d-inline-block">
+                <Info size={20} className="me-2" />
+                Only public forms can be embedded on external websites.
+              </Alert>
+            </div>
+          )}
+        </div>
+      </div>
     );
+
+    if (isEmbedded) {
+      return (
+        <div className="container-fluid p-3" style={{ maxWidth: '600px' }}>
+          {errorContent}
+        </div>
+      );
+    }
+
+    return <AppLayout hideHeader>{errorContent}</AppLayout>;
   }
 
-  if (!actualFormId || !formData || error) {
+  // Handle errors and access denied cases
+  if (!actualFormId || error) {
+    // Check if this is an access denied error for private forms
+    const isAccessDenied = error && (error.includes('Access denied') || error.includes('Authentication required'));
+    const isEmbedBlocked = error && error.includes('Embedding is only available for public forms');
+
+    const errorContent = (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+        <div className="text-center">
+          <h3>{isAccessDenied ? 'Form Not Available' : isEmbedBlocked ? 'Embedding Not Available' : error ? 'Error' : 'Form not found'}</h3>
+          <p className="text-muted">
+            {isEmbedBlocked
+              ? 'This form cannot be embedded because it is not public.'
+              : isAccessDenied && isEmbedded
+                ? 'This form cannot be embedded because it is not public.'
+                : error || 'The requested form could not be loaded.'}
+          </p>
+          {(isEmbedBlocked || (isAccessDenied && isEmbedded)) && (
+            <div className="mt-3">
+              <Alert variant="info" className="d-inline-block">
+                <Info size={20} className="me-2" />
+                Only public forms can be embedded on external websites.
+              </Alert>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+
+    if (isEmbedded) {
+      return (
+        <div className="container-fluid p-3" style={{ maxWidth: '600px' }}>
+          {errorContent}
+        </div>
+      );
+    }
+
+    return <AppLayout hideHeader>{errorContent}</AppLayout>;
+  }
+
+  // Embedded layout - minimal styling, just the form
+  if (isEmbedded) {
     return (
-      <AppLayout hideHeader>
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
-          <div className="text-center">
-            <h3>{error ? 'Error' : 'Form not found'}</h3>
-            <p className="text-muted">{error || 'The requested form could not be loaded.'}</p>
+      <div className="container-fluid p-3" style={{ maxWidth: '600px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="danger" className="d-flex align-items-start mb-3">
+            <Info size={20} className="me-2 mt-1 flex-shrink-0" />
+            <div>
+              <strong>Error:</strong> {error}
+            </div>
+          </Alert>
+        )}
+
+        {/* Form Card - Minimal styling for embedding */}
+        <Card className="border-0 shadow-sm">
+          <Card.Header className="bg-light border-bottom py-3">
+            <div className="d-flex align-items-center">
+              <div>
+                <h5 className="mb-0 fw-bold">{formData.name}</h5>
+              </div>
+            </div>
+          </Card.Header>
+          <Card.Body className="p-3">
+            {formData && formSchema.current && (
+              <Form
+                src={formSchema.current}
+                onChange={handleChange}
+                onSubmit={handleSubmit}
+                options={{
+                  noAlerts: true,
+                  readOnly: submitting,
+                }}
+              />
+            )}
+            {submitting && (
+              <div className="text-center mt-3">
+                <div className="spinner-border spinner-border-sm text-primary me-2" role="status">
+                  <span className="visually-hidden">Submitting...</span>
+                </div>
+                <span className="small">Submitting your response...</span>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+
+        {/* Minimal security notice for embedded forms */}
+        <div className="mt-3 p-2 bg-light rounded">
+          <div className="d-flex align-items-start">
+            <Shield size={16} className="text-success me-2 mt-1 flex-shrink-0" />
+            <div className="small text-muted">
+              {isLoggedIn ? ' Linked to your account.' : ' Anonymous submission - please do not enter sensitive information'}
+            </div>
           </div>
         </div>
-      </AppLayout>
+        {/* Powered by Flowy Forms */}
+        <div className="text-center mt-3">
+          <small className="text-muted small">
+            Powered by{' '}
+            <Link to="/" target="_blank" rel="noopener noreferrer">
+              Flowy Forms
+            </Link>
+          </small>
+        </div>
+      </div>
     );
   }
 
+  // Full layout for non-embedded forms
   return (
     <AppLayout hideHeader>
       <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #ebf4ff, #e0e7ff)' }}>
@@ -121,14 +243,7 @@ function FormsSubmit() {
             )}
 
             {/* User Status Alert */}
-            {!isLoggedIn ? (
-              <Alert variant="info" className="d-flex align-items-start mb-4">
-                <Info size={20} className="me-2 mt-1 flex-shrink-0" />
-                <div>
-                  <strong>Anonymous Submission:</strong> This is an anonymous submission. Please do not enter sensitive personal information.
-                </div>
-              </Alert>
-            ) : (
+            {isLoggedIn && (
               <Alert variant="success" className="d-flex align-items-start mb-4">
                 <User size={20} className="me-2 mt-1 flex-shrink-0" />
                 <div>
@@ -185,10 +300,11 @@ function FormsSubmit() {
                     <h6 className="fw-bold text-dark mb-2">Your Privacy & Security</h6>
                     <div className="text-muted small">
                       <ul className="mb-0 ps-3">
-                        <li>Your submission is encrypted and stored securely</li>
                         <li>We only collect the information you provide in this form</li>
                         <li>
-                          {isLoggedIn ? 'Your submission is linked to your account' : 'Anonymous submissions are not linked to any personal data'}
+                          {isLoggedIn
+                            ? 'Your submission is linked to your account'
+                            : 'Anonymous submission - please do not enter sensitive information'}
                         </li>
                         <li>You can contact us anytime if you have questions about your data</li>
                       </ul>

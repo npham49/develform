@@ -5,6 +5,7 @@ This document describes the test suite for user settings and profile management 
 ## Test File: `settings-simple.test.ts`
 
 ### Purpose
+
 Tests user profile management including profile retrieval, updates, and account deletion.
 
 ### Test Suites
@@ -190,12 +191,14 @@ Tests user profile management including profile retrieval, updates, and account 
    - **Edge Cases**: Public vs private field classification
 
 ### Mock Services Used
+
 - `mockAuthService`: Database operations for user profile management
   - `getUserProfile`: Retrieve user profile data with safety filtering
   - `updateUserProfile`: Update user profile with validation
   - `deleteUser`: Delete user account and related data cascade
 
 ### Key Testing Patterns
+
 - Profile data security and sensitive information filtering
 - Partial update handling for profile modifications
 - Input validation for profile fields (email, name)

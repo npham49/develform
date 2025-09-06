@@ -1,4 +1,4 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -8,7 +8,7 @@ describe('Submissions Routes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockSubmissionsService = {
       getSubmissionById: jest.fn(),
       getFormSubmissions: jest.fn(),
@@ -233,12 +233,9 @@ describe('Submissions Routes', () => {
       };
 
       expect(() => validateSubmissionData(validSubmissionData)).not.toThrow();
-      expect(() => validateSubmissionData({ ...validSubmissionData, formId: 'invalid' }))
-        .toThrow('FormId must be a number');
-      expect(() => validateSubmissionData({ ...validSubmissionData, versionSha: 123 }))
-        .toThrow('VersionSha must be a string');
-      expect(() => validateSubmissionData({ ...validSubmissionData, data: null }))
-        .toThrow('Data must be an object');
+      expect(() => validateSubmissionData({ ...validSubmissionData, formId: 'invalid' })).toThrow('FormId must be a number');
+      expect(() => validateSubmissionData({ ...validSubmissionData, versionSha: 123 })).toThrow('VersionSha must be a string');
+      expect(() => validateSubmissionData({ ...validSubmissionData, data: null })).toThrow('Data must be an object');
     });
 
     it('should handle form not found', async () => {
@@ -255,7 +252,7 @@ describe('Submissions Routes', () => {
 
       const token1 = generateToken();
       const token2 = generateToken();
-      
+
       expect(token1).toBe('random-token-123');
       expect(token2).toBe('random-token-123');
       expect(mockCrypto.randomBytes).toHaveBeenCalledWith(32);
@@ -264,8 +261,7 @@ describe('Submissions Routes', () => {
     it('should handle creation errors', async () => {
       mockSubmissionsService.createSubmission.mockRejectedValue(new Error('Creation failed'));
 
-      await expect(mockSubmissionsService.createSubmission(null, validSubmissionData, 1, null))
-        .rejects.toThrow('Creation failed');
+      await expect(mockSubmissionsService.createSubmission(null, validSubmissionData, 1, null)).rejects.toThrow('Creation failed');
     });
   });
 
@@ -353,7 +349,7 @@ describe('Submissions Routes', () => {
         const validatePayloadSize = (data: any) => {
           const maxSize = 10 * 1024 * 1024; // 10MB limit
           const serialized = JSON.stringify(data);
-          
+
           if (serialized.length > maxSize) {
             throw new Error('Payload too large');
           }
@@ -361,11 +357,11 @@ describe('Submissions Routes', () => {
         };
 
         expect(() => validatePayloadSize({ small: 'data' })).not.toThrow();
-        
+
         // This test should actually pass because we're checking if it would throw
         // Let's create a scenario where it actually would throw
         const reallyLargeData = {
-          data: 'x'.repeat(11 * 1024 * 1024) // 11MB string
+          data: 'x'.repeat(11 * 1024 * 1024), // 11MB string
         };
         expect(() => validatePayloadSize(reallyLargeData)).toThrow('Payload too large');
       });
@@ -393,7 +389,7 @@ describe('Submissions Routes', () => {
           if (currentDepth > maxDepth) {
             throw new Error('Object nesting too deep');
           }
-          
+
           if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
             for (const key in obj) {
               validateNestingDepth(obj[key], maxDepth, currentDepth + 1);
@@ -446,7 +442,7 @@ describe('Submissions Routes', () => {
 
         const sanitizeSubmissionData = (data: any) => {
           const sanitized: any = {};
-          
+
           for (const [key, value] of Object.entries(data)) {
             if (typeof value === 'string') {
               sanitized[key] = value
@@ -459,7 +455,7 @@ describe('Submissions Routes', () => {
               sanitized[key] = value;
             }
           }
-          
+
           return sanitized;
         };
 
@@ -475,10 +471,8 @@ describe('Submissions Routes', () => {
     describe('Token Security and Generation', () => {
       it('should generate cryptographically secure tokens', () => {
         const mockSecureBytes = Buffer.from([
-          0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
-          0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
-          0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00, 0x11,
-          0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99,
+          0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00,
+          0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99,
         ]);
 
         mockCrypto.randomBytes.mockReturnValue({
@@ -498,20 +492,20 @@ describe('Submissions Routes', () => {
 
       it('should handle token collision scenarios', async () => {
         const existingTokens = new Set(['token1', 'token2', 'token3']);
-        
+
         const generateUniqueToken = (existingTokens: Set<string>) => {
           let attempts = 0;
           let token;
-          
+
           do {
             token = `token_${Math.random().toString(36).substring(2)}`;
             attempts++;
-            
+
             if (attempts > 10) {
               throw new Error('Failed to generate unique token');
             }
           } while (existingTokens.has(token));
-          
+
           return token;
         };
 
@@ -525,20 +519,20 @@ describe('Submissions Routes', () => {
           if (!token || typeof token !== 'string') {
             throw new Error('Invalid token type');
           }
-          
+
           if (token.length < 32) {
             throw new Error('Token too short - security risk');
           }
-          
+
           if (!/^[a-f0-9]+$/.test(token)) {
             throw new Error('Invalid token format - must be hexadecimal');
           }
-          
+
           // Check for predictable patterns
           if (/(.)\1{5,}/.test(token)) {
             throw new Error('Token contains repeated patterns - security risk');
           }
-          
+
           return true;
         };
 
@@ -556,7 +550,7 @@ describe('Submissions Routes', () => {
           versionSha: 'abc123',
           data: { user: 'User1', timestamp: Date.now() },
         };
-        
+
         const submissionData2 = {
           formId: 1,
           versionSha: 'abc123',
@@ -589,19 +583,17 @@ describe('Submissions Routes', () => {
           const key = userId || 'anonymous';
           const now = Date.now();
           const userAttempts = rateLimiter.attempts.get(key) || [];
-          
+
           // Remove attempts outside the window
-          const recentAttempts = userAttempts.filter((time: number) => 
-            now - time < rateLimiter.window
-          );
-          
+          const recentAttempts = userAttempts.filter((time: number) => now - time < rateLimiter.window);
+
           if (recentAttempts.length >= rateLimiter.limit) {
             throw new Error('Rate limit exceeded');
           }
-          
+
           recentAttempts.push(now);
           rateLimiter.attempts.set(key, recentAttempts);
-          
+
           return true;
         };
 
@@ -609,7 +601,7 @@ describe('Submissions Routes', () => {
         for (let i = 0; i < 5; i++) {
           expect(() => checkRateLimit(1, rateLimiter)).not.toThrow();
         }
-        
+
         // Should block 6th attempt
         expect(() => checkRateLimit(1, rateLimiter)).toThrow('Rate limit exceeded');
       });
@@ -627,18 +619,18 @@ describe('Submissions Routes', () => {
 
         const validateSubmissionAgainstSchema = (data: any, schema: any) => {
           const errors: string[] = [];
-          
+
           schema.components.forEach((component: any) => {
             const value = data[component.name];
-            
+
             if (component.required && (!value || value === '')) {
               errors.push(`${component.name} is required`);
             }
-            
+
             if (component.type === 'email' && value && !/\S+@\S+\.\S+/.test(value)) {
               errors.push(`${component.name} must be a valid email`);
             }
-            
+
             if (component.type === 'number' && value !== undefined) {
               const num = Number(value);
               if (isNaN(num)) {
@@ -649,16 +641,16 @@ describe('Submissions Routes', () => {
                 errors.push(`${component.name} must be at most ${component.max}`);
               }
             }
-            
+
             if (component.minLength && value && value.length < component.minLength) {
               errors.push(`${component.name} must be at least ${component.minLength} characters`);
             }
           });
-          
+
           if (errors.length > 0) {
             throw new Error(errors.join(', '));
           }
-          
+
           return true;
         };
 
@@ -675,8 +667,7 @@ describe('Submissions Routes', () => {
         };
 
         expect(() => validateSubmissionAgainstSchema(validData, formSchema)).not.toThrow();
-        expect(() => validateSubmissionAgainstSchema(invalidData, formSchema))
-          .toThrow('email must be a valid email');
+        expect(() => validateSubmissionAgainstSchema(invalidData, formSchema)).toThrow('email must be a valid email');
       });
 
       it('should handle file upload edge cases', () => {
@@ -705,38 +696,37 @@ describe('Submissions Routes', () => {
           const maxFileSize = 10 * 1024 * 1024; // 10MB
           const maxTotalSize = 50 * 1024 * 1024; // 50MB
           const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'text/plain'];
-          
+
           let totalSize = 0;
-          
-          files.forEach(file => {
+
+          files.forEach((file) => {
             if (file.size > maxFileSize) {
               throw new Error(`File ${file.name} exceeds maximum size`);
             }
-            
+
             if (!allowedTypes.includes(file.type)) {
               throw new Error(`File type ${file.type} not allowed`);
             }
-            
+
             totalSize += file.size;
           });
-          
+
           if (totalSize > maxTotalSize) {
             throw new Error('Total file size exceeds limit');
           }
-          
+
           return true;
         };
 
         expect(() => validateFileSubmissions(fileSubmissionData.data.files)).not.toThrow();
-        
+
         const oversizedFile = {
           name: 'huge.pdf',
           size: 15 * 1024 * 1024, // 15MB
           type: 'application/pdf',
         };
-        
-        expect(() => validateFileSubmissions([oversizedFile]))
-          .toThrow('exceeds maximum size');
+
+        expect(() => validateFileSubmissions([oversizedFile])).toThrow('exceeds maximum size');
       });
     });
   });

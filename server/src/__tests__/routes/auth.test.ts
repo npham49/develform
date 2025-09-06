@@ -1,23 +1,22 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it } from '@jest/globals';
 import { Hono } from 'hono';
-import { createMockDb, mockUser, createMockJwtPayload } from '../mocks';
-import { mockAuthMiddleware } from '../helpers';
-import { TestResponse, MockUser } from '../types';
+import { mockUser } from '../mocks';
+import { TestResponse } from '../types';
 
 // Create test app with mocked routes
 const createTestAuthApp = () => {
   const app = new Hono();
-  
+
   // Mock GitHub OAuth initiation
   app.get('/github', async (c) => {
     const clientId = process.env.GITHUB_CLIENT_ID;
     if (!clientId) {
       return c.json({ error: 'GitHub OAuth not configured' }, 500);
     }
-    
+
     const redirectUri = encodeURIComponent(process.env.GITHUB_REDIRECT_URI || 'http://localhost:3001/api/auth/github/callback');
     const githubUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email`;
-    
+
     return c.redirect(githubUrl);
   });
 
@@ -74,7 +73,7 @@ const createTestAuthApp = () => {
     });
   });
 
-  // Mock logout endpoint  
+  // Mock logout endpoint
   app.post('/logout', async (c) => {
     const authHeader = c.req.header('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -97,7 +96,7 @@ describe('Auth Routes', () => {
   describe('GET /github', () => {
     it('should redirect to GitHub OAuth when client ID is configured', async () => {
       process.env.GITHUB_CLIENT_ID = 'test-client-id';
-      
+
       const res = await app.request('/github');
       expect(res.status).toBe(302);
       expect(res.headers.get('location')).toContain('github.com/login/oauth/authorize');
@@ -105,10 +104,10 @@ describe('Auth Routes', () => {
 
     it('should return error when GitHub OAuth is not configured', async () => {
       delete process.env.GITHUB_CLIENT_ID;
-      
+
       const res = await app.request('/github');
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(500);
       expect(data.error).toBe('GitHub OAuth not configured');
     });
@@ -122,8 +121,8 @@ describe('Auth Routes', () => {
 
     it('should handle successful OAuth callback', async () => {
       const res = await app.request('/github/callback?code=test-code');
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.user).toBeDefined();
       expect(data.token).toBeDefined();
@@ -131,16 +130,16 @@ describe('Auth Routes', () => {
 
     it('should handle OAuth error', async () => {
       const res = await app.request('/github/callback?error=access_denied');
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Authorization failed');
     });
 
     it('should handle missing authorization code', async () => {
       const res = await app.request('/github/callback');
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Authorization failed');
     });
@@ -151,8 +150,8 @@ describe('Auth Routes', () => {
       const res = await app.request('/me', {
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.user).toEqual({
         id: mockUser.id,
@@ -165,8 +164,8 @@ describe('Auth Routes', () => {
 
     it('should return unauthorized when not authenticated', async () => {
       const res = await app.request('/me');
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -178,16 +177,16 @@ describe('Auth Routes', () => {
         method: 'POST',
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.message).toBe('Logged out successfully');
     });
 
     it('should return unauthorized when not authenticated', async () => {
       const res = await app.request('/logout', { method: 'POST' });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -199,8 +198,8 @@ describe('Auth Routes', () => {
       const res = await app.request('/me', {
         headers: { Authorization: 'InvalidFormat' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -209,8 +208,8 @@ describe('Auth Routes', () => {
       const res = await app.request('/me', {
         headers: { Authorization: '' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -219,8 +218,8 @@ describe('Auth Routes', () => {
       const res = await app.request('/me', {
         headers: { Authorization: 'just-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });

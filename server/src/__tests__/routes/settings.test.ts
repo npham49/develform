@@ -1,18 +1,18 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it } from '@jest/globals';
 import { Hono } from 'hono';
-import { createMockDb, mockUser } from '../mocks';
-import { TestResponse, MockUser } from '../types';
+import { mockUser } from '../mocks';
+import { TestResponse } from '../types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Create test app with mocked settings routes
 const createTestSettingsApp = () => {
   const app = new Hono();
-  
+
   // Mock get profile endpoint
   app.get('/profile', async (c) => {
     const authHeader = c.req.header('Authorization');
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -34,26 +34,32 @@ const createTestSettingsApp = () => {
   // Mock update profile endpoint
   app.put('/profile', async (c) => {
     const authHeader = c.req.header('Authorization');
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
     const body = await c.req.json();
-    
+
     // Basic validation
     if (body.email && !body.email.includes('@')) {
-      return c.json({ 
-        error: 'Validation failed',
-        errors: { email: ['Invalid email format'] }
-      }, 400);
+      return c.json(
+        {
+          error: 'Validation failed',
+          errors: { email: ['Invalid email format'] },
+        },
+        400,
+      );
     }
 
     if (body.name && body.name.length < 2) {
-      return c.json({ 
-        error: 'Validation failed',
-        errors: { name: ['Name must be at least 2 characters'] }
-      }, 400);
+      return c.json(
+        {
+          error: 'Validation failed',
+          errors: { name: ['Name must be at least 2 characters'] },
+        },
+        400,
+      );
     }
 
     const updatedProfile = {
@@ -63,16 +69,16 @@ const createTestSettingsApp = () => {
       updatedAt: new Date(),
     };
 
-    return c.json({ 
+    return c.json({
       data: updatedProfile,
-      message: 'Profile updated successfully' 
+      message: 'Profile updated successfully',
     });
   });
 
   // Mock delete account endpoint
   app.delete('/account', async (c) => {
     const authHeader = c.req.header('Authorization');
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -95,8 +101,8 @@ describe('Settings Routes', () => {
       const res = await app.request('/profile', {
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
       expect((data.data as any).id).toBe(mockUser.id);
@@ -106,8 +112,8 @@ describe('Settings Routes', () => {
 
     it('should return unauthorized without authentication', async () => {
       const res = await app.request('/profile');
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -122,14 +128,14 @@ describe('Settings Routes', () => {
 
       const res = await app.request('/profile', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
       expect((data.data as any).name).toBe(updateData.name);
@@ -144,14 +150,14 @@ describe('Settings Routes', () => {
 
       const res = await app.request('/profile', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
       expect((data.data as any).name).toBe(updateData.name);
@@ -164,14 +170,14 @@ describe('Settings Routes', () => {
 
       const res = await app.request('/profile', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Validation failed');
       expect(data.errors).toBeDefined();
@@ -184,14 +190,14 @@ describe('Settings Routes', () => {
 
       const res = await app.request('/profile', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Validation failed');
       expect(data.errors).toBeDefined();
@@ -207,8 +213,8 @@ describe('Settings Routes', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -220,16 +226,16 @@ describe('Settings Routes', () => {
         method: 'DELETE',
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.message).toBe('Account deleted successfully');
     });
 
     it('should return unauthorized without authentication', async () => {
       const res = await app.request('/account', { method: 'DELETE' });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -245,14 +251,14 @@ describe('Settings Routes', () => {
 
       const res = await app.request('/profile', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
       expect((data.data as any).name).toBe(updateData.name);
@@ -265,14 +271,14 @@ describe('Settings Routes', () => {
 
       const res = await app.request('/profile', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
     });
@@ -284,14 +290,14 @@ describe('Settings Routes', () => {
 
       const res = await app.request('/profile', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
       expect((data.data as any).email).toBe(updateData.email);
@@ -300,13 +306,13 @@ describe('Settings Routes', () => {
     it('should handle malformed JSON in profile update', async () => {
       const res = await app.request('/profile', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: 'invalid json{',
       });
-      
+
       // Should handle JSON parse error gracefully
       expect(res.status).toBeGreaterThanOrEqual(400);
     });
@@ -314,14 +320,14 @@ describe('Settings Routes', () => {
     it('should handle empty profile update request', async () => {
       const res = await app.request('/profile', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({}),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
       // Should return existing data when no updates provided
@@ -332,21 +338,21 @@ describe('Settings Routes', () => {
         name: 'Concurrent Update',
       };
 
-      const promises = Array.from({ length: 3 }, (_, i) => 
+      const promises = Array.from({ length: 3 }, (_, i) =>
         app.request('/profile', {
           method: 'PUT',
-          headers: { 
+          headers: {
             Authorization: 'Bearer mock-token',
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ ...updateData, name: `${updateData.name} ${i}` }),
-        })
+        }),
       );
 
       const results = await Promise.all(promises);
-      
+
       // All should succeed
-      results.forEach(res => {
+      results.forEach((res) => {
         expect(res.status).toBe(200);
       });
     });
@@ -355,8 +361,8 @@ describe('Settings Routes', () => {
       const res = await app.request('/profile', {
         headers: { Authorization: 'InvalidFormat' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -365,8 +371,8 @@ describe('Settings Routes', () => {
       const res = await app.request('/profile', {
         headers: { Authorization: '' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -375,8 +381,8 @@ describe('Settings Routes', () => {
       const res = await app.request('/profile', {
         headers: { Authorization: 'just-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -389,14 +395,14 @@ describe('Settings Routes', () => {
 
       const res = await app.request('/profile', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       // Should use existing values when null is provided
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();

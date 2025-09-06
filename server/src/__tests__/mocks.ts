@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { MockUser, MockForm, MockFormVersion, MockSubmission, MockSubmissionToken, MockDb, JwtPayload } from './types';
+import { JwtPayload, MockDb, MockForm, MockFormVersion, MockSubmission, MockSubmissionToken, MockUser } from './types';
 
 // Mock data for testing
 export const mockUser: MockUser = {

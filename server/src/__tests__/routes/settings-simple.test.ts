@@ -1,4 +1,4 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -7,7 +7,7 @@ describe('Settings Routes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockAuthService = {
       getUserProfile: jest.fn(),
       updateUserProfile: jest.fn(),
@@ -43,8 +43,7 @@ describe('Settings Routes', () => {
     it('should handle database errors', async () => {
       mockAuthService.getUserProfile.mockRejectedValue(new Error('Database error'));
 
-      await expect(mockAuthService.getUserProfile(null, 1))
-        .rejects.toThrow('Database error');
+      await expect(mockAuthService.getUserProfile(null, 1)).rejects.toThrow('Database error');
     });
 
     it('should extract safe profile data', () => {
@@ -102,7 +101,7 @@ describe('Settings Routes', () => {
         name: 'New Name Only',
         email: 'old@example.com', // Email preserved
       };
-      
+
       mockAuthService.updateUserProfile.mockResolvedValue([nameOnlyProfile]);
 
       const result = await mockAuthService.updateUserProfile(null, 1, nameOnlyUpdate);
@@ -162,11 +161,7 @@ describe('Settings Routes', () => {
     });
 
     it('should handle partial updates', async () => {
-      const partialUpdates = [
-        { name: 'Only Name' },
-        { email: 'only@email.com' },
-        { name: 'Both', email: 'both@example.com' },
-      ];
+      const partialUpdates = [{ name: 'Only Name' }, { email: 'only@email.com' }, { name: 'Both', email: 'both@example.com' }];
 
       for (const update of partialUpdates) {
         const result = { id: 1, ...update };
@@ -180,8 +175,7 @@ describe('Settings Routes', () => {
     it('should handle update errors', async () => {
       mockAuthService.updateUserProfile.mockRejectedValue(new Error('Update failed'));
 
-      await expect(mockAuthService.updateUserProfile(null, 1, updateData))
-        .rejects.toThrow('Update failed');
+      await expect(mockAuthService.updateUserProfile(null, 1, updateData)).rejects.toThrow('Update failed');
     });
 
     it('should preserve non-updatable fields', () => {
@@ -207,7 +201,7 @@ describe('Settings Routes', () => {
         // Only allow updating specific fields
         const allowedFields = ['name', 'email'];
         const filtered = Object.keys(updates)
-          .filter(key => allowedFields.includes(key))
+          .filter((key) => allowedFields.includes(key))
           .reduce((obj: any, key) => {
             obj[key] = updates[key];
             return obj;
@@ -217,7 +211,7 @@ describe('Settings Routes', () => {
       };
 
       const result = applyUpdate(originalProfile, updateData);
-      
+
       expect(result.id).toBe(1); // Original ID preserved
       expect(result.githubId).toBe('123456'); // Original githubId preserved
       expect(result.createdAt).toEqual(originalProfile.createdAt); // Original createdAt preserved
@@ -238,8 +232,7 @@ describe('Settings Routes', () => {
     it('should handle deletion errors', async () => {
       mockAuthService.deleteUser.mockRejectedValue(new Error('Deletion failed'));
 
-      await expect(mockAuthService.deleteUser(null, 1))
-        .rejects.toThrow('Deletion failed');
+      await expect(mockAuthService.deleteUser(null, 1)).rejects.toThrow('Deletion failed');
     });
 
     it('should confirm deletion impact', () => {
@@ -286,29 +279,29 @@ describe('Settings Routes', () => {
 
         for (const [field, rules] of Object.entries(schema)) {
           const value = data[field];
-          
+
           if (value !== undefined) {
             if (rules.type && typeof value !== rules.type) {
               throw new Error(`${field} must be of type ${rules.type}`);
             }
-            
+
             if (rules.minLength && value.length < rules.minLength) {
               throw new Error(`${field} must be at least ${rules.minLength} characters`);
             }
-            
+
             if (rules.pattern && !rules.pattern.test(value)) {
               throw new Error(`${field} format is invalid`);
             }
           }
         }
-        
+
         return true;
       };
 
       expect(() => validateProfileUpdate({ name: 'Valid Name' })).not.toThrow();
       expect(() => validateProfileUpdate({ email: 'valid@example.com' })).not.toThrow();
       expect(() => validateProfileUpdate({ name: 'Valid', email: 'valid@example.com' })).not.toThrow();
-      
+
       expect(() => validateProfileUpdate({ name: '' })).toThrow('name must be at least 1 characters');
       expect(() => validateProfileUpdate({ email: 'invalid' })).toThrow('email format is invalid');
       expect(() => validateProfileUpdate({ name: 123 })).toThrow('name must be of type string');
@@ -317,16 +310,16 @@ describe('Settings Routes', () => {
     it('should sanitize profile input', () => {
       const sanitizeInput = (data: any) => {
         const sanitized = { ...data };
-        
+
         // Trim whitespace from string fields
         if (sanitized.name && typeof sanitized.name === 'string') {
           sanitized.name = sanitized.name.trim();
         }
-        
+
         if (sanitized.email && typeof sanitized.email === 'string') {
           sanitized.email = sanitized.email.trim().toLowerCase();
         }
-        
+
         return sanitized;
       };
 
@@ -347,11 +340,11 @@ describe('Settings Routes', () => {
         // Never include sensitive fields in profile responses
         const sensitiveFields = ['password', 'rememberToken', 'githubId'];
         const safeData = { ...userData };
-        
-        sensitiveFields.forEach(field => {
+
+        sensitiveFields.forEach((field) => {
           delete safeData[field];
         });
-        
+
         return safeData;
       };
 
@@ -365,7 +358,7 @@ describe('Settings Routes', () => {
       };
 
       const response = createProfileResponse(userData);
-      
+
       expect(response).toHaveProperty('name');
       expect(response).toHaveProperty('email');
       expect(response).not.toHaveProperty('password');

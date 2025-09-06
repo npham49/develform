@@ -7,10 +7,10 @@ import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { PageHeader } from '@/components/common/page-header';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
-import Spinner from 'react-bootstrap/Spinner';
 import { requireAuth } from '@/lib/auth-utils';
 import { createDebounce } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
+import Spinner from 'react-bootstrap/Spinner';
 
 import { FormBuilder, type FormType } from '@formio/react';
 import { ArrowLeft, Code, Save } from 'lucide-react';
@@ -105,7 +105,7 @@ function EditFormVersion() {
       console.warn(`[AutoSave ${saveId}] Missing dependencies:`, {
         hasBuilder: !!formBuilderRef.current,
         hasForm: !!form,
-        hasVersion: !!version
+        hasVersion: !!version,
       });
       return;
     }
@@ -143,11 +143,11 @@ function EditFormVersion() {
     }
 
     setIsManualSaving(true);
-    
+
     try {
       // Cancel any pending auto-save
       autoSaveDebounce.cleanup();
-      
+
       // Trigger save immediately
       await triggerAutoSave();
     } finally {
@@ -230,7 +230,6 @@ function EditFormVersion() {
 
       // Navigate immediately - no need for setTimeout
       navigate({ to: `/forms/${form.id}/manage` });
-
     } catch (error: unknown) {
       console.error('[Action] Error publishing version:', error);
       toast.error((error as Error).message || 'Failed to publish version');
@@ -298,8 +297,7 @@ function EditFormVersion() {
                   </div>
                 </Col>
                 <Col md={4}>
-                  <div className="d-flex gap-2 justify-content-end">
-                  </div>
+                  <div className="d-flex gap-2 justify-content-end"></div>
                 </Col>
               </Row>
               <Row>
@@ -349,14 +347,14 @@ function EditFormVersion() {
                 <div className="d-flex align-items-center gap-2">
                   {hasUnsavedChanges && (autoSaveDebounce.isPending() || isManualSaving) && (
                     <span className="d-flex align-items-center badge bg-warning text-dark">
-                      <Spinner className='me-1' animation="border" role="status" size="sm" />
+                      <Spinner className="me-1" animation="border" role="status" size="sm" />
                       {isManualSaving ? 'Saving...' : 'Auto-saving...'}
                     </span>
                   )}
                   {hasUnsavedChanges && autoSaveDebounce.isPending() && !isManualSaving && (
-                    <Button 
-                      variant="outline-primary" 
-                      size="sm" 
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
                       onClick={handleManualSave}
                       className="d-flex align-items-center"
                       disabled={isManualSaving}
@@ -368,9 +366,7 @@ function EditFormVersion() {
                   {hasUnsavedChanges && !autoSaveDebounce.isPending() && !isManualSaving && (
                     <span className="badge bg-danger text-white">Unsaved changes</span>
                   )}
-                  {!hasUnsavedChanges && (
-                    <span className="badge bg-success text-white">All changes saved</span>
-                  )}
+                  {!hasUnsavedChanges && <span className="badge bg-success text-white">All changes saved</span>}
                 </div>
               </div>
             </Card.Header>

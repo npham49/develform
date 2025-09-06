@@ -1,17 +1,17 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it } from '@jest/globals';
 import { Hono } from 'hono';
-import { createMockDb, mockUser, mockFormVersion } from '../mocks';
-import { TestResponse, MockUser, MockFormVersion } from '../types';
+import { mockFormVersion } from '../mocks';
+import { TestResponse } from '../types';
 
 // Create test app with mocked version routes
 const createTestVersionsApp = () => {
   const app = new Hono();
-  
+
   // Mock list versions endpoint
   app.get('/:formId/versions', async (c) => {
     const formId = c.req.param('formId');
     const authHeader = c.req.header('Authorization');
-    
+
     if (!formId || isNaN(Number(formId))) {
       return c.json({ error: 'Invalid form ID' }, 400);
     }
@@ -33,12 +33,12 @@ const createTestVersionsApp = () => {
     const formId = c.req.param('formId');
     const sha = c.req.param('sha');
     const authHeader = c.req.header('Authorization');
-    
+
     if (!formId || isNaN(Number(formId))) {
       return c.json({ error: 'Invalid form ID' }, 400);
     }
 
-    if (!sha || sha === "empty") {
+    if (!sha || sha === 'empty') {
       return c.json({ error: 'Version SHA is required' }, 400);
     }
 
@@ -58,7 +58,7 @@ const createTestVersionsApp = () => {
   app.post('/:formId/versions', async (c) => {
     const formId = c.req.param('formId');
     const authHeader = c.req.header('Authorization');
-    
+
     if (!formId || isNaN(Number(formId))) {
       return c.json({ error: 'Invalid form ID' }, 400);
     }
@@ -68,7 +68,7 @@ const createTestVersionsApp = () => {
     }
 
     const body = await c.req.json();
-    
+
     if (!body.schema) {
       return c.json({ error: 'Schema is required' }, 400);
     }
@@ -83,10 +83,13 @@ const createTestVersionsApp = () => {
       isPublished: body.isPublished || false,
     };
 
-    return c.json({ 
-      data: newVersion,
-      message: 'Version created successfully' 
-    }, 201);
+    return c.json(
+      {
+        data: newVersion,
+        message: 'Version created successfully',
+      },
+      201,
+    );
   });
 
   // Mock update version endpoint
@@ -94,12 +97,12 @@ const createTestVersionsApp = () => {
     const formId = c.req.param('formId');
     const sha = c.req.param('sha');
     const authHeader = c.req.header('Authorization');
-    
+
     if (!formId || isNaN(Number(formId))) {
       return c.json({ error: 'Invalid form ID' }, 400);
     }
 
-    if (!sha || sha === "empty") {
+    if (!sha || sha === 'empty') {
       return c.json({ error: 'Version SHA is required' }, 400);
     }
 
@@ -108,7 +111,7 @@ const createTestVersionsApp = () => {
     }
 
     const body = await c.req.json();
-    
+
     const updatedVersion = {
       ...mockFormVersion,
       formId: Number(formId),
@@ -119,9 +122,9 @@ const createTestVersionsApp = () => {
       updatedAt: new Date(),
     };
 
-    return c.json({ 
+    return c.json({
       data: updatedVersion,
-      message: 'Version updated successfully' 
+      message: 'Version updated successfully',
     });
   });
 
@@ -130,12 +133,12 @@ const createTestVersionsApp = () => {
     const formId = c.req.param('formId');
     const sha = c.req.param('sha');
     const authHeader = c.req.header('Authorization');
-    
+
     if (!formId || isNaN(Number(formId))) {
       return c.json({ error: 'Invalid form ID' }, 400);
     }
 
-    if (!sha || sha === "empty") {
+    if (!sha || sha === 'empty') {
       return c.json({ error: 'Version SHA is required' }, 400);
     }
 
@@ -153,9 +156,9 @@ const createTestVersionsApp = () => {
       isPublished: true,
     };
 
-    return c.json({ 
+    return c.json({
       data: newVersion,
-      message: 'Successfully reverted to version' 
+      message: 'Successfully reverted to version',
     });
   });
 
@@ -164,12 +167,12 @@ const createTestVersionsApp = () => {
     const formId = c.req.param('formId');
     const sha = c.req.param('sha');
     const authHeader = c.req.header('Authorization');
-    
+
     if (!formId || isNaN(Number(formId))) {
       return c.json({ error: 'Invalid form ID' }, 400);
     }
 
-    if (!sha || sha === "empty") {
+    if (!sha || sha === 'empty') {
       return c.json({ error: 'Version SHA is required' }, 400);
     }
 
@@ -184,9 +187,9 @@ const createTestVersionsApp = () => {
       isPublished: true,
     };
 
-    return c.json({ 
+    return c.json({
       data: promotedVersion,
-      message: 'Version promoted to live successfully' 
+      message: 'Version promoted to live successfully',
     });
   });
 
@@ -205,8 +208,8 @@ describe('Versions Routes', () => {
       const res = await app.request('/1/versions', {
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
       expect(Array.isArray(data.data)).toBe(true);
@@ -216,16 +219,16 @@ describe('Versions Routes', () => {
       const res = await app.request('/invalid/versions', {
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Invalid form ID');
     });
 
     it('should return unauthorized without authentication', async () => {
       const res = await app.request('/1/versions');
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -236,8 +239,8 @@ describe('Versions Routes', () => {
       const res = await app.request('/1/versions/abc123', {
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
     });
@@ -246,8 +249,8 @@ describe('Versions Routes', () => {
       const res = await app.request('/invalid/versions/abc123', {
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Invalid form ID');
     });
@@ -256,8 +259,8 @@ describe('Versions Routes', () => {
       const res = await app.request('/1/versions/empty', {
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Version SHA is required');
     });
@@ -266,8 +269,8 @@ describe('Versions Routes', () => {
       const res = await app.request('/1/versions/notfound', {
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(404);
       expect(data.error).toBe('Version not found');
     });
@@ -283,14 +286,14 @@ describe('Versions Routes', () => {
 
       const res = await app.request('/1/versions', {
         method: 'POST',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(versionData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(201);
       expect(data.data).toBeDefined();
       expect(data.message).toBe('Version created successfully');
@@ -303,14 +306,14 @@ describe('Versions Routes', () => {
 
       const res = await app.request('/1/versions', {
         method: 'POST',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(versionData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Schema is required');
     });
@@ -325,8 +328,8 @@ describe('Versions Routes', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(versionData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -341,14 +344,14 @@ describe('Versions Routes', () => {
 
       const res = await app.request('/1/versions/abc123', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
       expect(data.message).toBe('Version updated successfully');
@@ -357,14 +360,14 @@ describe('Versions Routes', () => {
     it('should return error for invalid form ID', async () => {
       const res = await app.request('/invalid/versions/abc123', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ description: 'Updated' }),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Invalid form ID');
     });
@@ -372,14 +375,14 @@ describe('Versions Routes', () => {
     it('should return error when SHA is missing', async () => {
       const res = await app.request('/1/versions/empty', {
         method: 'PUT',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ description: 'Updated' }),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Version SHA is required');
     });
@@ -391,8 +394,8 @@ describe('Versions Routes', () => {
         method: 'POST',
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
       expect(data.message).toBe('Successfully reverted to version');
@@ -403,8 +406,8 @@ describe('Versions Routes', () => {
         method: 'POST',
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Invalid form ID');
     });
@@ -413,8 +416,8 @@ describe('Versions Routes', () => {
       const res = await app.request('/1/versions/abc123/revert', {
         method: 'POST',
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -426,8 +429,8 @@ describe('Versions Routes', () => {
         method: 'POST',
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
       expect(data.message).toBe('Version promoted to live successfully');
@@ -438,8 +441,8 @@ describe('Versions Routes', () => {
         method: 'POST',
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(400);
       expect(data.error).toBe('Invalid form ID');
     });
@@ -448,8 +451,8 @@ describe('Versions Routes', () => {
       const res = await app.request('/1/versions/abc123/promote', {
         method: 'POST',
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(401);
       expect(data.error).toBe('Unauthorized');
     });
@@ -473,14 +476,14 @@ describe('Versions Routes', () => {
 
       const res = await app.request('/1/versions', {
         method: 'POST',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(versionData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(201);
       expect(data.data).toBeDefined();
     });
@@ -493,26 +496,26 @@ describe('Versions Routes', () => {
 
       const res = await app.request('/1/versions', {
         method: 'POST',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(versionData),
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(201);
       expect(data.data).toBeDefined();
     });
 
     it('should handle very long SHA values', async () => {
       const longSha = 'a'.repeat(100);
-      
+
       const res = await app.request(`/1/versions/${longSha}`, {
         headers: { Authorization: 'Bearer mock-token' },
       });
-      const data = await res.json() as TestResponse;
-      
+      const data = (await res.json()) as TestResponse;
+
       expect(res.status).toBe(200);
       expect(data.data).toBeDefined();
     });
@@ -520,13 +523,13 @@ describe('Versions Routes', () => {
     it('should handle malformed JSON in version creation', async () => {
       const res = await app.request('/1/versions', {
         method: 'POST',
-        headers: { 
+        headers: {
           Authorization: 'Bearer mock-token',
           'Content-Type': 'application/json',
         },
         body: 'invalid json{',
       });
-      
+
       // Should handle JSON parse error gracefully
       expect(res.status).toBeGreaterThanOrEqual(400);
     });

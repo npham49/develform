@@ -1,4 +1,4 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -7,7 +7,7 @@ describe('Versions Routes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockVersionsService = {
       getFormVersions: jest.fn(),
       getVersionBySha: jest.fn(),
@@ -119,7 +119,7 @@ describe('Versions Routes', () => {
         versionSha: 'new123',
         ...validVersionData,
       };
-      
+
       mockVersionsService.createVersion.mockResolvedValue(createdVersion);
 
       const result = await mockVersionsService.createVersion(null, 1, 1, validVersionData);
@@ -136,7 +136,7 @@ describe('Versions Routes', () => {
         description: null,
         publish: false,
       };
-      
+
       mockVersionsService.createVersion.mockResolvedValue(createdVersion);
 
       const result = await mockVersionsService.createVersion(null, 1, 1, minimalData);
@@ -160,8 +160,7 @@ describe('Versions Routes', () => {
     it('should handle creation errors', async () => {
       mockVersionsService.createVersion.mockRejectedValue(new Error('Creation failed'));
 
-      await expect(mockVersionsService.createVersion(null, 1, 1, validVersionData))
-        .rejects.toThrow('Creation failed');
+      await expect(mockVersionsService.createVersion(null, 1, 1, validVersionData)).rejects.toThrow('Creation failed');
     });
   });
 
@@ -178,7 +177,7 @@ describe('Versions Routes', () => {
         versionSha: 'abc123',
         ...updateData,
       };
-      
+
       mockVersionsService.updateVersion.mockResolvedValue(updatedVersion);
 
       const result = await mockVersionsService.updateVersion(null, 1, 'abc123', 1, updateData);
@@ -194,7 +193,7 @@ describe('Versions Routes', () => {
         description: 'Only description update',
         schema: { components: [] }, // Original schema preserved
       };
-      
+
       mockVersionsService.updateVersion.mockResolvedValue(updatedVersion);
 
       const result = await mockVersionsService.updateVersion(null, 1, 'abc123', 1, partialUpdate);
@@ -229,7 +228,7 @@ describe('Versions Routes', () => {
         description: revertData.description,
         isPublished: false,
       };
-      
+
       mockVersionsService.makeVersionLatest.mockResolvedValue(newVersion);
 
       const result = await mockVersionsService.makeVersionLatest(null, 1, 'abc123', 1, revertData.description);
@@ -245,7 +244,7 @@ describe('Versions Routes', () => {
         description: undefined,
         isPublished: false,
       };
-      
+
       mockVersionsService.makeVersionLatest.mockResolvedValue(newVersion);
 
       const result = await mockVersionsService.makeVersionLatest(null, 1, 'abc123', 1, undefined);
@@ -268,8 +267,7 @@ describe('Versions Routes', () => {
     it('should handle revert errors', async () => {
       mockVersionsService.makeVersionLatest.mockRejectedValue(new Error('Revert failed'));
 
-      await expect(mockVersionsService.makeVersionLatest(null, 1, 'abc123', 1, 'description'))
-        .rejects.toThrow('Revert failed');
+      await expect(mockVersionsService.makeVersionLatest(null, 1, 'abc123', 1, 'description')).rejects.toThrow('Revert failed');
     });
   });
 

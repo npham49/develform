@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router';
 
+import { EmbedCodeSection } from '@/components/common/embed-code-section';
 import { IconCard } from '@/components/common/icon-card';
 import { PageHeader } from '@/components/common/page-header';
 import { StatusBadge } from '@/components/common/status-badge';
@@ -143,9 +144,12 @@ function FormsManage() {
                     <div className="d-flex flex-column gap-2">
                       {(() => {
                         // Find the latest version by creation date
-                        const latestVersion = versions.reduce((latest, current) =>
-                          new Date(current.createdAt).getTime() > new Date(latest.createdAt).getTime() ? current : latest,
-                        );
+                        const latestVersion =
+                          versions.length > 0
+                            ? versions.reduce((latest, current) =>
+                                new Date(current.createdAt).getTime() > new Date(latest.createdAt).getTime() ? current : latest,
+                              )
+                            : null;
                         const isLatestDraft = latestVersion && !latestVersion.isPublished;
 
                         if (isLatestDraft) {
@@ -190,7 +194,7 @@ function FormsManage() {
                         Submit Form
                       </Button>
                     </Link>
-                    
+
                     <Link to="/forms/$formId/submissions" params={{ formId: form.id.toString() }} className="text-decoration-none">
                       <Button variant="outline-info" className="w-100 d-flex align-items-center">
                         <Users size={18} className="me-2" />
@@ -292,6 +296,15 @@ function FormsManage() {
               />
             </Col>
           </Row>
+
+          {/* Embed Code Section - Only for Public Forms */}
+          {form.isPublic && (
+            <Row className="g-4 mt-4">
+              <Col>
+                <EmbedCodeSection formId={form.id} formName={form.name} />
+              </Col>
+            </Row>
+          )}
 
           {/* Enhanced Version History */}
           <Row className="g-4 mt-4">

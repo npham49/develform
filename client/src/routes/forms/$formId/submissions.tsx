@@ -38,10 +38,7 @@ export const Route = createFileRoute('/forms/$formId/submissions')({
   loader: async ({ params }) => {
     try {
       const formId = parseInt(params.formId);
-      const [formResponse, submissionsResponse] = await Promise.all([
-        api.forms.get(formId), 
-        api.submissions.getByForm(formId)
-      ]);
+      const [formResponse, submissionsResponse] = await Promise.all([api.forms.get(formId), api.submissions.getByForm(formId)]);
       return {
         form: formResponse.data,
         submissions: submissionsResponse.data,
@@ -82,17 +79,13 @@ function FormSubmissions() {
   ];
 
   // Sort submissions by creation date (newest first)
-  const sortedSubmissions = [...submissions].sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  const sortedSubmissions = [...submissions].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   // Calculate stats
   const totalSubmissions = submissions.length;
-  const anonymousSubmissions = submissions.filter(s => s.isAnonymous).length;
-  const authenticatedSubmissions = submissions.filter(s => !s.isAnonymous).length;
-  const recentSubmissions = submissions.filter(s => 
-    new Date(s.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-  ).length;
+  const anonymousSubmissions = submissions.filter((s) => s.isAnonymous).length;
+  const authenticatedSubmissions = submissions.filter((s) => !s.isAnonymous).length;
+  const recentSubmissions = submissions.filter((s) => new Date(s.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length;
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -222,13 +215,9 @@ function FormSubmissions() {
                         <td className="py-3 px-4">
                           {submission.submitterInformation ? (
                             <div>
-                              <div className="fw-semibold text-dark">
-                                {submission.submitterInformation.name}
-                              </div>
+                              <div className="fw-semibold text-dark">{submission.submitterInformation.name}</div>
                               {submission.submitterInformation.email && (
-                                <div className="text-muted small">
-                                  {submission.submitterInformation.email}
-                                </div>
+                                <div className="text-muted small">{submission.submitterInformation.email}</div>
                               )}
                             </div>
                           ) : (
@@ -236,9 +225,7 @@ function FormSubmissions() {
                           )}
                         </td>
                         <td className="py-3 px-4">
-                          <Badge bg={submission.isAnonymous ? 'warning' : 'success'}>
-                            {submission.isAnonymous ? 'Anonymous' : 'Authenticated'}
-                          </Badge>
+                          <Badge bg={submission.isAnonymous ? 'warning' : 'success'}>{submission.isAnonymous ? 'Anonymous' : 'Authenticated'}</Badge>
                         </td>
                         <td className="py-3 px-4">
                           <div className="d-flex align-items-center text-muted small">
@@ -247,11 +234,7 @@ function FormSubmissions() {
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <Link 
-                            to="/submissions/$submissionId" 
-                            params={{ submissionId: submission.id.toString() }}
-                            className="text-decoration-none"
-                          >
+                          <Link to="/submissions/$submissionId" params={{ submissionId: submission.id.toString() }} className="text-decoration-none">
                             <Button variant="outline-primary" size="sm">
                               View Details
                             </Button>
@@ -265,9 +248,7 @@ function FormSubmissions() {
                 <div className="text-center py-5">
                   <FileText size={48} className="text-muted mb-3" />
                   <h5 className="text-muted">No Submissions Yet</h5>
-                  <p className="text-muted mb-4">
-                    This form hasn't received any submissions yet. Share your form to start collecting responses.
-                  </p>
+                  <p className="text-muted mb-4">This form hasn't received any submissions yet. Share your form to start collecting responses.</p>
                   <Link to="/forms/$formId/submit" params={{ formId: form.id.toString() }} className="text-decoration-none">
                     <Button variant="primary">Preview Form</Button>
                   </Link>
