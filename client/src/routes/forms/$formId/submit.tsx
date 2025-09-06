@@ -1,4 +1,4 @@
-import { createFileRoute, useLoaderData, useNavigate, useParams } from '@tanstack/react-router';
+import { createFileRoute, Link, useLoaderData, useNavigate, useParams } from '@tanstack/react-router';
 import { useRef, useState } from 'react';
 
 import { IconCard } from '@/components/common/icon-card';
@@ -75,8 +75,8 @@ function FormsSubmit() {
 
       // Redirect to success page with submission ID and token (if anonymous)
       const successUrl = `/forms/${actualFormId}/success/${submissionResult.id}`;
-      const urlWithToken = submissionResult.token 
-        ? `${successUrl}?token=${submissionResult.token}${isEmbedded ? '&embed=true' : ''}` 
+      const urlWithToken = submissionResult.token
+        ? `${successUrl}?token=${submissionResult.token}${isEmbedded ? '&embed=true' : ''}`
         : `${successUrl}${isEmbedded ? '?embed=true' : ''}`;
 
       navigate({ to: urlWithToken });
@@ -127,7 +127,7 @@ function FormsSubmit() {
     // Check if this is an access denied error for private forms
     const isAccessDenied = error && (error.includes('Access denied') || error.includes('Authentication required'));
     const isEmbedBlocked = error && error.includes('Embedding is only available for public forms');
-    
+
     const errorContent = (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
         <div className="text-center">
@@ -135,10 +135,10 @@ function FormsSubmit() {
           <p className="text-muted">
             {isEmbedBlocked
               ? 'This form cannot be embedded because it is not public.'
-              : (isAccessDenied && isEmbedded 
-                  ? 'This form cannot be embedded because it is not public.' 
-                  : (error || 'The requested form could not be loaded.')
-                )
+              : (isAccessDenied && isEmbedded
+                ? 'This form cannot be embedded because it is not public.'
+                : (error || 'The requested form could not be loaded.')
+              )
             }
           </p>
           {(isEmbedBlocked || (isAccessDenied && isEmbedded)) && (
@@ -182,24 +182,12 @@ function FormsSubmit() {
           </Alert>
         )}
 
-        {/* User Status Alert for embedded forms */}
-        {!isLoggedIn && (
-          <Alert variant="info" className="d-flex align-items-start mb-3">
-            <Info size={20} className="me-2 mt-1 flex-shrink-0" />
-            <div>
-              <strong>Anonymous Submission:</strong> Please do not enter sensitive personal information.
-            </div>
-          </Alert>
-        )}
-
         {/* Form Card - Minimal styling for embedding */}
         <Card className="border-0 shadow-sm">
           <Card.Header className="bg-light border-bottom py-3">
             <div className="d-flex align-items-center">
-              <FileText size={20} className="text-primary me-2" />
               <div>
                 <h5 className="mb-0 fw-bold">{formData.name}</h5>
-                <small className="text-muted">Complete all required fields and submit</small>
               </div>
             </div>
           </Card.Header>
@@ -231,10 +219,13 @@ function FormsSubmit() {
           <div className="d-flex align-items-start">
             <Shield size={16} className="text-success me-2 mt-1 flex-shrink-0" />
             <div className="small text-muted">
-              Your submission is encrypted and stored securely. 
-              {isLoggedIn ? ' Linked to your account.' : ' Anonymous submission - not linked to personal data.'}
+              {isLoggedIn ? ' Linked to your account.' : ' Anonymous submission - please do not enter sensitive information'}
             </div>
           </div>
+        </div>
+        {/* Powered by Flowy Forms */}
+        <div className="text-center mt-3">
+          <small className="text-muted small">Powered by <Link to="/" target="_blank" rel="noopener noreferrer">Flowy Forms</Link></small>
         </div>
       </div>
     );
@@ -257,14 +248,7 @@ function FormsSubmit() {
             )}
 
             {/* User Status Alert */}
-            {!isLoggedIn ? (
-              <Alert variant="info" className="d-flex align-items-start mb-4">
-                <Info size={20} className="me-2 mt-1 flex-shrink-0" />
-                <div>
-                  <strong>Anonymous Submission:</strong> This is an anonymous submission. Please do not enter sensitive personal information.
-                </div>
-              </Alert>
-            ) : (
+            {isLoggedIn && (
               <Alert variant="success" className="d-flex align-items-start mb-4">
                 <User size={20} className="me-2 mt-1 flex-shrink-0" />
                 <div>
@@ -321,10 +305,9 @@ function FormsSubmit() {
                     <h6 className="fw-bold text-dark mb-2">Your Privacy & Security</h6>
                     <div className="text-muted small">
                       <ul className="mb-0 ps-3">
-                        <li>Your submission is encrypted and stored securely</li>
                         <li>We only collect the information you provide in this form</li>
                         <li>
-                          {isLoggedIn ? 'Your submission is linked to your account' : 'Anonymous submissions are not linked to any personal data'}
+                          {isLoggedIn ? 'Your submission is linked to your account' : 'Anonymous submission - please do not enter sensitive information'}
                         </li>
                         <li>You can contact us anytime if you have questions about your data</li>
                       </ul>
