@@ -15,6 +15,11 @@ const createSubmissionSchema = z.object({
   data: z.any(),
 });
 
+// Validation schema for updating submission status
+const updateSubmissionStatusSchema = z.object({
+  status: z.enum(['SUBMITTED', 'REVIEWING', 'PENDING_UPDATES', 'COMPLETED']),
+});
+
 /**
  * GET /api/submissions/:id
  *
@@ -90,6 +95,7 @@ submissionRoutes.get('/:id', optionalAuthMiddleware, async (c) => {
             }
           : null,
         createdAt: data.submission.createdAt,
+        status: data.submission.status,
         isFormOwner: user?.id === data.form?.createdBy,
         submitterInformation: data.creator
           ? {
@@ -252,6 +258,76 @@ submissionRoutes.post('/form/:formId', optionalAuthMiddleware, async (c) => {
     }
     console.error('Error creating submission:', error);
     return c.json({ error: 'Failed to create submission' }, 500);
+  }
+});
+
+/**
+ * PUT /api/submissions/:id/status
+ *
+ * Updates the status of a submission
+ * Only form owners can update submission status
+ *
+ * Access: Form owner only
+ * Auth Required: Yes
+ *
+ * Body: { status: 'SUBMITTED' | 'REVIEWING' | 'PENDING_UPDATES' | 'COMPLETED' }
+ * Response: { data: { id, status, updatedAt } }
+ */
+submissionRoutes.put('/:id/status', authMiddleware, async (c) => {
+  try {
+    const submissionId = parseInt(c.req.param('id'));
+    const user = c.get('jwtPayload')?.user;
+    const body = await c.req.json();
+
+    if (isNaN(submissionId)) {
+      return c.json({ error: 'Invalid submission ID' }, 400);
+    }
+
+    if (!user) {
+      return c.json({ error: 'Authentication required' }, 401);
+    }
+
+    const validatedData = updateSubmissionStatusSchema.parse(body);
+
+    // Get submission to check ownership
+    const submission = await submissionsService.getSubmissionById(db, submissionId);
+
+    if (submission.length === 0) {
+      return c.json({ error: 'Submission not found' }, 404);
+    }
+
+    const submissionData = submission[0];
+
+    // Only form owner can update submission status
+    if (submissionData.form?.createdBy !== user.id) {
+      return c.json({ error: 'Only form owners can update submission status' }, 403);
+    }
+
+    // Update submission status
+    const updatedSubmission = await submissionsService.updateSubmissionStatus(
+      db,
+      submissionId,
+      validatedData.status,
+      user.id,
+    );
+
+    if (updatedSubmission.length === 0) {
+      return c.json({ error: 'Failed to update submission status' }, 500);
+    }
+
+    return c.json({
+      data: {
+        id: updatedSubmission[0].id,
+        status: updatedSubmission[0].status,
+        updatedAt: updatedSubmission[0].updatedAt,
+      },
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return c.json({ error: 'Validation failed', errors: error.issues }, 400);
+    }
+    console.error('Error updating submission status:', error);
+    return c.json({ error: 'Failed to update submission status' }, 500);
   }
 });
 

@@ -67,10 +67,18 @@ export interface MockSubmission {
   formId: number;
   versionSha: string;
   data: Record<string, unknown>;
+  status?: 'SUBMITTED' | 'REVIEWING' | 'PENDING_UPDATES' | 'COMPLETED';
   createdBy: number | null;
   updatedBy: number | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// Status update response interface
+export interface StatusUpdateResponse {
+  id: number;
+  status: 'SUBMITTED' | 'REVIEWING' | 'PENDING_UPDATES' | 'COMPLETED';
+  updatedAt: string;
 }
 
 // Mock submission token interface

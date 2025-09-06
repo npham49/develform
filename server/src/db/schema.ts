@@ -1,4 +1,7 @@
-import { boolean, index, integer, jsonb, pgTable, serial, text, timestamp, unique } from 'drizzle-orm/pg-core';
+import { boolean, index, integer, jsonb, pgEnum, pgTable, serial, text, timestamp, unique } from 'drizzle-orm/pg-core';
+
+// Define submission status enum
+export const submissionStatusEnum = pgEnum('submission_status', ['SUBMITTED', 'REVIEWING', 'PENDING_UPDATES', 'COMPLETED']);
 
 // Users table
 export const users = pgTable('users', {
@@ -67,6 +70,7 @@ export const submissions = pgTable('submissions', {
     .notNull(),
   versionSha: text('version_sha').references(() => formVersions.versionSha),
   data: jsonb('data').notNull(),
+  status: submissionStatusEnum('status').default('SUBMITTED').notNull(),
   createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
   updatedBy: integer('updated_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at').defaultNow(),
