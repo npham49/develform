@@ -8,171 +8,174 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root';
-import { Route as AuthRouteImport } from './routes/auth';
-import { Route as AuthLoginRouteImport } from './routes/auth/login';
-import { Route as DashboardRouteImport } from './routes/dashboard';
-import { Route as FormsFormIdManageRouteImport } from './routes/forms/$formId/manage';
-import { Route as FormsFormIdSubmissionsRouteImport } from './routes/forms/$formId/submissions';
-import { Route as FormsFormIdSubmitRouteImport } from './routes/forms/$formId/submit';
-import { Route as FormsFormIdSuccessSubmissionIdRouteImport } from './routes/forms/$formId/success.$submissionId';
-import { Route as FormsFormIdVersionsVersionIdEditRouteImport } from './routes/forms/$formId/versions/$versionId/edit';
-import { Route as FormsFormIdVersionsVersionIdPreviewRouteImport } from './routes/forms/$formId/versions/$versionId/preview';
-import { Route as FormsCreateRouteImport } from './routes/forms/create';
-import { Route as FormsIndexRouteImport } from './routes/forms/index';
-import { Route as IndexRouteImport } from './routes/index';
-import { Route as SettingsAppearanceRouteImport } from './routes/settings/appearance';
-import { Route as SettingsIndexRouteImport } from './routes/settings/index';
-import { Route as SettingsProfileRouteImport } from './routes/settings/profile';
-import { Route as SubmissionsSubmissionIdRouteImport } from './routes/submissions/$submissionId';
-import { Route as SubmissionsIndexRouteImport } from './routes/submissions/index';
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as SubmissionsIndexRouteImport } from './routes/submissions/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
+import { Route as FormsIndexRouteImport } from './routes/forms/index'
+import { Route as SubmissionsSubmissionIdRouteImport } from './routes/submissions/$submissionId'
+import { Route as SettingsProfileRouteImport } from './routes/settings/profile'
+import { Route as SettingsAppearanceRouteImport } from './routes/settings/appearance'
+import { Route as FormsCreateRouteImport } from './routes/forms/create'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as FormsFormIdSubmitRouteImport } from './routes/forms/$formId/submit'
+import { Route as FormsFormIdSubmissionsRouteImport } from './routes/forms/$formId/submissions'
+import { Route as FormsFormIdManageRouteImport } from './routes/forms/$formId/manage'
+import { Route as FormsFormIdSuccessSubmissionIdRouteImport } from './routes/forms/$formId/success.$submissionId'
+import { Route as FormsFormIdVersionsVersionIdPreviewRouteImport } from './routes/forms/$formId/versions/$versionId/preview'
+import { Route as FormsFormIdVersionsVersionIdEditRouteImport } from './routes/forms/$formId/versions/$versionId/edit'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SubmissionsIndexRoute = SubmissionsIndexRouteImport.update({
   id: '/submissions/',
   path: '/submissions/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SettingsIndexRoute = SettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const FormsIndexRoute = FormsIndexRouteImport.update({
   id: '/forms/',
   path: '/forms/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SubmissionsSubmissionIdRoute = SubmissionsSubmissionIdRouteImport.update({
   id: '/submissions/$submissionId',
   path: '/submissions/$submissionId',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SettingsProfileRoute = SettingsProfileRouteImport.update({
   id: '/settings/profile',
   path: '/settings/profile',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SettingsAppearanceRoute = SettingsAppearanceRouteImport.update({
   id: '/settings/appearance',
   path: '/settings/appearance',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const FormsCreateRoute = FormsCreateRouteImport.update({
   id: '/forms/create',
   path: '/forms/create',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => AuthRoute,
-} as any);
+} as any)
 const FormsFormIdSubmitRoute = FormsFormIdSubmitRouteImport.update({
   id: '/forms/$formId/submit',
   path: '/forms/$formId/submit',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const FormsFormIdSubmissionsRoute = FormsFormIdSubmissionsRouteImport.update({
   id: '/forms/$formId/submissions',
   path: '/forms/$formId/submissions',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const FormsFormIdManageRoute = FormsFormIdManageRouteImport.update({
   id: '/forms/$formId/manage',
   path: '/forms/$formId/manage',
   getParentRoute: () => rootRouteImport,
-} as any);
-const FormsFormIdSuccessSubmissionIdRoute = FormsFormIdSuccessSubmissionIdRouteImport.update({
-  id: '/forms/$formId/success/$submissionId',
-  path: '/forms/$formId/success/$submissionId',
-  getParentRoute: () => rootRouteImport,
-} as any);
-const FormsFormIdVersionsVersionIdPreviewRoute = FormsFormIdVersionsVersionIdPreviewRouteImport.update({
-  id: '/forms/$formId/versions/$versionId/preview',
-  path: '/forms/$formId/versions/$versionId/preview',
-  getParentRoute: () => rootRouteImport,
-} as any);
-const FormsFormIdVersionsVersionIdEditRoute = FormsFormIdVersionsVersionIdEditRouteImport.update({
-  id: '/forms/$formId/versions/$versionId/edit',
-  path: '/forms/$formId/versions/$versionId/edit',
-  getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const FormsFormIdSuccessSubmissionIdRoute =
+  FormsFormIdSuccessSubmissionIdRouteImport.update({
+    id: '/forms/$formId/success/$submissionId',
+    path: '/forms/$formId/success/$submissionId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FormsFormIdVersionsVersionIdPreviewRoute =
+  FormsFormIdVersionsVersionIdPreviewRouteImport.update({
+    id: '/forms/$formId/versions/$versionId/preview',
+    path: '/forms/$formId/versions/$versionId/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FormsFormIdVersionsVersionIdEditRoute =
+  FormsFormIdVersionsVersionIdEditRouteImport.update({
+    id: '/forms/$formId/versions/$versionId/edit',
+    path: '/forms/$formId/versions/$versionId/edit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute;
-  '/auth': typeof AuthRouteWithChildren;
-  '/dashboard': typeof DashboardRoute;
-  '/auth/login': typeof AuthLoginRoute;
-  '/forms/create': typeof FormsCreateRoute;
-  '/settings/appearance': typeof SettingsAppearanceRoute;
-  '/settings/profile': typeof SettingsProfileRoute;
-  '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute;
-  '/forms': typeof FormsIndexRoute;
-  '/settings': typeof SettingsIndexRoute;
-  '/submissions': typeof SubmissionsIndexRoute;
-  '/forms/$formId/manage': typeof FormsFormIdManageRoute;
-  '/forms/$formId/submissions': typeof FormsFormIdSubmissionsRoute;
-  '/forms/$formId/submit': typeof FormsFormIdSubmitRoute;
-  '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute;
-  '/forms/$formId/versions/$versionId/edit': typeof FormsFormIdVersionsVersionIdEditRoute;
-  '/forms/$formId/versions/$versionId/preview': typeof FormsFormIdVersionsVersionIdPreviewRoute;
+  '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/dashboard': typeof DashboardRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/forms/create': typeof FormsCreateRoute
+  '/settings/appearance': typeof SettingsAppearanceRoute
+  '/settings/profile': typeof SettingsProfileRoute
+  '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
+  '/forms': typeof FormsIndexRoute
+  '/settings': typeof SettingsIndexRoute
+  '/submissions': typeof SubmissionsIndexRoute
+  '/forms/$formId/manage': typeof FormsFormIdManageRoute
+  '/forms/$formId/submissions': typeof FormsFormIdSubmissionsRoute
+  '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
+  '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute
+  '/forms/$formId/versions/$versionId/edit': typeof FormsFormIdVersionsVersionIdEditRoute
+  '/forms/$formId/versions/$versionId/preview': typeof FormsFormIdVersionsVersionIdPreviewRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute;
-  '/auth': typeof AuthRouteWithChildren;
-  '/dashboard': typeof DashboardRoute;
-  '/auth/login': typeof AuthLoginRoute;
-  '/forms/create': typeof FormsCreateRoute;
-  '/settings/appearance': typeof SettingsAppearanceRoute;
-  '/settings/profile': typeof SettingsProfileRoute;
-  '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute;
-  '/forms': typeof FormsIndexRoute;
-  '/settings': typeof SettingsIndexRoute;
-  '/submissions': typeof SubmissionsIndexRoute;
-  '/forms/$formId/manage': typeof FormsFormIdManageRoute;
-  '/forms/$formId/submissions': typeof FormsFormIdSubmissionsRoute;
-  '/forms/$formId/submit': typeof FormsFormIdSubmitRoute;
-  '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute;
-  '/forms/$formId/versions/$versionId/edit': typeof FormsFormIdVersionsVersionIdEditRoute;
-  '/forms/$formId/versions/$versionId/preview': typeof FormsFormIdVersionsVersionIdPreviewRoute;
+  '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/dashboard': typeof DashboardRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/forms/create': typeof FormsCreateRoute
+  '/settings/appearance': typeof SettingsAppearanceRoute
+  '/settings/profile': typeof SettingsProfileRoute
+  '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
+  '/forms': typeof FormsIndexRoute
+  '/settings': typeof SettingsIndexRoute
+  '/submissions': typeof SubmissionsIndexRoute
+  '/forms/$formId/manage': typeof FormsFormIdManageRoute
+  '/forms/$formId/submissions': typeof FormsFormIdSubmissionsRoute
+  '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
+  '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute
+  '/forms/$formId/versions/$versionId/edit': typeof FormsFormIdVersionsVersionIdEditRoute
+  '/forms/$formId/versions/$versionId/preview': typeof FormsFormIdVersionsVersionIdPreviewRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  '/': typeof IndexRoute;
-  '/auth': typeof AuthRouteWithChildren;
-  '/dashboard': typeof DashboardRoute;
-  '/auth/login': typeof AuthLoginRoute;
-  '/forms/create': typeof FormsCreateRoute;
-  '/settings/appearance': typeof SettingsAppearanceRoute;
-  '/settings/profile': typeof SettingsProfileRoute;
-  '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute;
-  '/forms/': typeof FormsIndexRoute;
-  '/settings/': typeof SettingsIndexRoute;
-  '/submissions/': typeof SubmissionsIndexRoute;
-  '/forms/$formId/manage': typeof FormsFormIdManageRoute;
-  '/forms/$formId/submissions': typeof FormsFormIdSubmissionsRoute;
-  '/forms/$formId/submit': typeof FormsFormIdSubmitRoute;
-  '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute;
-  '/forms/$formId/versions/$versionId/edit': typeof FormsFormIdVersionsVersionIdEditRoute;
-  '/forms/$formId/versions/$versionId/preview': typeof FormsFormIdVersionsVersionIdPreviewRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/dashboard': typeof DashboardRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/forms/create': typeof FormsCreateRoute
+  '/settings/appearance': typeof SettingsAppearanceRoute
+  '/settings/profile': typeof SettingsProfileRoute
+  '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
+  '/forms/': typeof FormsIndexRoute
+  '/settings/': typeof SettingsIndexRoute
+  '/submissions/': typeof SubmissionsIndexRoute
+  '/forms/$formId/manage': typeof FormsFormIdManageRoute
+  '/forms/$formId/submissions': typeof FormsFormIdSubmissionsRoute
+  '/forms/$formId/submit': typeof FormsFormIdSubmitRoute
+  '/forms/$formId/success/$submissionId': typeof FormsFormIdSuccessSubmissionIdRoute
+  '/forms/$formId/versions/$versionId/edit': typeof FormsFormIdVersionsVersionIdEditRoute
+  '/forms/$formId/versions/$versionId/preview': typeof FormsFormIdVersionsVersionIdPreviewRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
@@ -190,8 +193,8 @@ export interface FileRouteTypes {
     | '/forms/$formId/submit'
     | '/forms/$formId/success/$submissionId'
     | '/forms/$formId/versions/$versionId/edit'
-    | '/forms/$formId/versions/$versionId/preview';
-  fileRoutesByTo: FileRoutesByTo;
+    | '/forms/$formId/versions/$versionId/preview'
+  fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
@@ -209,7 +212,7 @@ export interface FileRouteTypes {
     | '/forms/$formId/submit'
     | '/forms/$formId/success/$submissionId'
     | '/forms/$formId/versions/$versionId/edit'
-    | '/forms/$formId/versions/$versionId/preview';
+    | '/forms/$formId/versions/$versionId/preview'
   id:
     | '__root__'
     | '/'
@@ -228,161 +231,161 @@ export interface FileRouteTypes {
     | '/forms/$formId/submit'
     | '/forms/$formId/success/$submissionId'
     | '/forms/$formId/versions/$versionId/edit'
-    | '/forms/$formId/versions/$versionId/preview';
-  fileRoutesById: FileRoutesById;
+    | '/forms/$formId/versions/$versionId/preview'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  AuthRoute: typeof AuthRouteWithChildren;
-  DashboardRoute: typeof DashboardRoute;
-  FormsCreateRoute: typeof FormsCreateRoute;
-  SettingsAppearanceRoute: typeof SettingsAppearanceRoute;
-  SettingsProfileRoute: typeof SettingsProfileRoute;
-  SubmissionsSubmissionIdRoute: typeof SubmissionsSubmissionIdRoute;
-  FormsIndexRoute: typeof FormsIndexRoute;
-  SettingsIndexRoute: typeof SettingsIndexRoute;
-  SubmissionsIndexRoute: typeof SubmissionsIndexRoute;
-  FormsFormIdManageRoute: typeof FormsFormIdManageRoute;
-  FormsFormIdSubmissionsRoute: typeof FormsFormIdSubmissionsRoute;
-  FormsFormIdSubmitRoute: typeof FormsFormIdSubmitRoute;
-  FormsFormIdSuccessSubmissionIdRoute: typeof FormsFormIdSuccessSubmissionIdRoute;
-  FormsFormIdVersionsVersionIdEditRoute: typeof FormsFormIdVersionsVersionIdEditRoute;
-  FormsFormIdVersionsVersionIdPreviewRoute: typeof FormsFormIdVersionsVersionIdPreviewRoute;
+  IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  DashboardRoute: typeof DashboardRoute
+  FormsCreateRoute: typeof FormsCreateRoute
+  SettingsAppearanceRoute: typeof SettingsAppearanceRoute
+  SettingsProfileRoute: typeof SettingsProfileRoute
+  SubmissionsSubmissionIdRoute: typeof SubmissionsSubmissionIdRoute
+  FormsIndexRoute: typeof FormsIndexRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
+  SubmissionsIndexRoute: typeof SubmissionsIndexRoute
+  FormsFormIdManageRoute: typeof FormsFormIdManageRoute
+  FormsFormIdSubmissionsRoute: typeof FormsFormIdSubmissionsRoute
+  FormsFormIdSubmitRoute: typeof FormsFormIdSubmitRoute
+  FormsFormIdSuccessSubmissionIdRoute: typeof FormsFormIdSuccessSubmissionIdRoute
+  FormsFormIdVersionsVersionIdEditRoute: typeof FormsFormIdVersionsVersionIdEditRoute
+  FormsFormIdVersionsVersionIdPreviewRoute: typeof FormsFormIdVersionsVersionIdPreviewRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/dashboard': {
-      id: '/dashboard';
-      path: '/dashboard';
-      fullPath: '/dashboard';
-      preLoaderRoute: typeof DashboardRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
-      id: '/auth';
-      path: '/auth';
-      fullPath: '/auth';
-      preLoaderRoute: typeof AuthRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
-      id: '/';
-      path: '/';
-      fullPath: '/';
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/submissions/': {
-      id: '/submissions/';
-      path: '/submissions';
-      fullPath: '/submissions';
-      preLoaderRoute: typeof SubmissionsIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/submissions/'
+      path: '/submissions'
+      fullPath: '/submissions'
+      preLoaderRoute: typeof SubmissionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings/': {
-      id: '/settings/';
-      path: '/settings';
-      fullPath: '/settings';
-      preLoaderRoute: typeof SettingsIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/settings/'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forms/': {
-      id: '/forms/';
-      path: '/forms';
-      fullPath: '/forms';
-      preLoaderRoute: typeof FormsIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/forms/'
+      path: '/forms'
+      fullPath: '/forms'
+      preLoaderRoute: typeof FormsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/submissions/$submissionId': {
-      id: '/submissions/$submissionId';
-      path: '/submissions/$submissionId';
-      fullPath: '/submissions/$submissionId';
-      preLoaderRoute: typeof SubmissionsSubmissionIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/submissions/$submissionId'
+      path: '/submissions/$submissionId'
+      fullPath: '/submissions/$submissionId'
+      preLoaderRoute: typeof SubmissionsSubmissionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings/profile': {
-      id: '/settings/profile';
-      path: '/settings/profile';
-      fullPath: '/settings/profile';
-      preLoaderRoute: typeof SettingsProfileRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/settings/profile'
+      path: '/settings/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof SettingsProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings/appearance': {
-      id: '/settings/appearance';
-      path: '/settings/appearance';
-      fullPath: '/settings/appearance';
-      preLoaderRoute: typeof SettingsAppearanceRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/settings/appearance'
+      path: '/settings/appearance'
+      fullPath: '/settings/appearance'
+      preLoaderRoute: typeof SettingsAppearanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forms/create': {
-      id: '/forms/create';
-      path: '/forms/create';
-      fullPath: '/forms/create';
-      preLoaderRoute: typeof FormsCreateRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/forms/create'
+      path: '/forms/create'
+      fullPath: '/forms/create'
+      preLoaderRoute: typeof FormsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/login': {
-      id: '/auth/login';
-      path: '/login';
-      fullPath: '/auth/login';
-      preLoaderRoute: typeof AuthLoginRouteImport;
-      parentRoute: typeof AuthRoute;
-    };
+      id: '/auth/login'
+      path: '/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/forms/$formId/submit': {
-      id: '/forms/$formId/submit';
-      path: '/forms/$formId/submit';
-      fullPath: '/forms/$formId/submit';
-      preLoaderRoute: typeof FormsFormIdSubmitRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/forms/$formId/submit'
+      path: '/forms/$formId/submit'
+      fullPath: '/forms/$formId/submit'
+      preLoaderRoute: typeof FormsFormIdSubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forms/$formId/submissions': {
-      id: '/forms/$formId/submissions';
-      path: '/forms/$formId/submissions';
-      fullPath: '/forms/$formId/submissions';
-      preLoaderRoute: typeof FormsFormIdSubmissionsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/forms/$formId/submissions'
+      path: '/forms/$formId/submissions'
+      fullPath: '/forms/$formId/submissions'
+      preLoaderRoute: typeof FormsFormIdSubmissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forms/$formId/manage': {
-      id: '/forms/$formId/manage';
-      path: '/forms/$formId/manage';
-      fullPath: '/forms/$formId/manage';
-      preLoaderRoute: typeof FormsFormIdManageRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/forms/$formId/manage'
+      path: '/forms/$formId/manage'
+      fullPath: '/forms/$formId/manage'
+      preLoaderRoute: typeof FormsFormIdManageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forms/$formId/success/$submissionId': {
-      id: '/forms/$formId/success/$submissionId';
-      path: '/forms/$formId/success/$submissionId';
-      fullPath: '/forms/$formId/success/$submissionId';
-      preLoaderRoute: typeof FormsFormIdSuccessSubmissionIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/forms/$formId/success/$submissionId'
+      path: '/forms/$formId/success/$submissionId'
+      fullPath: '/forms/$formId/success/$submissionId'
+      preLoaderRoute: typeof FormsFormIdSuccessSubmissionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forms/$formId/versions/$versionId/preview': {
-      id: '/forms/$formId/versions/$versionId/preview';
-      path: '/forms/$formId/versions/$versionId/preview';
-      fullPath: '/forms/$formId/versions/$versionId/preview';
-      preLoaderRoute: typeof FormsFormIdVersionsVersionIdPreviewRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/forms/$formId/versions/$versionId/preview'
+      path: '/forms/$formId/versions/$versionId/preview'
+      fullPath: '/forms/$formId/versions/$versionId/preview'
+      preLoaderRoute: typeof FormsFormIdVersionsVersionIdPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forms/$formId/versions/$versionId/edit': {
-      id: '/forms/$formId/versions/$versionId/edit';
-      path: '/forms/$formId/versions/$versionId/edit';
-      fullPath: '/forms/$formId/versions/$versionId/edit';
-      preLoaderRoute: typeof FormsFormIdVersionsVersionIdEditRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/forms/$formId/versions/$versionId/edit'
+      path: '/forms/$formId/versions/$versionId/edit'
+      fullPath: '/forms/$formId/versions/$versionId/edit'
+      preLoaderRoute: typeof FormsFormIdVersionsVersionIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AuthRouteChildren {
-  AuthLoginRoute: typeof AuthLoginRoute;
+  AuthLoginRoute: typeof AuthLoginRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
-};
+}
 
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren);
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -400,6 +403,9 @@ const rootRouteChildren: RootRouteChildren = {
   FormsFormIdSubmitRoute: FormsFormIdSubmitRoute,
   FormsFormIdSuccessSubmissionIdRoute: FormsFormIdSuccessSubmissionIdRoute,
   FormsFormIdVersionsVersionIdEditRoute: FormsFormIdVersionsVersionIdEditRoute,
-  FormsFormIdVersionsVersionIdPreviewRoute: FormsFormIdVersionsVersionIdPreviewRoute,
-};
-export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>();
+  FormsFormIdVersionsVersionIdPreviewRoute:
+    FormsFormIdVersionsVersionIdPreviewRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()

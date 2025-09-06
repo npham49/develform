@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Card, Col, Row } from 'react-bootstrap';
+import { Button, Card, Form, Row } from 'react-bootstrap';
 import { Code, Copy } from 'lucide-react';
 
 interface EmbedCodeSectionProps {
@@ -9,6 +9,7 @@ interface EmbedCodeSectionProps {
 
 export function EmbedCodeSection({ formId, formName }: EmbedCodeSectionProps) {
   const [copied, setCopied] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState<'html' | 'react' | 'wordpress'>('html');
   const baseUrl = window.location.origin;
 
   const embedCodes = {
@@ -21,7 +22,7 @@ export function EmbedCodeSection({ formId, formName }: EmbedCodeSectionProps) {
   scrolling="auto"
   style="border: 1px solid #ddd; border-radius: 8px;">
 </iframe>`,
-    
+
     react: `// React Component for ${formName}
 function EmbeddedForm() {
   return (
@@ -54,6 +55,19 @@ function EmbeddedForm() {
 </iframe>`
   };
 
+  const returnEmbed = (type: 'html' | 'react' | 'wordpress') => {
+    switch (type) {
+      case 'html':
+        return embedCodes.html;
+      case 'react':
+        return embedCodes.react;
+      case 'wordpress':
+        return embedCodes.wordpress;
+      default:
+        return '';
+    }
+  }
+
   const copyToClipboard = (code: string, type: string) => {
     navigator.clipboard.writeText(code);
     setCopied(type);
@@ -74,67 +88,27 @@ function EmbeddedForm() {
       <Card.Body className="p-4">
         <Row className="g-4">
           {/* HTML */}
-          <Col lg={4}>
-            <div className="border rounded p-3">
-              <div className="d-flex align-items-center justify-content-between mb-2">
-                <h6 className="fw-bold mb-0">HTML</h6>
-                <Button
-                  variant="outline-secondary"
-                  size="sm"
-                  onClick={() => copyToClipboard(embedCodes.html, 'html')}
-                  className="d-flex align-items-center"
-                >
-                  <Copy size={14} className="me-1" />
-                  {copied === 'html' ? 'Copied!' : 'Copy'}
-                </Button>
-              </div>
-              <pre className="bg-light p-2 rounded small" style={{ fontSize: '0.75rem', maxHeight: '200px', overflow: 'auto' }}>
-                <code>{embedCodes.html}</code>
-              </pre>
+          <div className="border rounded p-3">
+            <div className="d-flex align-items-center justify-content-between mb-2">
+              <Form.Select className='me-2' aria-label="Default select example" value={selectedTab} onChange={(e) => setSelectedTab(e.target.value as 'html' | 'react' | 'wordpress')}>
+                <option value="html">HTML</option>
+                <option value="react">React</option>
+                <option value="wordpress">WordPress</option>
+              </Form.Select>
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                onClick={() => copyToClipboard(returnEmbed(selectedTab), selectedTab)}
+                className="d-flex align-items-center"
+              >
+                <Copy size={14} className="me-1" />
+                {copied === selectedTab ? 'Copied!' : 'Copy'}
+              </Button>
             </div>
-          </Col>
-
-          {/* React */}
-          <Col lg={4}>
-            <div className="border rounded p-3">
-              <div className="d-flex align-items-center justify-content-between mb-2">
-                <h6 className="fw-bold mb-0">React</h6>
-                <Button
-                  variant="outline-secondary"
-                  size="sm"
-                  onClick={() => copyToClipboard(embedCodes.react, 'react')}
-                  className="d-flex align-items-center"
-                >
-                  <Copy size={14} className="me-1" />
-                  {copied === 'react' ? 'Copied!' : 'Copy'}
-                </Button>
-              </div>
-              <pre className="bg-light p-2 rounded small" style={{ fontSize: '0.75rem', maxHeight: '200px', overflow: 'auto' }}>
-                <code>{embedCodes.react}</code>
-              </pre>
-            </div>
-          </Col>
-
-          {/* WordPress */}
-          <Col lg={4}>
-            <div className="border rounded p-3">
-              <div className="d-flex align-items-center justify-content-between mb-2">
-                <h6 className="fw-bold mb-0">WordPress</h6>
-                <Button
-                  variant="outline-secondary"
-                  size="sm"
-                  onClick={() => copyToClipboard(embedCodes.wordpress, 'wordpress')}
-                  className="d-flex align-items-center"
-                >
-                  <Copy size={14} className="me-1" />
-                  {copied === 'wordpress' ? 'Copied!' : 'Copy'}
-                </Button>
-              </div>
-              <pre className="bg-light p-2 rounded small" style={{ fontSize: '0.75rem', maxHeight: '200px', overflow: 'auto' }}>
-                <code>{embedCodes.wordpress}</code>
-              </pre>
-            </div>
-          </Col>
+            <pre className="bg-light p-2 rounded small" style={{ fontSize: '0.75rem', maxHeight: '400px', overflow: 'auto' }}>
+              <code>{returnEmbed(selectedTab)}</code>
+            </pre>
+          </div>
         </Row>
 
         {/* Usage Notes */}
