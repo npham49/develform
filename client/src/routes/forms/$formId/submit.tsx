@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import { IconCard } from '@/components/common/icon-card';
 import { VersionShaDisplay } from '@/components/common/version-sha-display';
-import { useAuth } from '@/hooks/use-auth';
 import { type Appearance } from '@/hooks/use-appearance';
+import { useAuth } from '@/hooks/use-auth';
 import AppLayout from '@/layouts/app-layout';
 import { api } from '@/lib/api';
 import type { FormSchema } from '@/types/api';
@@ -31,8 +31,8 @@ export const Route = createFileRoute('/forms/$formId/submit')({
 });
 
 function FormsSubmit() {
-  const { form, isEmbedded, embedTheme } = useLoaderData({ from: '/forms/$formId/submit' }) as { 
-    form: FormSchema; 
+  const { form, isEmbedded, embedTheme } = useLoaderData({ from: '/forms/$formId/submit' }) as {
+    form: FormSchema;
     isEmbedded: boolean;
     embedTheme: string | null;
   };
@@ -53,7 +53,7 @@ function FormsSubmit() {
     if (isEmbedded && embedTheme) {
       const validThemes: Appearance[] = ['light', 'dark', 'system'];
       const theme = validThemes.includes(embedTheme as Appearance) ? (embedTheme as Appearance) : 'system';
-      
+
       // Apply theme directly for embedded forms
       const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
       document.documentElement.classList.toggle('dark', isDark);
